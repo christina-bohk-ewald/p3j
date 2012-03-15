@@ -1,0 +1,1 @@
+start javaw -cp *;./libs/* p3j.gui.P3J

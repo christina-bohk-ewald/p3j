@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="p3j.pppm.parameters">
+	<class name="ParameterAssignment" table="parameter_assignments">
+		<id name="ID">
+			<generator class="native" />
+		</id>
+		<many-to-one name="paramInstance" column="param_instance_id" />
+		<many-to-one name="matrix" column="matrix_id" />
+		<property name="name" />
+		<property name="description" length="1024" />
+		<property name="probability" />
+		<property name="deviation" />
+	</class>
+</hibernate-mapping>

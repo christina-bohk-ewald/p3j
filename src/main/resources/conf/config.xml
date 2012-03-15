@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_17" class="java.beans.XMLDecoder"> 
+ <object class="p3j.gui.misc.P3JConfigFile"> 
+  <void property="fileName"> 
+   <string>./config.xml</string> 
+  </void> 
+  <void property="values">
+   <void method="put"> 
+    <string>Database URL</string> 
+    <string>jdbc:hsqldb:file:./pppm_db</string> 
+   </void>
+   <void method="put"> 
+    <string>Database User Name</string> 
+    <string>user</string> 
+   </void>
+   <void method="put">
+    <!-- The DB password is stored WITHOUT encryption! Make sure that access to this file is limited accordingly. --> 
+    <string>Database Password</string> 
+    <string></string> 
+   </void>     
+   <void method="put"> 
+    <string>Number of Parallel Threads</string> 
+    <int>2</int> 
+   </void> 
+   <void method="put"> 
+    <string>Parallel Threads (Monte-Carlo)</string> 
+    <int>2</int> 
+   </void> 
+   <void method="put"> 
+    <string>Number of Trials</string> 
+    <int>20</int> 
+   </void> 
+  </void> 
+ </object> 
+</java> 

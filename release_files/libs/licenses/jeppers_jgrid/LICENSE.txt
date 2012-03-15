@@ -1,0 +1,8 @@
+Jeppers (jeppers.jar) is licensed under GPL (see gpl.txt) and runs a spreadsheet application 
+demo. It uses JExpression for formula evaluation and the spreadsheet component is based on 
+JGrid. It is for demostration purposes only and is not intended to be used as a spreadsheet 
+application by end-users.
+
+JExpression (jexpression.jar) and JGrid (jgrid.jar) are licensed under LGPL (see lgpl.txt)
+
+All code is the copyright of myself, Cameron Zemek.

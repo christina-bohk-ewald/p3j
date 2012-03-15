@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="p3j.pppm.sets">
+<class name="SetType" table="set_types">
+<id name="ID">
+	<generator class="native"/>
+</id>
+<property name="name"/>
+<property name="description" length="1024"/>
+<list name = "definedParameters" table="set_types_instances">
+	<key column="settype_id"/>
+	<list-index column="instance_num" />
+	<many-to-many class="p3j.pppm.parameters.ParameterInstance" column="instance_id"/>	
+</list>
+<list name = "sets" cascade="save-update,persist,delete-orphan">
+	<key column="settype_id"/>
+	<list-index column="set_num" />
+	<one-to-many class="p3j.pppm.sets.Set"/>	
+</list>
+</class>
+</hibernate-mapping>

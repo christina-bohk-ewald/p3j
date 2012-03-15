@@ -1,0 +1,34 @@
+P3J - The Probabilistic Population Projection Model (PPPM) for Java
+Copyright 2006-2012 Christina Bohk and Roland Ewald
+
+The software is based on the open-source modeling and simulation framework JAMES II (http://jamesii.org), which is available under a custom open-source license (see libs/licenses/james2). 
+
+Matrix calculations are provided by Colt (http://acs.lbl.gov/software/colt/), a free Java library developed at CERN (see libs/licenses/colt). 
+Colt relies on concurrency utilities by Doug Lea (http://gee.cs.oswego.edu/dl/), which are in the public domain (see libs/licenses/concurrent).
+
+The JGrid component of Jeppers (http://jeppers.sourceforge.net/), which provides a tabular grid for data input in the GUI, is available under a LGPL 2.1 license (see libs/licenses/jeppers_jgrid). 
+
+JGoodies Forms and JGoodies Looks (http://www.jgoodies.com/) are used to layout form elements in the GUI and adapt the overall Look&Feel. They are developed by Karsten Lentzsch and are available under a BSD license (see libs/licenses/jgoodies).
+
+JMathPlot (http://code.google.com/p/jmathplot/) is used to show data plots. It is developed by Yann Richet and available under a BSD license (see libs/licenses/jmathplot).
+
+Freemarker (http://freemarker.org/), a template engine currently maintained by the Visigoth Software Society, is used to
+generate the result report files. It is available under a "BSD-ish" license (see libs/licenses/freemarker).
+
+Hibernate (http://www.hibernate.org/), an open-source O/R mapper for Java, is used to store both model data and results. It is available under
+an LGPL 2.1 license (see libs/licenses/hibernate). 
+Hibernate relies on the following software packages, which we distribute as well (to allow an easy installation):
+	- the antlr parser generator (http://www.antlr.org/), which is in the public domain (see libs/licenses/antlr)
+	- the collections and logging libraries from Apache commons (http://commons.apache.org/collections/), both available under Apache 2.0 License (see libs/licenses/apache_commons)
+	- dom4j, an open source library by MetaStuff Ltd. (http://dom4j.sourceforge.net/) available under a custom license (see libs/licenses/dom4j)
+	- the Java transaction API (JTA) specification (http://java.sun.com/products/jta/), developed by Oracle and available under a custom license (see libs/licenses/jta)
+	- ehcache (http://www.ehcache.org/), developed by Terracotta Inc. and available under Apache 2.0 license (see libs/licenses/ehcache)
+	- the code generator library (cglib, http://cglib.sourceforge.net/), available under Apache 1.1 license (see libs/licenses/cglib)
+	- the asm bytecode analysis and manipulation framework (http://asm.ow2.org/), available under a BSD license (see libs/licenses/asm) 
+
+To allow an easy installation of the software, we also re-distribute two JDBC drivers that we tested to work with P3J:
+
+	- the MySQL connector for Java (http://dev.mysql.com/downloads/connector/j/), distributed by Oracle and available under a GPL license (see here for details: http://www.mysql.com/about/legal/licensing/foss-exception/, and libs/licenses/mysql_conn)
+	- HSQLDB (http://hsqldb.org/), available under a custom open-source license (see libs/licenses/hsqldb) 
+
+The icons used are from the Eclipse project (http://www.eclipse.org/) and are licensed under the Eclipse Public License (http://www.eclipse.org/legal/epl-v10.html).

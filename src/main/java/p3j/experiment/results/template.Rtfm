@@ -1,0 +1,144 @@
+<#-- Basic report template -->
+\documentclass{report}
+
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\renewcommand{\aboverulesep}{0pt}
+\renewcommand{\belowrulesep}{0pt}
+
+<#macro addplot fileName years plotType caption="Add the attribute to define a caption." textwidth=1.0>
+\begin{Scode}{label=${fileName},fig=TRUE,echo=FALSE,pdf=TRUE,eps=FALSE,height=10,width=10,include=false,results=hide} 
+ source("plotting.R");
+ par(mfrow=c(1,1));
+ currentData <- read.csv("./aggregated/${fileName}.csv", header=FALSE);
+ currentYears <- matrix(c(${years}),nr=1);
+ ${plotType}(currentData, currentYears);
+\end{Scode}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=${textwidth}\textwidth]{report-${fileName}}
+\caption{${caption}} \label{report-${fileName}}
+\end{figure}
+</#macro>
+
+
+<#macro addpyramid subPop years linecolor="blue" linecolor2="red" caption="Add the attribute to define a caption." textwidth=1.0>
+\begin{Scode}{label=pyramid-y${years}-${subPop},fig=TRUE,echo=FALSE,pdf=TRUE,eps=FALSE,height=10,width=10,include=false,results=hide} 
+ source("plotting.R");
+ par(mfrow=c(1,1));
+ quantilesMales <- read.csv("./aggregated/year_${years}_${subPop}_end_x_m_quantiles.csv", header=FALSE);
+ quantilesFemales <- read.csv("./aggregated/year_${years}_${subPop}_end_x_f_quantiles.csv", header=FALSE);
+ originalMales <- read.csv("./aggregated/year_0_${subPop}_end_x_m_quantiles.csv", header=FALSE);
+ originalFemales <- read.csv("./aggregated/year_0_${subPop}_end_x_f_quantiles.csv", header=FALSE);
+ populationPyramidQuantilePlot(quantilesMales, quantilesFemales, originalMales, originalFemales, "${linecolor}", "${linecolor2}");
+\end{Scode}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=${textwidth}\textwidth]{report-pyramid-y${years}-${subPop}}
+\caption{${caption}} \label{report-pyramid-y${years}-${subPop}}
+\end{figure}
+</#macro>
+
+
+
+<#macro addsummary name texname>
+<@addplot fileName="${name}_sum" years="${densityYears}" plotType="densityPlot" caption="${texname}: Density for various projection intervals."/>
+\clearpage
+<@addplot fileName="${name}_quantiles" years="${allYears}" plotType="polygonPlot" caption="${texname}: Projected development over the projection horizon, for quantiles $p = 0$, $0.025$, $0.05$,
+$0.01$, $0.5$, $0.9$, $0.95$, $0.975$, and $1.0$."/>
+\clearpage
+</#macro>
+
+<#macro populationsummary pop popname>
+\subsection{Females}
+<@addsummary name="${pop}_end_x_f" texname="${popname}, females"/>
+
+\subsection{Males}
+<@addsummary name="${pop}_end_x_m" texname="${popname}, males"/>
+
+\subsection{Both sexes}
+<@addsummary name="${pop}_end_x_mf" texname="${popname}, both sexes"/>
+<@addpyramid subPop="${pop}" years="${finalYearIndex}" caption="${popname}, both sexes: Population pyramid in the jump-off year (blue/red) and target year (black), for quantiles $p = 0$ (dashed), $0.5$ (straight), and $1.0$ (dashed)."/>
+</#macro>
+
+<#escape x as x?replace('\\','/')?replace('_',' ')?replace(r'$','')>
+\title{Report of Results for the Probabilistic Population Projection '${projection.name}'}
+</#escape>
+\date{${date}}
+\author{P3J Result Aggregator}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+
+\chapter{Results}
+
+\section{Total Population}
+<@populationsummary pop="total" popname="Total population"/>
+
+\section{Natives}
+<@populationsummary pop="natives" popname="Natives"/>
+
+
+
+\section{Immigrants: Direct Immigrants}
+<@populationsummary pop="immigrants_gen_0" popname="Direct immigrants"/>
+
+<#list desc_generations as gen>
+\section{Immigrants: Descendant Generation ${gen}}
+<@populationsummary pop="immigrants_gen_${gen}" popname="Descendant immigrant generation ${gen}"/>
+</#list>
+
+\section{Immigrants: All Descendant Generations}
+<@populationsummary pop="immigrants_desc" popname="All descendant immigrant generations"/>
+
+\section{Immigrants: All Immigrants}
+<@populationsummary pop="immigrants" popname="All immigrants"/>
+
+
+
+\section{Emigrants: Direct Emigrants}
+<@populationsummary pop="emigrants_gen_0" popname="Direct emigrants"/>
+
+<#list desc_generations as gen>
+\section{Emigrants: Descendant Generation ${gen}}
+<@populationsummary pop="emigrants_gen_${gen}" popname="Descendant emigrant generation ${gen}"/>
+</#list>
+
+\section{Emigrants: All Descendant Generations}
+<@populationsummary pop="emigrants_desc" popname="All descendant emigrant generations"/>
+
+\section{Emigrants: All Emigrants}
+<@populationsummary pop="emigrants" popname="All emigrants"/>
+
+
+
+\chapter{General Information}
+
+\section{Included Settypes and Sets}
+
+<#escape x as x?replace('\\','/')?replace('_',' ')?replace(r'$','')>
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|p{4cm}|p{6cm}|l|}
+\hline
+\textbf{Settype} & \textbf{Set} & \textbf{Probability} \\\hline
+<#list projection.allSetTypes as setType>
+\multirow{<#noescape>${setType.numOfSets}</#noescape>}{*}{\textbf{${setType.name}}} 
+	<#list setType.sets as set> & \emph{${set.name}} & <#noescape>${set.probability}</#noescape> \\
+	</#list>\midrule[1pt]
+</#list>  
+\end{tabular}
+\end{table}
+
+</#escape>
+
+\end{document}

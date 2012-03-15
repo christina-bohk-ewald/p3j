@@ -1,0 +1,82 @@
+<assembly>
+	<id>release</id>
+	<formats>
+		<format>zip</format>
+		<format>tar.gz</format>
+	</formats>
+
+	<!-- Include all required libraries and all binary JAR files (without tests) -->
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>libs</outputDirectory>
+			<excludes>
+				<exclude>p3j:*:jar</exclude>
+				<exclude>james2:core:jar</exclude>
+			</excludes>
+		</dependencySet>
+		<dependencySet>
+			<includes>
+				<include>james2:core:jar</include>
+			</includes>
+			<outputFileNameMapping>${artifact.groupId}-${artifact.artifactId}-${artifact.version}.${artifact.extension}
+			</outputFileNameMapping>
+		</dependencySet>
+		<dependencySet>
+			<includes>
+				<include>p3j:*:jar</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+
+
+	<fileSets>
+
+		<!-- Include files for report generation. -->
+		<fileSet>
+			<directory>src/p3j/experiment/results</directory>
+			<outputDirectory>report_template</outputDirectory>
+			<includes>
+				<include>template.Rtfm</include>
+				<include>plotting.R</include>
+			</includes>
+		</fileSet>
+
+
+		<!-- Copy config files -->
+		<fileSet>
+			<directory>src/main/resources/conf</directory>
+			<outputDirectory>conf/</outputDirectory>
+			<includes>
+				<include>config.xml</include>
+				<include>hibernate.cfg.xml</include>
+				<include>mysql_hibernate.cfg.xml</include>
+			</includes>
+		</fileSet>
+
+
+		<!-- Copy start-scripts to top level. -->
+		<fileSet>
+			<directory>release_files</directory>
+			<outputDirectory></outputDirectory>
+		</fileSet>
+
+		<!-- Copy HTML info -->
+		<fileSet>
+			<directory>src/main/resources/doc</directory>
+			<outputDirectory>doc</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+
+		<!-- Copy technical documentation -->
+		<fileSet>
+			<directory>target/site</directory>
+			<outputDirectory>doc/techdoc</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+
+	</fileSets>
+</assembly>

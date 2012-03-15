@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="p3j.experiment.results">
+<class name="ResultsOfTrial" table="results_trials">
+<id name="ID">
+	<generator class="native"/>
+</id>
+<map name="assignment" table="results_assignments" lazy="true">
+     <key column="trial_id"/>
+     <map-key-many-to-many column="instance_id" class="p3j.pppm.parameters.ParameterInstance" />
+     <many-to-many column="assignment_id" class="p3j.pppm.parameters.ParameterAssignment"/>
+</map>
+<many-to-one name="projection" column="projection_id"/>
+<list name="nativeResults" cascade="all" table="results_natives"  lazy="true">
+    <key column="trial_id"/>
+    <list-index column="result_order" />
+    <many-to-many class="p3j.experiment.results.BasicResults" column="result_id"/>
+</list>
+<list name="immigrantResults" cascade="all" table="results_immigrants"  lazy="true">
+    <key column="trial_id"/>
+    <list-index column="result_order" />
+    <many-to-many class="p3j.experiment.results.BasicResults" column="result_id"/>
+</list>
+<list name="emigrantResults" cascade="all" table="results_emigrants"  lazy="true">
+    <key column="trial_id"/>
+    <list-index column="result_order"/>
+    <many-to-many class="p3j.experiment.results.BasicResults" column="result_id"/>
+</list>
+<property name="assignmentProbability" column="probability"/>
+<property name="setCombinationProbability" column="sets_probability"/>
+</class>
+</hibernate-mapping>

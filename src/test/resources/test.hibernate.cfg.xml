@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+<session-factory>
+<property name="dialect">
+org.hibernate.dialect.HSQLDialect
+</property>
+<property name="connection.driver_class">
+org.hsqldb.jdbcDriver
+</property>
+<property name="connection.username">
+test
+</property>
+<property name="connection.password">
+</property>
+<property name="connection.url">
+jdbc:hsqldb:mem:test_db
+</property>
+<property name="connection.url.rewriteBatchedStatements">
+true
+</property>
+<property name="hibernate.bytecode.use_reflection_optimizer">
+true
+</property>
+<property name="hibernate.show_sql">
+false
+</property>
+<property name="hibernate.hbm2ddl.auto">
+update
+</property>
+
+<!-- Hibernate Performance -->
+<property name="hibernate.cache.use_query_cache">
+false
+</property>
+<property name="hibernate.cache.use_second_level_cache">
+false
+</property>
+<!-- Disable the second-level cache  -->
+<property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+<property name="hibernate.jdbc.batch_size">50</property>
+
+<!-- Debugging -->
+<property name="hibernate.show_sql">false</property>
+<property name="hibernate.generate_statistic">false</property>
+
+<!-- Model database: -->
+<mapping resource="p3j/database/hibernate/Parameter.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/ParameterInstance.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/ParameterAssignment.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/ParameterAssignmentSet.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/Matrix.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/Set.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/SetType.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/Projection.hbm.xml"/>
+<!-- Result database: -->
+<mapping resource="p3j/database/hibernate/BasicResults.hbm.xml"/>
+<mapping resource="p3j/database/hibernate/ResultsOfTrial.hbm.xml"/>
+</session-factory>
+</hibernate-configuration>

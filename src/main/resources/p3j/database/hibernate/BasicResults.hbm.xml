@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="p3j.experiment.results">
+	<class name="BasicResults" table="results_basic">
+		<id name="ID">
+			<generator class="native" />
+		</id>
+		<property name="endXm" length="65536" lazy="true"/>
+		<property name="endXf" length="65536" lazy="true"/>
+		<property name="meanXm" length="65536" lazy="true"/>
+		<property name="meanXf" length="65536" lazy="true"/>
+	</class>
+</hibernate-mapping>

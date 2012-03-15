@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="p3j.pppm">
+<class name="ProjectionModel" table="projections">
+<id name="ID">
+	<generator class="native"/>
+</id>
+<property name="name"/>
+<property name="description" length="4096"/>
+<property name="generations"/>
+<property name="years"/>
+<property name="jumpOffYear"/>
+<property name="maximumAge"/>
+
+<many-to-one name="defaultType" class="p3j.pppm.sets.SetType" cascade="save-update,persist,delete"/>
+<many-to-one name="defaultSet" class="p3j.pppm.sets.Set" cascade="save-update,persist,delete"/>
+
+<list name = "allParameterInstances" table="projection_instances">
+	<key column="scenario_id"/>
+	<list-index column="instance_num" />
+	<many-to-many class="p3j.pppm.parameters.ParameterInstance" column="instance_id"/>	
+</list>
+
+<list name="userDefinedTypes" cascade="save-update,persist,delete-orphan" table="projection_settypes">
+	<key column="scenario_id"/>
+	<list-index column="settype_num" />
+	<one-to-many class="p3j.pppm.sets.SetType"/>	
+</list>
+
+<map name="instanceSetTypes" table="scenario_instances_set_types" cascade="save-update,persist,delete-orphan">
+    <key column="set_id"/>
+    <map-key-many-to-many class="p3j.pppm.parameters.ParameterInstance" column="param_instance_id"/>
+    <many-to-many class="p3j.pppm.sets.SetType" column="set_type_id"/>
+</map>
+
+</class>
+</hibernate-mapping>

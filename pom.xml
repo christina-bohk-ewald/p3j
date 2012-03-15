@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>p3j</groupId>
+	<artifactId>p3j</artifactId>
+	<name>P3J</name>
+	<description>The Probabilistic Population Projection Model (PPPM) for Java.</description>
+	<url>https://bitbucket.org/Christina_Bohk/p3j</url>
+	<version>0.9.5</version>
+
+	<scm>
+		<connection>scm:hg:https://bitbucket.org/Christina_Bohk/p3j</connection>
+		<url>https://bitbucket.org/Christina_Bohk/p3j</url>
+	</scm>
+
+	<issueManagement>
+		<system>Bitbucket</system>
+		<url>https://bitbucket.org/Christina_Bohk/p3j/issues</url>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>Apache 2</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>Christina_Bohk</id>
+			<name>Christina Bohk</name>
+			<email>christina.bohk@uni-rostock.de</email>
+			<roles>
+				<role>Project Lead</role>
+				<role>Concept</role>
+				<role>Testing</role>
+				<role>Programming</role>
+			</roles>
+			<organization>University of Rostock</organization>
+		</developer>
+		<developer>
+			<id>Roland_Ewald</id>
+			<name>Roland Ewald</name>
+			<email>roland.ewald@uni-rostock.de</email>
+			<roles>
+				<role>Programming</role>
+			</roles>
+			<organization>University of Rostock</organization>
+		</developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<source.version>1.6</source.version>
+
+		<!-- Maven Plugin Versions -->
+		<!-- Building -->
+		<maven.compiler.v>2.3.1</maven.compiler.v>
+		<maven.surefire.v>2.10</maven.surefire.v>
+		<maven.scm.v>1.5</maven.scm.v>
+		<maven.release.v>2.2</maven.release.v>
+		<maven.source.v>2.1.2</maven.source.v>
+		<maven.jar.v>2.3.2</maven.jar.v>
+		<maven.assembly.v>2.2.1</maven.assembly.v>
+
+		<!-- Reporting -->
+		<maven.site.v>3.0</maven.site.v>
+		<maven.inforeports.v>2.4</maven.inforeports.v>
+		<maven.javadoc.v>2.8</maven.javadoc.v>
+		<maven.jxr.v>2.1</maven.jxr.v>
+
+	</properties>
+
+	<!-- Use local Maven repository -->
+	<repositories>
+		<repository>
+			<id>p3j-repo</id>
+			<name>p3j-repo</name>
+			<url>file://${project.basedir}/repo</url>
+			<releases>
+				<checksumPolicy>ignore</checksumPolicy>
+			</releases>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<!-- James II -->
+		<dependency>
+			<groupId>james2</groupId>
+			<artifactId>core</artifactId>
+			<version>0.8.5</version>
+		</dependency>
+
+		<!-- Colt -->
+		<dependency>
+			<groupId>colt</groupId>
+			<artifactId>colt</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+
+		<!-- JGrid -->
+		<dependency>
+			<groupId>jeppers</groupId>
+			<artifactId>jgrid</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<!-- JMathTools / MathPlot -->
+		<dependency>
+			<groupId>jmathtools</groupId>
+			<artifactId>mathplot</artifactId>
+			<version>08-2009</version>
+		</dependency>
+
+		<!-- JGoodies / Forms -->
+		<dependency>
+			<groupId>com.jgoodies</groupId>
+			<artifactId>forms</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+
+		<!-- JGoodies / Looks -->
+		<dependency>
+			<groupId>com.jgoodies</groupId>
+			<artifactId>looks</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+
+		<!-- Hibernate -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+			<version>3.2.7.ga</version>
+		</dependency>
+
+		<!-- Freemaker template engine (for reports) -->
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.16</version>
+		</dependency>
+
+		<!-- HyperSQL (file/mem-based Java DB) -->
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.2.4</version>
+			<scope>runtime</scope>
+		</dependency>
+
+
+		<!-- MySQL Connector for JDBC -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.17</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- JUnit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+
+		<plugins>
+
+			<!-- Compile -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven.compiler.v}</version>
+				<configuration>
+					<source>${source.version}</source>
+					<target>${source.version}</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
+			<!-- Bundle source files -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>${maven.source.v}</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+							<goal>test-jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Include tests classes (in extra JAR file) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>${maven.jar.v}</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>p3j.gui.P3J</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Final assembly -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>${maven.assembly.v}</version>
+				<configuration>
+					<descriptors>
+						<descriptor>release-assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>assembly</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Test -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven.surefire.v}</version>
+				<configuration>
+					<!-- Wait no more than 3 minutes: -->
+					<forkedProcessTimeoutInSeconds>180</forkedProcessTimeoutInSeconds>
+					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
+					<runOrder>random</runOrder>
+				</configuration>
+			</plugin>
+
+			<!-- Reporting -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>${maven.site.v}</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>${maven.inforeports.v}</version>
+							<configuration>
+							<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+							</configuration>
+							<reportSets>
+								<reportSet>
+									<reports>
+										<report>index</report>
+										<report>dependencies</report>
+										<report>project-team</report>
+										<report>issue-tracking</report>
+										<report>license</report>
+										<report>scm</report>
+									</reports>
+								</reportSet>
+							</reportSets>
+						</plugin>
+
+						<!-- JavaDoc -->
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>${maven.javadoc.v}</version>
+						</plugin>
+
+						<!-- JXR (Source as HTML) -->
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-jxr-plugin</artifactId>
+							<version>${maven.jxr.v}</version>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
