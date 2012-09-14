@@ -62,6 +62,7 @@ import javax.swing.UIManager;
 import javax.swing.tree.TreePath;
 
 import p3j.database.DatabaseFactory;
+import p3j.database.hibernate.P3MDatabase;
 import p3j.gui.dialogs.CopyGenerationsDialog;
 import p3j.gui.dialogs.ExecutionPreferencesDialog;
 import p3j.gui.dialogs.NewProjectionDialog;
@@ -124,7 +125,7 @@ public final class P3J extends JFrame {
 
 	/** Icon for the run button. */
 	private final Icon runIcon = new ImageIcon(this.getClass().getResource(
-	    "/p3j/icons/run.gif"));
+			"/p3j/icons/run.gif"));
 
 	/** The button to run a calculation. */
 	private final JButton runButton = new JButton(runIcon);
@@ -167,10 +168,10 @@ public final class P3J extends JFrame {
 
 	/** Menu to create a new scenario. */
 	private final JMenuItem newProjectionMenu = new JMenuItem("New projection",
-	    KeyEvent.VK_N);
+			KeyEvent.VK_N);
 	{
 		newProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-		    ActionEvent.CTRL_MASK));
+				ActionEvent.CTRL_MASK));
 		newProjectionMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -181,11 +182,11 @@ public final class P3J extends JFrame {
 
 	/** Menu to load a scenario. */
 	private final JMenuItem openProjectionMenu = new JMenuItem(
-	    "Open/import projection...", KeyEvent.VK_O);
+			"Open/import projection...", KeyEvent.VK_O);
 	{
 		openProjectionMenu.setVisible(false); // TODO
 		openProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-		    ActionEvent.CTRL_MASK));
+				ActionEvent.CTRL_MASK));
 		openProjectionMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -196,10 +197,10 @@ public final class P3J extends JFrame {
 
 	/** Menu to quick-save. */
 	private final JMenuItem quickSaveProjectionMenu = new JMenuItem(
-	    "Save projection", KeyEvent.VK_S);
+			"Save projection", KeyEvent.VK_S);
 	{
 		quickSaveProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(
-		    KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+				KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		quickSaveProjectionMenu.setVisible(false); // TODO
 		quickSaveProjectionMenu.addActionListener(new ActionListener() {
 			@Override
@@ -215,7 +216,7 @@ public final class P3J extends JFrame {
 
 	/** Menu to save scenario. */
 	private final JMenuItem saveProjectionMenu = new JMenuItem(
-	    "Save projection...");
+			"Save projection...");
 	{
 		saveProjectionMenu.setVisible(false); // TODO
 		saveProjectionMenu.addActionListener(new ActionListener() {
@@ -257,7 +258,7 @@ public final class P3J extends JFrame {
 
 	/** Menu to open execution preferences dialog. */
 	private final JMenuItem execPreferencesMenu = new JMenuItem(
-	    "Execution Preferences...");
+			"Execution Preferences...");
 	{
 		execPreferencesMenu.addActionListener(new ActionListener() {
 			@Override
@@ -271,7 +272,7 @@ public final class P3J extends JFrame {
 	private final JMenuItem quitMenu = new JMenuItem("Quit", KeyEvent.VK_Q);
 	{
 		quitMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-		    ActionEvent.CTRL_MASK));
+				ActionEvent.CTRL_MASK));
 		quitMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -327,7 +328,7 @@ public final class P3J extends JFrame {
 
 	/** Menu to input a matrix quickly. */
 	private final JMenuItem quickMatrixInput = new JMenuItem(
-	    "Quick Matrix Input...");
+			"Quick Matrix Input...");
 	{
 		quickMatrixInput.addActionListener(new ActionListener() {
 			@Override
@@ -338,7 +339,8 @@ public final class P3J extends JFrame {
 	}
 
 	/** Menu to input a matrix quickly. */
-	private final JMenuItem copyGenerations = new JMenuItem("Copy Generations...");
+	private final JMenuItem copyGenerations = new JMenuItem(
+			"Copy Generations...");
 	{
 		copyGenerations.addActionListener(new ActionListener() {
 			@Override
@@ -406,13 +408,14 @@ public final class P3J extends JFrame {
 
 	/** Panel that allows navigation through the current projection. */
 	private ProjectionTreePanel projTreePanel = new ProjectionTreePanel(
-	    getCurrentProjection(), contentPanel);
+			getCurrentProjection(), contentPanel);
 
 	/**
-	 * Panel that allows navigation through the results of the current projection.
+	 * Panel that allows navigation through the results of the current
+	 * projection.
 	 */
 	private ResultTreePanel resultsPanel = new ResultTreePanel(
-	    getCurrentProjection(), contentPanel);
+			getCurrentProjection(), contentPanel);
 
 	/**
 	 * Panel that allows to navigate through the overall database and load
@@ -433,9 +436,11 @@ public final class P3J extends JFrame {
 		} catch (Exception ex) {
 			SimSystem.report(ex);
 			getConfigFile().setFileName("./" + Misc.CONFIG_FILE);
-			GUI.printErrorMessage(this, "Error while loading configuration file.",
-			    "An error occurred while attempting to read the file '"
-			        + Misc.CONFIG_FILE + "' from the working directory:" + ex);
+			GUI.printErrorMessage(this,
+					"Error while loading configuration file.",
+					"An error occurred while attempting to read the file '"
+							+ Misc.CONFIG_FILE
+							+ "' from the working directory:" + ex);
 		}
 
 		updateFromExecConfig();
@@ -447,16 +452,17 @@ public final class P3J extends JFrame {
 	 * Edits the preferences.
 	 */
 	protected void editPreferences() {
-		PreferencesDialog prefsDialog = new PreferencesDialog(this, getConfigFile());
+		PreferencesDialog prefsDialog = new PreferencesDialog(this,
+				getConfigFile());
 		prefsDialog.setVisible(true);
 		try {
 			getConfigFile().writeFile();
 		} catch (Exception ex) {
 			SimSystem.report(ex);
 			GUI.printErrorMessage(this, "Error writing configuration file.",
-			    "An error occurred while attempting to write to file '"
-			        + getConfigFile().getFileName() + "' in the working directory:"
-			        + ex);
+					"An error occurred while attempting to write to file '"
+							+ getConfigFile().getFileName()
+							+ "' in the working directory:" + ex);
 		}
 		updateFromConfig();
 	}
@@ -466,16 +472,17 @@ public final class P3J extends JFrame {
 	 */
 	protected void editExecutionPreferences() {
 		ExecutionPreferencesDialog execPrefsDialog = new ExecutionPreferencesDialog(
-		    this);
+				this);
 		execPrefsDialog.setVisible(true);
 		try {
 			getConfigFile().writeFile();
 		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE, "Error writing configuration file.", ex);
+			SimSystem.report(Level.SEVERE, "Error writing configuration file.",
+					ex);
 			GUI.printErrorMessage(this, "Error writing configuration file.",
-			    "An error occurred while attempting to write to file '"
-			        + getConfigFile().getFileName() + "' in the working directory:"
-			        + ex);
+					"An error occurred while attempting to write to file '"
+							+ getConfigFile().getFileName()
+							+ "' in the working directory:" + ex);
 		}
 		updateFromExecConfig();
 	}
@@ -501,7 +508,7 @@ public final class P3J extends JFrame {
 	 */
 	protected void copyGenerations() {
 		CopyGenerationsDialog cgd = new CopyGenerationsDialog(
-		    getCurrentProjection(), this);
+				getCurrentProjection(), this);
 		cgd.setVisible(true);
 	}
 
@@ -510,7 +517,7 @@ public final class P3J extends JFrame {
 	 */
 	protected void newProjection() {
 		NewProjectionDialog newProjectionDialog = new NewProjectionDialog(this,
-		    DatabaseFactory.getDatabaseSingleton());
+				DatabaseFactory.getDatabaseSingleton());
 		newProjectionDialog.setVisible(true);
 		if (newProjectionDialog.hasCreatedNewProjection()) {
 			currentProjection = newProjectionDialog.getNewProjection();
@@ -549,7 +556,7 @@ public final class P3J extends JFrame {
 		currentProjection = null;
 		dbOverviewPanel = new DatabaseOverviewPanel(contentPanel);
 		projTreePanel = new ProjectionTreePanel(getCurrentProjection(),
-		    contentPanel);
+				contentPanel);
 
 		tabbedPane.removeAll();
 		tabbedPane.addTab("Database", dbOverviewPanel);
@@ -594,17 +601,18 @@ public final class P3J extends JFrame {
 		int userReaction = this.scenarioFileChooser.showDialog(this, "Save");
 
 		if (userReaction != JFileChooser.ERROR_OPTION
-		    && userReaction != JFileChooser.CANCEL_OPTION) {
+				&& userReaction != JFileChooser.CANCEL_OPTION) {
 			File projectionFile = this.scenarioFileChooser.getSelectedFile();
 
 			String ending = Misc.getFileEnding(projectionFile);
 
 			if (ending.compareToIgnoreCase("p3j") != 0) {
-				projectionFile = new File(projectionFile.getAbsolutePath() + ".p3j");
+				projectionFile = new File(projectionFile.getAbsolutePath()
+						+ ".p3j");
 			}
 
 			if (projectionFile != null
-			    && (!projectionFile.exists() || projectionFile.canWrite())) {
+					&& (!projectionFile.exists() || projectionFile.canWrite())) {
 				quickSaveProjection(projectionFile.getAbsolutePath());
 			}
 
@@ -615,17 +623,18 @@ public final class P3J extends JFrame {
 	 * Quick-save current scenario.
 	 * 
 	 * @param scenarioFile
-	 *          the file to which the scenario shall be saved
+	 *            the file to which the scenario shall be saved
 	 */
 	void quickSaveProjection(String scenarioFile) {
 		try {
 			serializer.save(getCurrentProjection(), scenarioFile);
 			this.currentProjectionFile = scenarioFile;
 		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE, "Error while saving scenario file.", ex);
+			SimSystem.report(Level.SEVERE, "Error while saving scenario file.",
+					ex);
 			GUI.printErrorMessage(this, "Error while saving scenario file.",
-			    "An error occurred while attempting to save file to '" + scenarioFile
-			        + "': " + ex);
+					"An error occurred while attempting to save file to '"
+							+ scenarioFile + "': " + ex);
 		}
 
 	}
@@ -638,21 +647,23 @@ public final class P3J extends JFrame {
 		int userReaction = this.scenarioFileChooser.showDialog(this, "Open");
 
 		if (userReaction != JFileChooser.ERROR_OPTION
-		    && userReaction != JFileChooser.CANCEL_OPTION) {
+				&& userReaction != JFileChooser.CANCEL_OPTION) {
 			File scenarioFile = this.scenarioFileChooser.getSelectedFile();
 
 			if (scenarioFile != null && scenarioFile.exists()) {
 				try {
-					currentProjection = (ProjectionModel) serializer.load(scenarioFile
-					    .getAbsolutePath());
+					currentProjection = (ProjectionModel) serializer
+							.load(scenarioFile.getAbsolutePath());
 					currentProjectionFile = scenarioFile.getAbsolutePath();
 					projTreePanel.setProjection(currentProjection);
 				} catch (Exception ex) {
-					SimSystem.report(Level.SEVERE, "Error while opening scenario file.",
-					    ex);
-					GUI.printErrorMessage(this, "Error while opening scenario file.",
-					    "An error occurred while attempting to save file to '"
-					        + scenarioFile.getAbsolutePath() + "': " + ex);
+					SimSystem.report(Level.SEVERE,
+							"Error while opening scenario file.", ex);
+					GUI.printErrorMessage(this,
+							"Error while opening scenario file.",
+							"An error occurred while attempting to save file to '"
+									+ scenarioFile.getAbsolutePath() + "': "
+									+ ex);
 				}
 			}
 		}
@@ -673,11 +684,12 @@ public final class P3J extends JFrame {
 	 * Switches to a new projection model for editing.
 	 * 
 	 * @param newProjModel
-	 *          the new projection model to be edited
+	 *            the new projection model to be edited
 	 */
 	public void setCurrentProjection(ProjectionModel newProjModel) {
 		if (currentProjection != null) {
-			DatabaseFactory.getDatabaseSingleton().saveProjection(currentProjection);
+			DatabaseFactory.getDatabaseSingleton().saveProjection(
+					currentProjection);
 		}
 		currentProjection = newProjModel;
 		projTreePanel.setProjection(currentProjection);
@@ -702,33 +714,35 @@ public final class P3J extends JFrame {
 		configureSimulator(baseExperiment);
 		configureMultiThreading(baseExperiment);
 		ExperimentExecutorThreadPool.getInstance().getExecutor()
-		    .execute(new ExperimentThread(baseExperiment));
+				.execute(new ExperimentThread(baseExperiment));
 	}
 
 	/**
 	 * Configures the given experiment for multi-threading.
 	 * 
 	 * @param baseExperiment
-	 *          the experiment to be configured
+	 *            the experiment to be configured
 	 */
 	private void configureMultiThreading(BaseExperiment baseExperiment) {
 		int numOfTrials = (Integer) getConfigFile().get(Misc.PREF_NUM_TRIALS);
 		int numOfThreads = (Integer) getConfigFile().get(
-		    Misc.PREF_NUM_PARALLEL_THREADS);
+				Misc.PREF_NUM_PARALLEL_THREADS);
 		double stopTime = Math.ceil((double) numOfTrials / numOfThreads);
 
 		baseExperiment.setDefaultSimStopTime(stopTime);
 		baseExperiment.setRepeatRuns(numOfThreads);
 		baseExperiment
-		    .setComputationInstrumenterFactory(new ExecProgressInstrFactory());
+				.setComputationInstrumenterFactory(new ExecProgressInstrFactory());
 		baseExperiment.setComputationInstrumenterParameters(new ParameterBlock(
-		    numOfTrials, ExecProgressInstrFactory.NUM_OF_TRIALS));
+				numOfTrials, ExecProgressInstrFactory.NUM_OF_TRIALS));
 
 		if (numOfThreads > 1) {
 			baseExperiment
-			    .setTaskRunnerFactory(new ParameterizedFactory<TaskRunnerFactory>(
-			        new ParallelComputationTaskRunnerFactory(), new ParameterBlock(
-			            numOfThreads, ParallelComputationTaskRunnerFactory.NUM_CORES)));
+					.setTaskRunnerFactory(new ParameterizedFactory<TaskRunnerFactory>(
+							new ParallelComputationTaskRunnerFactory(),
+							new ParameterBlock(
+									numOfThreads,
+									ParallelComputationTaskRunnerFactory.NUM_CORES)));
 		}
 	}
 
@@ -736,24 +750,24 @@ public final class P3J extends JFrame {
 	 * Configures experiment to use PPPM simulator.
 	 * 
 	 * @param baseExperiment
-	 *          the experiment to be configured
+	 *            the experiment to be configured
 	 */
 	private void configureSimulator(BaseExperiment baseExperiment) {
 		ParameterBlock processorParameters = baseExperiment
-		    .getParameters()
-		    .getParameterBlock()
-		    .addSubBlock(ProcessorFactory.class.getName(),
-		        PPPMProcessorFactory.class.getName());
+				.getParameters()
+				.getParameterBlock()
+				.addSubBlock(ProcessorFactory.class.getName(),
+						PPPMProcessorFactory.class.getName());
 		processorParameters.addSubBl(ParamAssignmentGenFactory.class.getName(),
-		    ((ExecutionMode) getConfigFile().get(Misc.PREF_EXECUTION_MODE))
-		        .getFactoryName());
+				((ExecutionMode) getConfigFile().get(Misc.PREF_EXECUTION_MODE))
+						.getFactoryName());
 	}
 
 	/**
 	 * Configures experiment regarding model location.
 	 * 
 	 * @param baseExperiment
-	 *          the experiment to be configured
+	 *            the experiment to be configured
 	 */
 	private void configureModelLocation(BaseExperiment baseExperiment) {
 		try {
@@ -761,12 +775,12 @@ public final class P3J extends JFrame {
 			String dbURL = DatabaseFactory.getDbConnData().getUrl();
 			SimSystem.report(Level.INFO, "Using database URL:" + dbURL);
 			dbURL = dbURL.substring(dbURL.indexOf('/')).substring(2);
-			baseExperiment.setModelLocation(new URI("db-p3j://" + dbData.getUser()
-			    + ":" + dbData.getPassword() + "@" + dbURL + "?"
-			    + currentProjection.getID()));
+			baseExperiment.setModelLocation(new URI("db-p3j://"
+					+ dbData.getUser() + ":" + dbData.getPassword() + "@"
+					+ dbURL + "?" + currentProjection.getID()));
 		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE, "Configuration of model location failed.",
-			    ex);
+			SimSystem.report(Level.SEVERE,
+					"Configuration of model location failed.", ex);
 		}
 	}
 
@@ -774,17 +788,19 @@ public final class P3J extends JFrame {
 	 * Main function.
 	 * 
 	 * @param argv
-	 *          command line arguments
+	 *            command line arguments
 	 */
 	public static void main(String[] argv) {
 
 		showSplashScreen();
 		Locale.setDefault(Locale.US);
 
+		processCmdLineArgs(argv);
+
 		try {
 			String lf = LookUtils.IS_OS_WINDOWS ? Options
-			    .getCrossPlatformLookAndFeelClassName() : Options
-			    .getSystemLookAndFeelClassName();
+					.getCrossPlatformLookAndFeelClassName() : Options
+					.getSystemLookAndFeelClassName();
 			UIManager.setLookAndFeel(lf);
 		} catch (Exception e) {
 			SimSystem.report(e);
@@ -797,6 +813,22 @@ public final class P3J extends JFrame {
 	}
 
 	/**
+	 * Process cmd line arguments.
+	 * 
+	 * @param argv
+	 *            the argv
+	 */
+	private static void processCmdLineArgs(String[] argv) {
+		if (argv.length > 1) {
+			SimSystem
+					.report(Level.WARNING,
+							"Only a single command line argument is allowed (which points to the database configuration file to be used). Arguments will be ignored.");
+		} else if (argv.length == 1) {
+			P3MDatabase.setHibernateConfigFile(argv[0]);
+		}
+	}
+
+	/**
 	 * Shows splash screen.
 	 */
 	private static void showSplashScreen() {
@@ -806,11 +838,13 @@ public final class P3J extends JFrame {
 				public void run() {
 					Image image = null;
 					try {
-						image = IconManager.getImage("image:/p3j/splashscreen.png");
+						image = IconManager
+								.getImage("image:/p3j/splashscreen.png");
 					} catch (Exception ex) {
 						SimSystem.report(ex);
 					}
-					splashScreen = new SplashScreen(image, "", "Version 0.9.5", "", true);
+					splashScreen = new SplashScreen(image, "", "Version 0.9.5",
+							"", true);
 					splashScreen.setVisible(true);
 					splashScreen.pack();
 				}
@@ -827,7 +861,7 @@ public final class P3J extends JFrame {
 	 * deleted.
 	 * 
 	 * @param deletedModel
-	 *          the model that has been deleted from the database
+	 *            the model that has been deleted from the database
 	 */
 	public void projectionDeleted(ProjectionModel deletedModel) {
 		if (currentProjection.equals(deletedModel)) {
@@ -841,7 +875,7 @@ public final class P3J extends JFrame {
 	 * Switch the navigation tree tab.
 	 * 
 	 * @param targetTab
-	 *          the desired tab of the navigation tree
+	 *            the desired tab of the navigation tree
 	 */
 	public void switchNavigationTreeTab(NavigationTreeTab targetTab) {
 		tabbedPane.setSelectedIndex(targetTab.getTabIndex());
@@ -861,9 +895,9 @@ public final class P3J extends JFrame {
 	 */
 	private void updateFromExecConfig() {
 		execPrefsButton.setText("#Trials:"
-		    + getConfigFile().get(Misc.PREF_NUM_TRIALS) + ", #Threads:"
-		    + getConfigFile().get(Misc.PREF_NUM_PARALLEL_THREADS) + ", Mode:"
-		    + getConfigFile().get(Misc.PREF_EXECUTION_MODE));
+				+ getConfigFile().get(Misc.PREF_NUM_TRIALS) + ", #Threads:"
+				+ getConfigFile().get(Misc.PREF_NUM_PARALLEL_THREADS)
+				+ ", Mode:" + getConfigFile().get(Misc.PREF_EXECUTION_MODE));
 	}
 
 	/**
@@ -881,17 +915,17 @@ public final class P3J extends JFrame {
 	 */
 	public void refreshNavigationTree() {
 		NavigationTreeTab currentTab = NavigationTreeTab.values()[tabbedPane
-		    .getSelectedIndex()];
+				.getSelectedIndex()];
 		setCurrentProjection(currentProjection);
 		switchNavigationTreeTab(currentTab);
 		switch (currentTab) {
 		case PROJECTION_OVERVIEW:
 			projTreePanel.getTree().setSelectionPath(
-			    new TreePath(projTreePanel.getTreeModel().getRoot()));
+					new TreePath(projTreePanel.getTreeModel().getRoot()));
 			break;
 		case RESULTS_OVERVIEW:
 			resultsPanel.getTree().setSelectionPath(
-			    new TreePath(resultsPanel.getTreeModel().getRoot()));
+					new TreePath(resultsPanel.getTreeModel().getRoot()));
 			break;
 		}
 
