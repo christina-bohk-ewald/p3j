@@ -1,0 +1,9 @@
+glob:target
+glob:*.class
+glob:.settings
+glob:.classpath
+glob:.project
+glob:*.lck
+glob:*.log
+glob:*.properties
+glob:*.script
