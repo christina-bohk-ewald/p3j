@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import p3j.pppm.ProjectionModel;
 
@@ -55,11 +56,12 @@ public abstract class AbstractNavigationPanel extends JPanel {
 	 * Instantiates a new abstract navigation panel.
 	 * 
 	 * @param projectionModel
-	 *          the projectionModel
+	 *            the projectionModel
 	 * @param content
-	 *          the content panel
+	 *            the content panel
 	 */
-	public AbstractNavigationPanel(ProjectionModel projectionModel, JPanel content) {
+	public AbstractNavigationPanel(ProjectionModel projectionModel,
+			JPanel content) {
 		projection = projectionModel;
 		contentPanel = content;
 		if (projection == null) {
@@ -72,7 +74,7 @@ public abstract class AbstractNavigationPanel extends JPanel {
 	 * Sets the new projection model to be displayed.
 	 * 
 	 * @param projMod
-	 *          the new projection model
+	 *            the new projection model
 	 */
 	public final void setProjection(ProjectionModel projMod) {
 		projection = projMod;
@@ -88,6 +90,13 @@ public abstract class AbstractNavigationPanel extends JPanel {
 	 * Initializes tree (after projection changed, for example).
 	 */
 	protected abstract void initTree();
+
+	/**
+	 * Select root of the tree.
+	 */
+	public void selectRoot() {
+		tree.setSelectionPath(new TreePath(treeModel.getRoot()));
+	}
 
 	public final JTree getTree() {
 		return tree;

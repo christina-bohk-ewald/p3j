@@ -184,7 +184,7 @@ public final class P3J extends JFrame {
 	private final JMenuItem openProjectionMenu = new JMenuItem(
 			"Open/import projection...", KeyEvent.VK_O);
 	{
-		openProjectionMenu.setVisible(false); // TODO
+		openProjectionMenu.setVisible(true); 
 		openProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
 				ActionEvent.CTRL_MASK));
 		openProjectionMenu.addActionListener(new ActionListener() {
@@ -201,7 +201,7 @@ public final class P3J extends JFrame {
 	{
 		quickSaveProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(
 				KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-		quickSaveProjectionMenu.setVisible(false); // TODO
+		quickSaveProjectionMenu.setVisible(true);
 		quickSaveProjectionMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -216,9 +216,9 @@ public final class P3J extends JFrame {
 
 	/** Menu to save scenario. */
 	private final JMenuItem saveProjectionMenu = new JMenuItem(
-			"Save projection...");
+			"Save projection as...");
 	{
-		saveProjectionMenu.setVisible(false); // TODO
+		saveProjectionMenu.setVisible(true);
 		saveProjectionMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -920,12 +920,15 @@ public final class P3J extends JFrame {
 		switchNavigationTreeTab(currentTab);
 		switch (currentTab) {
 		case PROJECTION_OVERVIEW:
-			projTreePanel.getTree().setSelectionPath(
-					new TreePath(projTreePanel.getTreeModel().getRoot()));
+			projTreePanel.selectRoot();
 			break;
 		case RESULTS_OVERVIEW:
-			resultsPanel.getTree().setSelectionPath(
-					new TreePath(resultsPanel.getTreeModel().getRoot()));
+			resultsPanel.selectRoot();
+			break;
+		case DB_OVERVIEW:
+			dbOverviewPanel.selectRoot();
+			break;
+		default:
 			break;
 		}
 
