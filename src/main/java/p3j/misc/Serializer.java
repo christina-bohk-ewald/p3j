@@ -29,6 +29,11 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import p3j.database.DatabaseFactory;
+import p3j.database.IP3MDatabase;
+import p3j.database.hibernate.P3MDatabase;
+import p3j.pppm.ProjectionModel;
+
 /**
  * 
  * Class that stores and loads serializable classes. Needed to store and load
@@ -46,23 +51,23 @@ public class Serializer {
 	 * Flag that indicates whether objects should be stored in XML or in binary
 	 * encoding.
 	 */
-	private boolean usingXML;
+	private boolean usingXML = true;
 
 	/**
 	 * Flag that indicates whether GZIP compression (LZW) is used.
 	 */
-	private boolean useCompression = true;
+	private boolean usingCompression = false;
 
 	/**
 	 * Loads object from file.
 	 * 
 	 * @param file
-	 *          path to file with the object to be loaded
+	 *            path to file with the object to be loaded
 	 * @return object the object that has been loaded
 	 * @throws IOException
-	 *           if file was not found, file input failed, etc.
+	 *             if file was not found, file input failed, etc.
 	 * @throws ClassNotFoundException
-	 *           if class of persistent object could not be found
+	 *             if class of persistent object could not be found
 	 */
 	public Object load(String file) throws IOException, ClassNotFoundException {
 		if (usingXML) {
@@ -75,15 +80,15 @@ public class Serializer {
 	 * Load object from a binary file.
 	 * 
 	 * @param file
-	 *          path and file name
+	 *            path and file name
 	 * @return deserialised object
 	 * @throws IOException
-	 *           if file was not found, etc.
+	 *             if file was not found, etc.
 	 * @throws ClassNotFoundException
-	 *           if class of persistent object could not be found
+	 *             if class of persistent object could not be found
 	 */
 	public Object loadFromBinary(String file) throws IOException,
-	    ClassNotFoundException {
+			ClassNotFoundException {
 		ObjectInputStream input = new ObjectInputStream(getInputStream(file));
 		Object o = input.readObject();
 		input.close();
@@ -94,10 +99,10 @@ public class Serializer {
 	 * Load object from XML file.
 	 * 
 	 * @param file
-	 *          path and file name
+	 *            path and file name
 	 * @return deserialised object
 	 * @throws IOException
-	 *           if file was not found, a read error occurred, etc.
+	 *             if file was not found, a read error occurred, etc.
 	 */
 	public Object loadFromXML(String file) throws IOException {
 		XMLDecoder xmlDecoder = new XMLDecoder(getInputStream(file));
@@ -110,14 +115,14 @@ public class Serializer {
 	 * Create an input stream.
 	 * 
 	 * @param file
-	 *          source file
+	 *            source file
 	 * @return input stream from file
 	 * @throws IOException
-	 *           if stream creation fails
+	 *             if stream creation fails
 	 */
 	protected InputStream getInputStream(String file) throws IOException {
 		InputStream in = new BufferedInputStream(new FileInputStream(file));
-		if (useCompression) {
+		if (isUsingCompression()) {
 			in = new GZIPInputStream(in);
 		}
 		return in;
@@ -127,14 +132,14 @@ public class Serializer {
 	 * Create an output stream.
 	 * 
 	 * @param file
-	 *          target file
+	 *            target file
 	 * @return output stream to file
 	 * @throws IOException
-	 *           if stream creation fails
+	 *             if stream creation fails
 	 */
 	protected OutputStream getOutputStream(String file) throws IOException {
 		OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-		if (useCompression) {
+		if (isUsingCompression()) {
 			out = new GZIPOutputStream(out);
 		}
 		return out;
@@ -144,32 +149,48 @@ public class Serializer {
 	 * Save object to file.
 	 * 
 	 * @param object
-	 *          the object to be saved in the file
+	 *            the object to be saved in the file
 	 * @param file
-	 *          the file
+	 *            the file
 	 * @throws IOException
-	 *           if outputting went wrong
+	 *             if outputting went wrong
 	 */
-	public void save(Object object, String file) throws IOException {
+	public void save(ProjectionModel pm, String file) throws IOException {
+		ProjectionModel modelToSave = retrieveFullModel(pm.getID());
 		if (usingXML) {
-			saveToXML(object, file);
+			saveToXML(modelToSave, file);
 		} else {
-			saveToBinary(object, file);
+			saveToBinary(modelToSave, file);
 		}
+	}
+
+	/**
+	 * Retrieve full model for storage. The returned object must not contain any
+	 * hibernate-based data structures (used for lazy evaluation etc.).
+	 * 
+	 * @param pmID
+	 *            the ID of the projection model
+	 * @return the full projection model
+	 */
+	private ProjectionModel retrieveFullModel(int pmID) {
+		IP3MDatabase db = DatabaseFactory.createDatabase(P3MDatabase
+				.getHibernateConfigFile()); // TODO: switch off lazy-eval
+		return db.getProjectionByID(pmID);
 	}
 
 	/**
 	 * Save object to binary file.
 	 * 
 	 * @param object
-	 *          the object to be written
+	 *            the object to be written
 	 * @param file
-	 *          the target file
+	 *            the target file
 	 * @throws IOException
-	 *           if writing fails
+	 *             if writing fails
 	 */
 	public void saveToBinary(Object object, String file) throws IOException {
-		ObjectOutputStream output = new ObjectOutputStream(getOutputStream(file));
+		ObjectOutputStream output = new ObjectOutputStream(
+				getOutputStream(file));
 		output.writeObject(object);
 		output.close();
 	}
@@ -178,11 +199,11 @@ public class Serializer {
 	 * Save object to XML file.
 	 * 
 	 * @param object
-	 *          the object to be written
+	 *            the object to be written
 	 * @param file
-	 *          the target file
+	 *            the target file
 	 * @throws IOException
-	 *           if writing fails
+	 *             if writing fails
 	 */
 	public void saveToXML(Object object, String file) throws IOException {
 		XMLEncoder xmlEncoder = new XMLEncoder(getOutputStream(file));
@@ -196,6 +217,14 @@ public class Serializer {
 
 	public void setUsingXML(boolean usingXML) {
 		this.usingXML = usingXML;
+	}
+
+	public boolean isUsingCompression() {
+		return usingCompression;
+	}
+
+	public void setUsingCompression(boolean usingCompression) {
+		this.usingCompression = usingCompression;
 	}
 
 }
