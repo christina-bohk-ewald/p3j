@@ -38,19 +38,10 @@ public final class DatabaseFactory {
 	private DatabaseFactory() {
 	}
 
-	/**
-	 * Serialization ID.
-	 */
-	private static boolean useSQLDatabase = true;
-
-	/**
-	 * Implementing singleton pattern.
-	 */
+	/** Implementing singleton pattern. */
 	private static IP3MDatabase sqlDatabase;
 
-	/**
-	 * Connection data to be used.
-	 */
+	/** Connection data to be used. */
 	private static DBConnectionData dbConnData = Misc.DEFAULT_DB_CONN;
 
 	/**
@@ -71,18 +62,14 @@ public final class DatabaseFactory {
 	 * @return the newly created database interface object
 	 */
 	public static IP3MDatabase createDatabase() {
-		if (DatabaseFactory.useSQLDatabase) {
-			P3MDatabase database = new P3MDatabase();
-			database.init(dbConnData);
-			try {
-				database.open();
-			} catch (Exception ex) {
-				SimSystem.report(ex);
-				database = null;
-			}
-			return database;
+		P3MDatabase database = new P3MDatabase();
+		database.init(dbConnData);
+		try {
+			database.open();
+		} catch (Exception ex) {
+			SimSystem.report(ex);
 		}
-		return null;
+		return database;
 	}
 
 	/**
@@ -90,7 +77,7 @@ public final class DatabaseFactory {
 	 * file.
 	 * 
 	 * @param hibernateConfigFile
-	 *          the hibernate config file
+	 *            the hibernate config file
 	 * 
 	 * @return the database
 	 */
@@ -112,7 +99,7 @@ public final class DatabaseFactory {
 	 * Sets the DB connection data.
 	 * 
 	 * @param dbConnData
-	 *          the new DB connection data
+	 *            the new DB connection data
 	 */
 	public static void setDbConnData(DBConnectionData dbConnData) {
 		try {
