@@ -60,15 +60,15 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	private String description;
 
 	/**
-	 * Default Settype. This will always be there and contain all parameters that
-	 * do not belong to specific Settypes.
+	 * Default Settype. This will always be there and contain all parameters
+	 * that do not belong to specific Settypes.
 	 */
 	private SetType defaultType = new SetType("Default Settype",
-	    "This is the default Settype.");
+			"This is the default Settype.");
 
 	/** Default set. */
 	private Set defaultSet = defaultType.createSet("Default Set",
-	    "This is the default set.", 1);
+			"This is the default set.", 1);
 
 	/** List of user defined Settypes. */
 	private List<SetType> userDefinedTypes = new ArrayList<SetType>();
@@ -111,20 +111,20 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Default constructor.
 	 * 
 	 * @param scenName
-	 *          name of the scenario
+	 *            name of the scenario
 	 * @param desc
-	 *          description of the scenario
+	 *            description of the scenario
 	 * @param numOfGenerations
-	 *          number of generations to be considered
+	 *            number of generations to be considered
 	 * @param predYears
-	 *          number of years to be predicted
+	 *            number of years to be predicted
 	 * @param maxAge
-	 *          maximum age to be considered
+	 *            maximum age to be considered
 	 * @param jumpOffYear
-	 *          the jump off year
+	 *            the jump off year
 	 */
 	public ProjectionModel(String scenName, String desc, int numOfGenerations,
-	    int predYears, int maxAge, int jumpOffYear) {
+			int predYears, int maxAge, int jumpOffYear) {
 		this.name = scenName;
 		this.description = desc;
 		this.generations = numOfGenerations;
@@ -149,9 +149,9 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Defines a new Settype for this scenario.
 	 * 
 	 * @param stName
-	 *          name of the Settype
+	 *            name of the Settype
 	 * @param stDesc
-	 *          description of the Settype
+	 *            description of the Settype
 	 * 
 	 * @return newly defined Settype for this scenario
 	 */
@@ -162,8 +162,8 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	}
 
 	/**
-	 * Get all {@link ParameterInstance} objects that still belong to the default
-	 * {@link SetType}. These have not yet been assigned to any custom
+	 * Get all {@link ParameterInstance} objects that still belong to the
+	 * default {@link SetType}. These have not yet been assigned to any custom
 	 * {@link SetType}.
 	 * 
 	 * @return list of all parameter instances that are not yet assigned to user
@@ -177,19 +177,19 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Assign a {@link ParameterInstance} to a specific {@link SetType}.
 	 * 
 	 * @param instance
-	 *          the parameter instance to be assigned
+	 *            the parameter instance to be assigned
 	 * @param type
-	 *          the {@link SetType} that shall manage the
-	 *          {@link ParameterInstance} from now on
+	 *            the {@link SetType} that shall manage the
+	 *            {@link ParameterInstance} from now on
 	 * @param migrate
-	 *          flag to switch migration of existing assumption to new Settype
-	 *          on/off
+	 *            flag to switch migration of existing assumption to new Settype
+	 *            on/off
 	 * 
 	 * @return true, if parameter instance could be assigned (i.e., former set
 	 *         type is default Settype), otherwise false
 	 */
 	public boolean assignParameterInstance(ParameterInstance instance,
-	    SetType type, boolean migrate) {
+			SetType type, boolean migrate) {
 
 		if (type.equals(defaultType)) {
 			removeParameterInstanceAssignment(instance);
@@ -214,18 +214,18 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Migrate assignments from default type.
 	 * 
 	 * @param instance
-	 *          the parameter instance of the assignments to be migrated
+	 *            the parameter instance of the assignments to be migrated
 	 * @param newType
-	 *          the destination Settype
+	 *            the destination Settype
 	 */
 	private void migrateAssignmentsFromDefaultType(ParameterInstance instance,
-	    SetType newType) {
+			SetType newType) {
 		Set set = newType.getNumOfSets() == 0 ? newType.createSet(
-		    "Migrated parameter assignments",
-		    "Automatically created during Settype definition.", 0.0) : newType
-		    .getSets().get(0);
+				"Migrated parameter assignments",
+				"Automatically created during Settype definition.", 0.0)
+				: newType.getSets().get(0);
 		ParameterAssignmentSet paramAssignmentSet = getDefaultSet()
-		    .getParameterAssignments(instance);
+				.getParameterAssignments(instance);
 		for (ParameterAssignment pa : paramAssignmentSet.getAssignments()) {
 			set.addParameterAssignment(pa);
 		}
@@ -235,8 +235,8 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Removes a {@link ParameterInstance} from a certain {@link SetType}.
 	 * 
 	 * @param instance
-	 *          the instance that should from now on be managed by the default
-	 *          {@link SetType}
+	 *            the instance that should from now on be managed by the default
+	 *            {@link SetType}
 	 * 
 	 * @return true, if instance could be removed from its Settype (i.e., if set
 	 *         type is not default Settype)
@@ -258,7 +258,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Retrieves a custom {@link SetType}.
 	 * 
 	 * @param index
-	 *          index of the Settype
+	 *            index of the Settype
 	 * 
 	 * @return Settype with given index
 	 */
@@ -270,7 +270,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Removes {@link SetType} with given index from scenario.
 	 * 
 	 * @param index
-	 *          index of the Settype
+	 *            index of the Settype
 	 * 
 	 * @return true, if operation could be executed
 	 */
@@ -282,7 +282,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 		}
 
 		List<ParameterInstance> parameterInstances = new ArrayList<ParameterInstance>(
-		    removedSetType.getDefinedParameters());
+				removedSetType.getDefinedParameters());
 		for (ParameterInstance instance : parameterInstances) {
 			removeParameterInstanceAssignment(instance);
 		}
@@ -312,7 +312,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the default set.
 	 * 
 	 * @param defaultSet
-	 *          the new default set
+	 *            the new default set
 	 */
 	public void setDefaultSet(Set defaultSet) {
 		this.defaultSet = defaultSet;
@@ -331,7 +331,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the default type.
 	 * 
 	 * @param defaultType
-	 *          the new default type
+	 *            the new default type
 	 */
 	public void setDefaultType(SetType defaultType) {
 		this.defaultType = defaultType;
@@ -355,7 +355,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the generations.
 	 * 
 	 * @param generations
-	 *          the new generations
+	 *            the new generations
 	 */
 	public void setGenerations(int generations) {
 		// TODO: Remove obsolete generations if necessary.
@@ -371,7 +371,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the maximum age.
 	 * 
 	 * @param maximumAge
-	 *          the new maximum age
+	 *            the new maximum age
 	 */
 	public void setMaximumAge(int maximumAge) {
 		// TODO: Adjust matrix size if necessary.
@@ -387,7 +387,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the years.
 	 * 
 	 * @param years
-	 *          the new years
+	 *            the new years
 	 */
 	public void setYears(int years) {
 		// TODO: Adjust matrix size if necessary.
@@ -407,7 +407,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the user defined types.
 	 * 
 	 * @param userDefinedTypes
-	 *          the new user defined types
+	 *            the new user defined types
 	 */
 	public void setUserDefinedTypes(List<SetType> userDefinedTypes) {
 		this.userDefinedTypes = userDefinedTypes;
@@ -426,10 +426,10 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the all parameter instances.
 	 * 
 	 * @param allParameterInstances
-	 *          the new all parameter instances
+	 *            the new all parameter instances
 	 */
 	public void setAllParameterInstances(
-	    List<ParameterInstance> allParameterInstances) {
+			List<ParameterInstance> allParameterInstances) {
 		this.allParameterInstances = allParameterInstances;
 	}
 
@@ -442,10 +442,10 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the instance Settypes.
 	 * 
 	 * @param instanceSetTypes
-	 *          the instance Settypes
+	 *            the instance Settypes
 	 */
 	public void setInstanceSetTypes(
-	    Map<ParameterInstance, SetType> instanceSetTypes) {
+			Map<ParameterInstance, SetType> instanceSetTypes) {
 		this.instanceSetTypes = instanceSetTypes;
 	}
 
@@ -453,7 +453,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Removes the Settype.
 	 * 
 	 * @param setType
-	 *          the Settype
+	 *            the Settype
 	 * 
 	 * @return true, if successful
 	 */
@@ -483,7 +483,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the id.
 	 * 
 	 * @param uniqueID
-	 *          the new id
+	 *            the new id
 	 */
 	public void setID(int uniqueID) {
 		id = uniqueID;
@@ -512,7 +512,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the description.
 	 * 
 	 * @param description
-	 *          the new description
+	 *            the new description
 	 */
 	public void setDescription(String description) {
 		this.description = description;
@@ -541,9 +541,34 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 * Sets the jump off year.
 	 * 
 	 * @param jumpOffYear
-	 *          the new jump off year
+	 *            the new jump off year
 	 */
 	public void setJumpOffYear(int jumpOffYear) {
 		this.jumpOffYear = jumpOffYear;
+	}
+
+	/**
+	 * Creates a deep copy of this projection model
+	 * 
+	 * @return a full copy of the projection model, including copies of all
+	 *         sub-elements (set types, matrices, etc.)
+	 */
+	public ProjectionModel getCopy() {
+
+		ProjectionModel copy = new ProjectionModel();
+
+		// Copy simple fields
+		copy.setName(getName());
+		copy.setDescription(getDescription());
+		copy.setJumpOffYear(getJumpOffYear());
+		copy.setMaximumAge(getMaximumAge());
+		copy.setYears(getYears());
+		copy.setGenerations(getGenerations());
+
+		// Copy sub-elements
+
+		// TODO
+
+		return copy;
 	}
 }

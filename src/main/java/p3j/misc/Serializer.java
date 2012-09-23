@@ -29,9 +29,6 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import p3j.database.DatabaseFactory;
-import p3j.database.IP3MDatabase;
-import p3j.database.hibernate.P3MDatabase;
 import p3j.pppm.ProjectionModel;
 
 /**
@@ -156,26 +153,12 @@ public class Serializer {
 	 *             if outputting went wrong
 	 */
 	public void save(ProjectionModel pm, String file) throws IOException {
-		ProjectionModel modelToSave = retrieveFullModel(pm.getID());
+		ProjectionModel modelToSave = pm.getCopy();
 		if (usingXML) {
 			saveToXML(modelToSave, file);
 		} else {
 			saveToBinary(modelToSave, file);
 		}
-	}
-
-	/**
-	 * Retrieve full model for storage. The returned object must not contain any
-	 * hibernate-based data structures (used for lazy evaluation etc.).
-	 * 
-	 * @param pmID
-	 *            the ID of the projection model
-	 * @return the full projection model
-	 */
-	private ProjectionModel retrieveFullModel(int pmID) {
-		IP3MDatabase db = DatabaseFactory.createDatabase(P3MDatabase
-				.getHibernateConfigFile()); // TODO: switch off lazy-eval
-		return db.getProjectionByID(pmID);
 	}
 
 	/**
