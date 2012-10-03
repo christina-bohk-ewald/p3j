@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterAssignmentSet;
 import p3j.pppm.parameters.ParameterInstance;
@@ -556,6 +557,8 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	 */
 	public ProjectionModel getCopy() {
 
+		// TODO: Move all this to extra class?
+
 		ProjectionModel copy = new ProjectionModel();
 
 		// Copy simple fields
@@ -609,19 +612,24 @@ public class ProjectionModel extends Model implements IProjectionModel {
 		copy.setInstanceSetTypes(newInstanceSetTypesMap);
 	}
 
-	private Set copySet(Set defaultSet2) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	private ParameterInstance copyParameterInstance(
 			ParameterInstance paramInstance) {
-		// TODO Auto-generated method stub
-		return null;
+		Parameter param = paramInstance.getParameter();
+		return new ParameterInstance(paramInstance.getComparisonIndex(),
+				new Parameter(param.getID(), param.isGenerationDependent(),
+						param.getName(), param.getValueHeight(), param
+								.getValueWidth(), param.getPopulation()),
+				paramInstance.getGeneration());
 	}
 
 	private SetType copySetType(SetType defaultType2) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	private Set copySet(Set defaultSet2) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
