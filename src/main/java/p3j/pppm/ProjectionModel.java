@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import p3j.misc.math.Matrix;
+import p3j.misc.math.Matrix2D;
 import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterAssignmentSet;
@@ -579,19 +581,30 @@ public class ProjectionModel extends Model implements IProjectionModel {
 		}
 		copy.setAllParameterInstances(listOfNewParamInstances);
 
+		// Copy sets
+		Map<Set, Set> sets = new HashMap<>();
+		Set newDefaultSet = copySet(defaultSet, paramInstances);
+		copy.setDefaultSet(defaultSet);
+		sets.put(defaultSet, newDefaultSet);
+		for (SetType setType : getAllSetTypes())
+			for (Set set : setType.getSets()) {
+				Set setCopy = copySet(set, paramInstances);
+				sets.put(set, setCopy);
+			}
+
 		// Copy set types
-		copy.setDefaultType(copySetType(defaultType));
 		Map<SetType, SetType> setTypes = new HashMap<>();
+		SetType newDefaultSetType = copySetType(defaultType, paramInstances,
+				sets);
+		copy.setDefaultType(newDefaultSetType);
+		setTypes.put(defaultType, newDefaultSetType);
 		List<SetType> listOfNewUserDefSetTypes = new ArrayList<>();
 		for (SetType setType : userDefinedTypes) {
-			SetType stCopy = copySetType(setType);
+			SetType stCopy = copySetType(setType, paramInstances, sets);
 			setTypes.put(setType, stCopy);
 			listOfNewUserDefSetTypes.add(stCopy);
 		}
 		copy.setUserDefinedTypes(listOfNewUserDefSetTypes);
-
-		// Copy sets
-		copy.setDefaultSet(copySet(defaultSet));
 
 		// Copy mapping from parameter instances to set types
 		copyParamInstToSetTypeMapping(copy, paramInstances, setTypes);
@@ -622,14 +635,63 @@ public class ProjectionModel extends Model implements IProjectionModel {
 				paramInstance.getGeneration());
 	}
 
-	private SetType copySetType(SetType defaultType2) {
-		// TODO Auto-generated method stub
-		return null;
+	private Set copySet(Set set,
+			Map<ParameterInstance, ParameterInstance> paramInstances) {
+		Set copy = new Set();
+		copy.setName(set.getName());
+		copy.setDescription(set.getDescription());
+		copy.setProbability(set.getProbability());
+
+		Map<ParameterInstance, ParameterAssignmentSet> copyOfSetData = new HashMap<>();
+		for (Entry<ParameterInstance, ParameterAssignmentSet> setDataEntry : set
+				.getSetData().entrySet()) {
+			copyOfSetData.put(
+					paramInstances.get(setDataEntry.getKey()),
+					copyParamAssignmentSet(setDataEntry.getValue(),
+							paramInstances));
+		}
+
+		copy.setSetData(copyOfSetData);
+		return copy;
 	}
 
-	private Set copySet(Set defaultSet2) {
-		// TODO Auto-generated method stub
-		return null;
+	private ParameterAssignmentSet copyParamAssignmentSet(
+			ParameterAssignmentSet paramAssignmentSet,
+			Map<ParameterInstance, ParameterInstance> paramInstances) {
+		ParameterAssignmentSet copy = new ParameterAssignmentSet();
+		for (ParameterAssignment assignment : paramAssignmentSet
+				.getAssignments()) {
+			copy.add(new ParameterAssignment(paramInstances.get(assignment
+					.getParamInstance()), assignment.getName(), assignment
+					.getDescription(), assignment.getProbability(), assignment
+					.getDeviation(), copyMatrix(assignment.getMatrix())));
+		}
+		return copy;
+	}
+
+	private Matrix copyMatrix(Matrix matrix) {
+		Matrix2D matrixValue = matrix.getValue();
+		Matrix copy = new Matrix(new Matrix2D(matrixValue.toArray(),
+				matrixValue.getRowLabel(), matrixValue.getColumnLabel()));
+		return copy;
+	}
+
+	private SetType copySetType(SetType setType,
+			Map<ParameterInstance, ParameterInstance> paramInstances,
+			Map<Set, Set> sets) {
+		SetType copy = new SetType(setType.getName(), setType.getDescription());
+
+		List<ParameterInstance> copyDefinedParameters = new ArrayList<>();
+		for (ParameterInstance paramInstance : setType.getDefinedParameters())
+			copyDefinedParameters.add(paramInstances.get(paramInstance));
+		List<Set> copySets = new ArrayList<>();
+		for (Set set : setType.getSets())
+			copySets.add(sets.get(set));
+
+		copy.setDefinedParameters(copyDefinedParameters);
+		copy.setSets(copySets);
+
+		return copy;
 	}
 
 }
