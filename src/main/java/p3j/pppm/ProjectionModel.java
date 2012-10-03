@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterAssignmentSet;
@@ -548,7 +549,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	}
 
 	/**
-	 * Creates a deep copy of this projection model
+	 * Creates a full, deep copy of this projection model
 	 * 
 	 * @return a full copy of the projection model, including copies of all
 	 *         sub-elements (set types, matrices, etc.)
@@ -565,10 +566,62 @@ public class ProjectionModel extends Model implements IProjectionModel {
 		copy.setYears(getYears());
 		copy.setGenerations(getGenerations());
 
-		// Copy sub-elements
+		// Copy parameter instances
+		Map<ParameterInstance, ParameterInstance> paramInstances = new HashMap<>();
+		List<ParameterInstance> listOfNewParamInstances = new ArrayList<>();
+		for (ParameterInstance paramInstance : allParameterInstances) {
+			ParameterInstance piCopy = copyParameterInstance(paramInstance);
+			paramInstances.put(paramInstance, piCopy);
+			listOfNewParamInstances.add(piCopy);
+		}
+		copy.setAllParameterInstances(listOfNewParamInstances);
 
-		// TODO
+		// Copy set types
+		copy.setDefaultType(copySetType(defaultType));
+		Map<SetType, SetType> setTypes = new HashMap<>();
+		List<SetType> listOfNewUserDefSetTypes = new ArrayList<>();
+		for (SetType setType : userDefinedTypes) {
+			SetType stCopy = copySetType(setType);
+			setTypes.put(setType, stCopy);
+			listOfNewUserDefSetTypes.add(stCopy);
+		}
+		copy.setUserDefinedTypes(listOfNewUserDefSetTypes);
+
+		// Copy sets
+		copy.setDefaultSet(copySet(defaultSet));
+
+		// Copy mapping from parameter instances to set types
+		copyParamInstToSetTypeMapping(copy, paramInstances, setTypes);
 
 		return copy;
+	}
+
+	private void copyParamInstToSetTypeMapping(ProjectionModel copy,
+			Map<ParameterInstance, ParameterInstance> paramInstances,
+			Map<SetType, SetType> setTypes) {
+		Map<ParameterInstance, SetType> newInstanceSetTypesMap = new HashMap<>();
+		for (Entry<ParameterInstance, SetType> instSetTypeEntry : instanceSetTypes
+				.entrySet()) {
+			newInstanceSetTypesMap.put(
+					paramInstances.get(instSetTypeEntry.getKey()),
+					setTypes.get(instSetTypeEntry.getValue()));
+		}
+		copy.setInstanceSetTypes(newInstanceSetTypesMap);
+	}
+
+	private Set copySet(Set defaultSet2) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private ParameterInstance copyParameterInstance(
+			ParameterInstance paramInstance) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private SetType copySetType(SetType defaultType2) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
