@@ -560,6 +560,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 	public ProjectionModel getCopy() {
 
 		// TODO: Move all this to extra class?
+		// TODO: Add progress bar...
 
 		ProjectionModel copy = new ProjectionModel();
 
@@ -584,7 +585,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 		// Copy sets
 		Map<Set, Set> sets = new HashMap<>();
 		Set newDefaultSet = copySet(defaultSet, paramInstances);
-		copy.setDefaultSet(defaultSet);
+		copy.setDefaultSet(newDefaultSet);
 		sets.put(defaultSet, newDefaultSet);
 		for (SetType setType : getAllSetTypes())
 			for (Set set : setType.getSets()) {
@@ -664,15 +665,8 @@ public class ProjectionModel extends Model implements IProjectionModel {
 			copy.add(new ParameterAssignment(paramInstances.get(assignment
 					.getParamInstance()), assignment.getName(), assignment
 					.getDescription(), assignment.getProbability(), assignment
-					.getDeviation(), copyMatrix(assignment.getMatrix())));
+					.getDeviation(), assignment.getMatrix().copy()));
 		}
-		return copy;
-	}
-
-	private Matrix copyMatrix(Matrix matrix) {
-		Matrix2D matrixValue = matrix.getValue();
-		Matrix copy = new Matrix(new Matrix2D(matrixValue.toArray(),
-				matrixValue.getRowLabel(), matrixValue.getColumnLabel()));
 		return copy;
 	}
 
