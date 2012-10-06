@@ -26,10 +26,21 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.parameters.Parameter;
+import p3j.pppm.parameters.ParameterAssignment;
+import p3j.pppm.parameters.ParameterAssignmentSet;
+import p3j.pppm.parameters.ParameterInstance;
+import p3j.pppm.sets.Set;
+import p3j.pppm.sets.SetType;
 
 /**
  * 
@@ -153,7 +164,7 @@ public class Serializer {
 	 *             if outputting went wrong
 	 */
 	public void save(ProjectionModel pm, String file) throws IOException {
-		ProjectionModel modelToSave = pm.getCopy();
+		ProjectionModel modelToSave = copy(pm);
 		if (usingXML) {
 			saveToXML(modelToSave, file);
 		} else {
@@ -208,6 +219,258 @@ public class Serializer {
 
 	public void setUsingCompression(boolean usingCompression) {
 		this.usingCompression = usingCompression;
+	}
+
+	/**
+	 * Creates a full, deep copy of this projection model. This is necessary for
+	 * serialization, because hibernate is used with lazy evaluation, so that
+	 * non-serializable hibernate-specific collections are used internally. The
+	 * copy only relies on serializable collections, so it can be serialized
+	 * easily.
+	 * 
+	 * @return a full copy of the projection model, including copies of all
+	 *         sub-elements (set types, matrices, etc.)
+	 */
+	private ProjectionModel copy(ProjectionModel original) {
+		ProjectionModel copy = new ProjectionModel();
+		copySimpleFields(original, copy);
+		Map<ParameterInstance, ParameterInstance> paramInstances = copyParameterInstances(
+				original, copy);
+		Map<Set, Set> sets = copySets(original, copy, paramInstances);
+		Map<SetType, SetType> setTypes = copySetTypes(original, copy,
+				paramInstances, sets);
+		copyParamInstToSetTypeMapping(original, copy, paramInstances, setTypes);
+		return copy;
+	}
+
+	/**
+	 * Copies all simple fields of the projection model.
+	 * 
+	 * @param original
+	 *            the original
+	 * @param copy
+	 *            the copy
+	 */
+	private void copySimpleFields(ProjectionModel original, ProjectionModel copy) {
+		copy.setName(original.getName());
+		copy.setDescription(original.getDescription());
+		copy.setJumpOffYear(original.getJumpOffYear());
+		copy.setMaximumAge(original.getMaximumAge());
+		copy.setYears(original.getYears());
+		copy.setGenerations(original.getGenerations());
+	}
+
+	/**
+	 * Copies parameter instances (and parameters) from the original projection
+	 * to the copy.
+	 * 
+	 * @param original
+	 *            the original
+	 * @param copy
+	 *            the copy
+	 * @return mapping from old parameter instances to their corresponding new
+	 *         parameter instances, which is necessary for creating sets and set
+	 *         types with the same structure
+	 */
+	private Map<ParameterInstance, ParameterInstance> copyParameterInstances(
+			ProjectionModel original, ProjectionModel copy) {
+		Map<ParameterInstance, ParameterInstance> paramInstances = new HashMap<>();
+		List<ParameterInstance> listOfNewParamInstances = new ArrayList<>();
+		for (ParameterInstance paramInstance : original
+				.getAllParameterInstances()) {
+			ParameterInstance piCopy = copyParameterInstance(paramInstance);
+			paramInstances.put(paramInstance, piCopy);
+			listOfNewParamInstances.add(piCopy);
+		}
+		copy.setAllParameterInstances(listOfNewParamInstances);
+		return paramInstances;
+	}
+
+	/**
+	 * Copies all sets of the original model to the copy.
+	 * 
+	 * @param original
+	 *            the original
+	 * @param copy
+	 *            the copy
+	 * @param paramInstances
+	 *            the mapping from old to new parameter instances
+	 * @return the mapping from old sets to their corresponding copies, which is
+	 *         necessary to construct set types with the same structure
+	 */
+	private Map<Set, Set> copySets(ProjectionModel original,
+			ProjectionModel copy,
+			Map<ParameterInstance, ParameterInstance> paramInstances) {
+		Map<Set, Set> sets = new HashMap<>();
+		Set newDefaultSet = copySet(original.getDefaultSet(), paramInstances);
+		copy.setDefaultSet(newDefaultSet);
+		sets.put(original.getDefaultSet(), newDefaultSet);
+		for (SetType setType : original.getAllSetTypes())
+			for (Set set : setType.getSets()) {
+				Set setCopy = copySet(set, paramInstances);
+				sets.put(set, setCopy);
+			}
+		return sets;
+	}
+
+	/**
+	 * Copies set types from the original projection to the copy.
+	 * 
+	 * @param original
+	 *            the original
+	 * @param copy
+	 *            the copy
+	 * @param paramInstances
+	 *            the mapping from old to new parameter instances
+	 * @param sets
+	 *            the mapping from old to new sets
+	 * @return the mapping from old to new set types, required to correctly
+	 *         update the internal structure of the projection (see
+	 *         {@link Serializer#copyParamInstToSetTypeMapping(ProjectionModel, ProjectionModel, Map, Map)}
+	 *         )
+	 */
+	private Map<SetType, SetType> copySetTypes(ProjectionModel original,
+			ProjectionModel copy,
+			Map<ParameterInstance, ParameterInstance> paramInstances,
+			Map<Set, Set> sets) {
+		Map<SetType, SetType> setTypes = new HashMap<>();
+		SetType newDefaultSetType = copySetType(original.getDefaultSetType(),
+				paramInstances, sets);
+		copy.setDefaultType(newDefaultSetType);
+		setTypes.put(original.getDefaultSetType(), newDefaultSetType);
+		List<SetType> listOfNewUserDefSetTypes = new ArrayList<>();
+		for (SetType setType : original.getUserDefinedTypes()) {
+			SetType stCopy = copySetType(setType, paramInstances, sets);
+			setTypes.put(setType, stCopy);
+			listOfNewUserDefSetTypes.add(stCopy);
+		}
+		copy.setUserDefinedTypes(listOfNewUserDefSetTypes);
+		return setTypes;
+	}
+
+	/**
+	 * Copies the mapping from parameter instances to the set types that manage
+	 * them from the original projection to the copy.
+	 * 
+	 * @param copy
+	 *            the copy
+	 * @param original
+	 *            the original
+	 * @param paramInstances
+	 *            the mapping from old to new parameter instances
+	 * @param setTypes
+	 *            the mapping from old to new set types
+	 */
+	private void copyParamInstToSetTypeMapping(ProjectionModel original,
+			ProjectionModel copy,
+			Map<ParameterInstance, ParameterInstance> paramInstances,
+			Map<SetType, SetType> setTypes) {
+		Map<ParameterInstance, SetType> newInstanceSetTypesMap = new HashMap<>();
+		for (Entry<ParameterInstance, SetType> instSetTypeEntry : original
+				.getInstanceSetTypes().entrySet()) {
+			newInstanceSetTypesMap.put(
+					paramInstances.get(instSetTypeEntry.getKey()),
+					setTypes.get(instSetTypeEntry.getValue()));
+		}
+		copy.setInstanceSetTypes(newInstanceSetTypesMap);
+	}
+
+	/**
+	 * Copies a parameter instance.
+	 * 
+	 * @param paramInstance
+	 *            the original parameter instance
+	 * @return the copy
+	 */
+	private ParameterInstance copyParameterInstance(
+			ParameterInstance paramInstance) {
+		Parameter param = paramInstance.getParameter();
+		return new ParameterInstance(paramInstance.getComparisonIndex(),
+				new Parameter(param.getID(), param.isGenerationDependent(),
+						param.getName(), param.getValueHeight(), param
+								.getValueWidth(), param.getPopulation()),
+				paramInstance.getGeneration());
+	}
+
+	/**
+	 * Copies a set.
+	 * 
+	 * @param set
+	 *            the original set
+	 * @param paramInstances
+	 *            the mapping from old to new parameter instances
+	 * @return the copy
+	 */
+	private Set copySet(Set set,
+			Map<ParameterInstance, ParameterInstance> paramInstances) {
+		Set copy = new Set();
+		copy.setName(set.getName());
+		copy.setDescription(set.getDescription());
+		copy.setProbability(set.getProbability());
+
+		Map<ParameterInstance, ParameterAssignmentSet> copyOfSetData = new HashMap<>();
+		for (Entry<ParameterInstance, ParameterAssignmentSet> setDataEntry : set
+				.getSetData().entrySet()) {
+			copyOfSetData.put(
+					paramInstances.get(setDataEntry.getKey()),
+					copyParamAssignmentSet(setDataEntry.getValue(),
+							paramInstances));
+		}
+
+		copy.setSetData(copyOfSetData);
+		return copy;
+	}
+
+	/**
+	 * Copies a parameter assignment set.
+	 * 
+	 * @param paramAssignmentSet
+	 *            the original parameter assignment set
+	 * @param paramInstances
+	 *            the map from old to new parameter instances
+	 * @return the copy
+	 */
+	private ParameterAssignmentSet copyParamAssignmentSet(
+			ParameterAssignmentSet paramAssignmentSet,
+			Map<ParameterInstance, ParameterInstance> paramInstances) {
+		ParameterAssignmentSet copy = new ParameterAssignmentSet();
+		for (ParameterAssignment assignment : paramAssignmentSet
+				.getAssignments()) {
+			copy.add(new ParameterAssignment(paramInstances.get(assignment
+					.getParamInstance()), assignment.getName(), assignment
+					.getDescription(), assignment.getProbability(), assignment
+					.getDeviation(), assignment.getMatrix().copy()));
+		}
+		return copy;
+	}
+
+	/**
+	 * Copies a set type.
+	 * 
+	 * @param setType
+	 *            the original set type
+	 * @param paramInstances
+	 *            the mapping from old to new parameter instances
+	 * @param sets
+	 *            the mapping from old to new sets
+	 * @return the copy
+	 */
+	private SetType copySetType(SetType setType,
+			Map<ParameterInstance, ParameterInstance> paramInstances,
+			Map<Set, Set> sets) {
+		SetType copy = new SetType(setType.getName(), setType.getDescription());
+
+		List<ParameterInstance> copyDefinedParameters = new ArrayList<>();
+		for (ParameterInstance paramInstance : setType.getDefinedParameters())
+			copyDefinedParameters.add(paramInstances.get(paramInstance));
+		List<Set> copySets = new ArrayList<>();
+		for (Set set : setType.getSets())
+			copySets.add(sets.get(set));
+
+		copy.setDefinedParameters(copyDefinedParameters);
+		copy.setSets(copySets);
+
+		return copy;
 	}
 
 }

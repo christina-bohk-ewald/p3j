@@ -59,7 +59,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
-import javax.swing.tree.TreePath;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.hibernate.P3MDatabase;
