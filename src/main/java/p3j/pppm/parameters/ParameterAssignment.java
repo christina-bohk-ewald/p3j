@@ -16,6 +16,7 @@
 package p3j.pppm.parameters;
 
 import james.SimSystem;
+import james.core.util.misc.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -127,8 +128,8 @@ public class ParameterAssignment implements Serializable, IStochasticOccurrence 
 	 * @param byteArray
 	 *          the byte array which contains the persistent matrix object
 	 */
-	public void setMatrixBinary(byte[] byteArray) {
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
+	public void setMatrixBinary(String byteArray) {
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64.decode(byteArray));
 		try {
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 			matrix = (Matrix) objectInputStream.readObject();
@@ -143,7 +144,7 @@ public class ParameterAssignment implements Serializable, IStochasticOccurrence 
 	 * 
 	 * @return byte representation of assignment value (a matrix object)
 	 */
-	public byte[] getMatrixBinary() {
+	public String getMatrixBinary() {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(
@@ -153,7 +154,7 @@ public class ParameterAssignment implements Serializable, IStochasticOccurrence 
 		} catch (IOException ex) {
 			SimSystem.report(Level.SEVERE, "Serialization of matrix failed.", ex);
 		}
-		return outputStream.toByteArray();
+		return Base64.encode(outputStream.toByteArray());
 	}
 
 	/**
