@@ -232,7 +232,7 @@ public final class GUI {
 	 * @param newContent
 	 *          the list containing the content
 	 */
-	public static void replaceListContents(DefaultListModel model,
+	public static void replaceListContents(DefaultListModel<Object> model,
 	    List<?> newContent) {
 		model.clear();
 		if (newContent != null) {

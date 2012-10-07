@@ -38,6 +38,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Locale;
@@ -73,6 +74,7 @@ import p3j.gui.panels.WelcomePanel;
 import p3j.gui.panels.dboverview.DatabaseOverviewPanel;
 import p3j.gui.panels.projections.ProjectionTreePanel;
 import p3j.gui.panels.results.ResultTreePanel;
+import p3j.misc.LoadedProjectionFormatException;
 import p3j.misc.Misc;
 import p3j.misc.Serializer;
 import p3j.misc.gui.GUI;
@@ -96,843 +98,839 @@ import com.jgoodies.looks.plastic.PlasticLookAndFeel;
  */
 public final class P3J extends JFrame {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = -142244898041811667L;
-
-	/** Initial window width. */
-	static final int INITIAL_WIDTH = 1024;
-
-	/** Initial window height. */
-	static final int INITIAL_HEIGHT = 768;
-
-	/** Initial width of the projection/result tree tab-pane. */
-	static final int INITIAL_TREE_WIDTH = 300;
-
-	/** Reference to singleton. */
-	private static P3J instance;
-
-	/** The splash screen to be shown at startup. */
-	private static SplashScreen splashScreen;
-
-	/** Current projection to be edited. */
-	private static ProjectionModel currentProjection;
-
-	/** Serialization tool. */
-	private final Serializer serializer = new Serializer();
-
-	// GUI elements
-
-	/** Icon for the run button. */
-	private final Icon runIcon = new ImageIcon(this.getClass().getResource(
-			"/p3j/icons/run.gif"));
-
-	/** The button to run a calculation. */
-	private final JButton runButton = new JButton(runIcon);
-	{
-		runButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				startExperiment();
-			}
-		});
-	}
-
-	/** The button in the toolbar shown the replication configurations. */
-	private JButton execPrefsButton = new JButton();
-	{
-		execPrefsButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editExecutionPreferences();
-			}
-		});
-	}
-
-	/** Main toolbar. */
-	private final JToolBar toolBar = new JToolBar();
-	{
-		toolBar.add(runButton);
-		toolBar.putClientProperty(Options.HEADER_STYLE_KEY, HeaderStyle.BOTH);
-		toolBar.putClientProperty(PlasticLookAndFeel.IS_3D_KEY, Boolean.FALSE);
-		toolBar.add(execPrefsButton);
-	}
-
-	/** The desktop. */
-	private final JDesktopPane desktop = new JDesktopPane();
-
-	/** File chooser to save scenario files. */
-	private final JFileChooser scenarioFileChooser = new JFileChooser();
-
-	// File menu
-
-	/** Menu to create a new scenario. */
-	private final JMenuItem newProjectionMenu = new JMenuItem("New projection",
-			KeyEvent.VK_N);
-	{
-		newProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-				ActionEvent.CTRL_MASK));
-		newProjectionMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				newProjection();
-			}
-		});
-	}
-
-	/** Menu to load a scenario. */
-	private final JMenuItem openProjectionMenu = new JMenuItem(
-			"Open/import projection...", KeyEvent.VK_O);
-	{
-		openProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-				ActionEvent.CTRL_MASK));
-		openProjectionMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				loadProjection();
-			}
-		});
-	}
-
-	/** Menu to quick-save. */
-	private final JMenuItem quickSaveProjectionMenu = new JMenuItem(
-			"Save projection", KeyEvent.VK_S);
-	{
-		quickSaveProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-		quickSaveProjectionMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (currentProjectionFile == null) {
-					saveProjection();
-				} else {
-					quickSaveProjection(currentProjectionFile);
-				}
-			}
-		});
-	}
-
-	/** Menu to save scenario. */
-	private final JMenuItem saveProjectionMenu = new JMenuItem(
-			"Save projection as...");
-	{
-		saveProjectionMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveProjection();
-			}
-		});
-	}
-
-	/** Menu to load results. */
-	private final JMenuItem loadResultsMenu = new JMenuItem("Load results...");
-	{
-		loadResultsMenu.setVisible(false); // TODO
-	}
-
-	/** Menu to save results. */
-	private final JMenuItem saveResultsMenu = new JMenuItem("Save results...");
-	{
-		saveResultsMenu.setVisible(false); // TODO
-	}
-
-	/** Menu to quick-save results. */
-	private final JMenuItem quickSaveResultsMenu = new JMenuItem("Save results");
-	{
-		quickSaveResultsMenu.setVisible(false); // TODO
-	}
-
-	/** Menu to open preferences dialog. */
-	private final JMenuItem preferencesMenu = new JMenuItem("Preferences...");
-	{
-		preferencesMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editPreferences();
-			}
-		});
-	}
-
-	/** Menu to open execution preferences dialog. */
-	private final JMenuItem execPreferencesMenu = new JMenuItem(
-			"Execution Preferences...");
-	{
-		execPreferencesMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				execPrefsButton.doClick();
-			}
-		});
-	}
-
-	/** Menu to quit. */
-	private final JMenuItem quitMenu = new JMenuItem("Quit", KeyEvent.VK_Q);
-	{
-		quitMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-				ActionEvent.CTRL_MASK));
-		quitMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				quitApplication();
-			}
-		});
-	}
-
-	/** File menu. */
-	private final JMenu fileMenu = new JMenu("File");
-	{
-		fileMenu.add(newProjectionMenu);
-		fileMenu.add(openProjectionMenu);
-		fileMenu.add(quickSaveProjectionMenu);
-		fileMenu.add(saveProjectionMenu);
-		// TODO: Implement binary result storage.
-		// fileMenu.add(new JSeparator());
-		fileMenu.add(loadResultsMenu);
-		fileMenu.add(quickSaveResultsMenu);
-		fileMenu.add(saveResultsMenu);
-		fileMenu.add(new JSeparator());
-		fileMenu.add(preferencesMenu);
-		fileMenu.add(execPreferencesMenu);
-		fileMenu.add(new JSeparator());
-		fileMenu.add(quitMenu);
-		fileMenu.setMnemonic(KeyEvent.VK_F);
-	}
-
-	// Parameter menu
-
-	/** Menu to edit sets. */
-	private final JMenuItem editSetsMenu = new JMenuItem("Edit Sets...");
-	{
-		editSetsMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editSets();
-			}
-		});
-	}
-
-	/** Menu to edit Settypes. */
-	private final JMenuItem editSetTypesMenu = new JMenuItem("Edit Settypes...");
-	{
-		editSetTypesMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editSetTypes();
-			}
-		});
-
-	}
-
-	/** Menu to input a matrix quickly. */
-	private final JMenuItem quickMatrixInput = new JMenuItem(
-			"Quick Matrix Input...");
-	{
-		quickMatrixInput.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				inputMatrixQuickly();
-			}
-		});
-	}
-
-	/** Menu to input a matrix quickly. */
-	private final JMenuItem copyGenerations = new JMenuItem(
-			"Copy Generations...");
-	{
-		copyGenerations.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				copyGenerations();
-			}
-		});
-	}
-
-	/** Parameter menu. */
-	private final JMenu parameterMenu = new JMenu("Parameters");
-	{
-		parameterMenu.add(new JSeparator());
-		parameterMenu.add(editSetTypesMenu);
-		parameterMenu.add(editSetsMenu);
-		parameterMenu.add(new JSeparator());
-		parameterMenu.add(quickMatrixInput);
-		parameterMenu.add(copyGenerations);
-	}
-
-	/** Menu to open info panel. */
-	private final JMenuItem infoMenu = new JMenuItem("Info (Welcome Screen)");
-	{
-		infoMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				contentPanel.removeAll();
-				contentPanel.add(new WelcomePanel(), BorderLayout.CENTER);
-				pack();
-				repaint();
-			}
-		});
-	}
-
-	/** Help menu. */
-	private final JMenu helpMenu = new JMenu("Help");
-	{
-		helpMenu.add(infoMenu);
-	}
-
-	/** Main menu bar. */
-	private final JMenuBar menuBar = new JMenuBar();
-	{
-		menuBar.add(fileMenu);
-		// TODO: Redesign and refactor old parameter dialogs
-		// menuBar.add(parameterMenu);
-		menuBar.add(helpMenu);
-		menuBar.putClientProperty(Options.HEADER_STYLE_KEY, HeaderStyle.BOTH);
-		menuBar.putClientProperty(PlasticLookAndFeel.IS_3D_KEY, Boolean.FALSE);
-	}
-
-	// Dialogs to be used
-
-	/** Stores name of the last saved projection. */
-	private String currentProjectionFile;
-
-	/** Large panel for displaying the content of a selected element. */
-	private JPanel contentPanel = new JPanel(GUI.getStdBorderLayout());
-
-	/**
-	 * The tabbed pane for viewing the different levels (database overview,
-	 * structure of a single projection, etc).
-	 */
-	private JTabbedPane tabbedPane = new JTabbedPane();
-
-	/** Panel that allows navigation through the current projection. */
-	private ProjectionTreePanel projTreePanel = new ProjectionTreePanel(
-			getCurrentProjection(), contentPanel);
-
-	/**
-	 * Panel that allows navigation through the results of the current
-	 * projection.
-	 */
-	private ResultTreePanel resultsPanel = new ResultTreePanel(
-			getCurrentProjection(), contentPanel);
-
-	/**
-	 * Panel that allows to navigate through the overall database and load
-	 * projection models etc.
-	 */
-	private DatabaseOverviewPanel dbOverviewPanel;
-
-	/** The configuration file. */
-	private final P3JConfigFile configFile = new P3JConfigFile();
-
-	/**
-	 * Default constructor.
-	 */
-	private P3J() {
-
-		try {
-			getConfigFile().readFile("./" + Misc.CONFIG_FILE);
-		} catch (Exception ex) {
-			SimSystem.report(ex);
-			getConfigFile().setFileName("./" + Misc.CONFIG_FILE);
-			GUI.printErrorMessage(this,
-					"Error while loading configuration file.",
-					"An error occurred while attempting to read the file '"
-							+ Misc.CONFIG_FILE
-							+ "' from the working directory:" + ex);
-		}
-
-		updateFromExecConfig();
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.initUI();
-	}
-
-	/**
-	 * Edits the preferences.
-	 */
-	protected void editPreferences() {
-		PreferencesDialog prefsDialog = new PreferencesDialog(this,
-				getConfigFile());
-		prefsDialog.setVisible(true);
-		try {
-			getConfigFile().writeFile();
-		} catch (Exception ex) {
-			SimSystem.report(ex);
-			GUI.printErrorMessage(this, "Error writing configuration file.",
-					"An error occurred while attempting to write to file '"
-							+ getConfigFile().getFileName()
-							+ "' in the working directory:" + ex);
-		}
-		updateFromConfig();
-	}
-
-	/**
-	 * Edits the execution preferences.
-	 */
-	protected void editExecutionPreferences() {
-		ExecutionPreferencesDialog execPrefsDialog = new ExecutionPreferencesDialog(
-				this);
-		execPrefsDialog.setVisible(true);
-		try {
-			getConfigFile().writeFile();
-		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE, "Error writing configuration file.",
-					ex);
-			GUI.printErrorMessage(this, "Error writing configuration file.",
-					"An error occurred while attempting to write to file '"
-							+ getConfigFile().getFileName()
-							+ "' in the working directory:" + ex);
-		}
-		updateFromExecConfig();
-	}
-
-	/**
-	 * Displays a dialog to edit sets.
-	 */
-	protected void editSets() {
-		// (new EditSetsDialog(this,
-		// P3J.getCurrentProjection())).setVisible(true);
-	}
-
-	/**
-	 * Displays a dialog to edit Settypes.
-	 */
-	protected void editSetTypes() {
-		// (new EditSetTypesDialog(this,
-		// getCurrentProjection())).setVisible(true);
-	}
-
-	/**
-	 * Opens dialog to copy generations.
-	 */
-	protected void copyGenerations() {
-		CopyGenerationsDialog cgd = new CopyGenerationsDialog(
-				getCurrentProjection(), this);
-		cgd.setVisible(true);
-	}
-
-	/**
-	 * Create a new scenario in database.
-	 */
-	protected void newProjection() {
-		NewProjectionDialog newProjectionDialog = new NewProjectionDialog(this,
-				DatabaseFactory.getDatabaseSingleton());
-		newProjectionDialog.setVisible(true);
-		if (newProjectionDialog.hasCreatedNewProjection()) {
-			currentProjection = newProjectionDialog.getNewProjection();
-			projTreePanel.setProjection(currentProjection);
-			switchNavigationTreeTab(NavigationTreeTab.PROJECTION_OVERVIEW);
-			dbOverviewPanel.totalRefresh();
-		}
-	}
-
-	/**
-	 * Retrieves user interface singleton.
-	 * 
-	 * @return instance of P3J
-	 */
-	public static P3J getInstance() {
-		if (instance == null) {
-			instance = new P3J();
-		}
-		return instance;
-	}
-
-	/**
-	 * Initializes user interface.
-	 */
-	private void initUI() {
-
-		this.setTitle("P3J : Probabilistic Population Projection");
-		this.setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
-
-		this.setJMenuBar(menuBar);
-		this.getContentPane().setLayout(new BorderLayout());
-		this.getContentPane().add(toolBar, BorderLayout.NORTH);
-		this.getContentPane().add(desktop, BorderLayout.CENTER);
-
-		DatabaseFactory.setDbConnData(getConfigFile().getDBConnectionData());
-		currentProjection = null;
-		dbOverviewPanel = new DatabaseOverviewPanel(contentPanel);
-		projTreePanel = new ProjectionTreePanel(getCurrentProjection(),
-				contentPanel);
-
-		tabbedPane.removeAll();
-		tabbedPane.addTab("Database", dbOverviewPanel);
-		tabbedPane.addTab("Projection", projTreePanel);
-		tabbedPane.addTab("Results", resultsPanel);
-		contentPanel.removeAll();
-		contentPanel.add(new WelcomePanel(), BorderLayout.CENTER);
-
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.add(tabbedPane);
-		splitPane.setDividerLocation(INITIAL_TREE_WIDTH);
-		splitPane.add(contentPanel);
-
-		this.getContentPane().add(splitPane);
-
-		// Action handler: close window
-		this.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent l) {
-				P3J.this.quitApplication();
-			}
-		});
-
-		this.pack();
-		this.repaint();
-	}
-
-	/**
-	 * Retrieves current PPP model.
-	 * 
-	 * @return the PPP model that is currently edited
-	 */
-	public static ProjectionModel getCurrentProjection() {
-		return currentProjection;
-	}
-
-	/**
-	 * Save current projection.
-	 */
-	void saveProjection() {
-
-		if (currentProjection == null) {
-			GUI.printMessage(this, "No projection to save.",
-					"In order to save a projection, you first have to load it from the database.");
-			return;
-		}
-
-		int userReaction = this.scenarioFileChooser.showDialog(this, "Save");
-
-		if (userReaction != JFileChooser.ERROR_OPTION
-				&& userReaction != JFileChooser.CANCEL_OPTION) {
-			File projectionFile = this.scenarioFileChooser.getSelectedFile();
-
-			String ending = Misc.getFileEnding(projectionFile);
-
-			if (ending.compareToIgnoreCase("p3j") != 0) {
-				projectionFile = new File(projectionFile.getAbsolutePath()
-						+ ".p3j");
-			}
-
-			if (projectionFile != null
-					&& (!projectionFile.exists() || projectionFile.canWrite())) {
-				quickSaveProjection(projectionFile.getAbsolutePath());
-			}
-
-		}
-	}
-
-	/**
-	 * Quick-save current scenario.
-	 * 
-	 * @param scenarioFile
-	 *            the file to which the scenario shall be saved
-	 */
-	void quickSaveProjection(String scenarioFile) {
-		try {
-			serializer.save(getCurrentProjection(), scenarioFile);
-			this.currentProjectionFile = scenarioFile;
-		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE, "Error while saving scenario file.",
-					ex);
-			GUI.printErrorMessage(this, "Error while saving scenario file.",
-					"An error occurred while attempting to save file to '"
-							+ scenarioFile + "': " + ex);
-		}
-
-	}
-
-	/**
-	 * Load a scenario.
-	 */
-	void loadProjection() {
-
-		int userReaction = this.scenarioFileChooser.showDialog(this, "Open");
-
-		if (userReaction != JFileChooser.ERROR_OPTION
-				&& userReaction != JFileChooser.CANCEL_OPTION) {
-			File scenarioFile = this.scenarioFileChooser.getSelectedFile();
-
-			if (scenarioFile != null && scenarioFile.exists()) {
-				try {
-					currentProjection = (ProjectionModel) serializer
-							.load(scenarioFile.getAbsolutePath());
-					currentProjectionFile = scenarioFile.getAbsolutePath();
-					projTreePanel.setProjection(currentProjection);
-				} catch (Exception ex) {
-					SimSystem.report(Level.SEVERE,
-							"Error while opening scenario file.", ex);
-					GUI.printErrorMessage(this,
-							"Error while opening scenario file.",
-							"An error occurred while attempting to save file to '"
-									+ scenarioFile.getAbsolutePath() + "': "
-									+ ex);
-				}
-			}
-		}
-	}
-
-	// Event Handler
-
-	/**
-	 * Quit application.
-	 */
-	public void quitApplication() {
-		if (GUI.printQuestion(this, "Quit?", "Do you really want to quit?")) {
-			System.exit(0);
-		}
-	}
-
-	/**
-	 * Switches to a new projection model for editing.
-	 * 
-	 * @param newProjModel
-	 *            the new projection model to be edited
-	 */
-	public void setCurrentProjection(ProjectionModel newProjModel) {
-		if (currentProjection != null) {
-			DatabaseFactory.getDatabaseSingleton().saveProjection(
-					currentProjection);
-		}
-		currentProjection = newProjModel;
-		projTreePanel.setProjection(currentProjection);
-		resultsPanel.setProjection(currentProjection);
-		switchNavigationTreeTab(NavigationTreeTab.PROJECTION_OVERVIEW);
-	}
-
-	/**
-	 * Input a matrix quickly.
-	 */
-	protected void inputMatrixQuickly() {
-		// (new QuickInputDialog(this,
-		// getCurrentProjection())).setVisible(true);
-	}
-
-	/**
-	 * Executed to run a calculation.
-	 */
-	protected void startExperiment() {
-		BaseExperiment baseExperiment = new BaseExperiment();
-		configureModelLocation(baseExperiment);
-		configureSimulator(baseExperiment);
-		configureMultiThreading(baseExperiment);
-		ExperimentExecutorThreadPool.getInstance().getExecutor()
-				.execute(new ExperimentThread(baseExperiment));
-	}
-
-	/**
-	 * Configures the given experiment for multi-threading.
-	 * 
-	 * @param baseExperiment
-	 *            the experiment to be configured
-	 */
-	private void configureMultiThreading(BaseExperiment baseExperiment) {
-		int numOfTrials = (Integer) getConfigFile().get(Misc.PREF_NUM_TRIALS);
-		int numOfThreads = (Integer) getConfigFile().get(
-				Misc.PREF_NUM_PARALLEL_THREADS);
-		double stopTime = Math.ceil((double) numOfTrials / numOfThreads);
-
-		baseExperiment.setDefaultSimStopTime(stopTime);
-		baseExperiment.setRepeatRuns(numOfThreads);
-		baseExperiment
-				.setComputationInstrumenterFactory(new ExecProgressInstrFactory());
-		baseExperiment.setComputationInstrumenterParameters(new ParameterBlock(
-				numOfTrials, ExecProgressInstrFactory.NUM_OF_TRIALS));
-
-		if (numOfThreads > 1) {
-			baseExperiment
-					.setTaskRunnerFactory(new ParameterizedFactory<TaskRunnerFactory>(
-							new ParallelComputationTaskRunnerFactory(),
-							new ParameterBlock(
-									numOfThreads,
-									ParallelComputationTaskRunnerFactory.NUM_CORES)));
-		}
-	}
-
-	/**
-	 * Configures experiment to use PPPM simulator.
-	 * 
-	 * @param baseExperiment
-	 *            the experiment to be configured
-	 */
-	private void configureSimulator(BaseExperiment baseExperiment) {
-		ParameterBlock processorParameters = baseExperiment
-				.getParameters()
-				.getParameterBlock()
-				.addSubBlock(ProcessorFactory.class.getName(),
-						PPPMProcessorFactory.class.getName());
-		processorParameters.addSubBl(ParamAssignmentGenFactory.class.getName(),
-				((ExecutionMode) getConfigFile().get(Misc.PREF_EXECUTION_MODE))
-						.getFactoryName());
-	}
-
-	/**
-	 * Configures experiment regarding model location.
-	 * 
-	 * @param baseExperiment
-	 *            the experiment to be configured
-	 */
-	private void configureModelLocation(BaseExperiment baseExperiment) {
-		try {
-			DBConnectionData dbData = DatabaseFactory.getDbConnData();
-			String dbURL = DatabaseFactory.getDbConnData().getUrl();
-			SimSystem.report(Level.INFO, "Using database URL:" + dbURL);
-			dbURL = dbURL.substring(dbURL.indexOf('/')).substring(2);
-			baseExperiment.setModelLocation(new URI("db-p3j://"
-					+ dbData.getUser() + ":" + dbData.getPassword() + "@"
-					+ dbURL + "?" + currentProjection.getID()));
-		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE,
-					"Configuration of model location failed.", ex);
-		}
-	}
-
-	/**
-	 * Main function.
-	 * 
-	 * @param argv
-	 *            command line arguments
-	 */
-	public static void main(String[] argv) {
-
-		showSplashScreen();
-		Locale.setDefault(Locale.US);
-
-		processCmdLineArgs(argv);
-
-		try {
-			String lf = LookUtils.IS_OS_WINDOWS ? Options
-					.getCrossPlatformLookAndFeelClassName() : Options
-					.getSystemLookAndFeelClassName();
-			UIManager.setLookAndFeel(lf);
-		} catch (Exception e) {
-			SimSystem.report(e);
-		}
-
-		P3J p3j = P3J.getInstance();
-		splashScreen.setVisible(false);
-		GUI.centerOnScreen(p3j);
-		p3j.setVisible(true);
-	}
-
-	/**
-	 * Process cmd line arguments.
-	 * 
-	 * @param argv
-	 *            the argv
-	 */
-	private static void processCmdLineArgs(String[] argv) {
-		if (argv.length > 1) {
-			SimSystem
-					.report(Level.WARNING,
-							"Only a single command line argument is allowed (which points to the database configuration file to be used). Arguments will be ignored.");
-		} else if (argv.length == 1) {
-			P3MDatabase.setHibernateConfigFile(argv[0]);
-		}
-	}
-
-	/**
-	 * Shows splash screen.
-	 */
-	private static void showSplashScreen() {
-		try {
-			BasicUtilities.invokeAndWaitOnEDT(new Runnable() {
-				@Override
-				public void run() {
-					Image image = null;
-					try {
-						image = IconManager
-								.getImage("image:/p3j/splashscreen.png");
-					} catch (Exception ex) {
-						SimSystem.report(ex);
-					}
-					splashScreen = new SplashScreen(image, "", "Version 0.9.5",
-							"", true);
-					splashScreen.setVisible(true);
-					splashScreen.pack();
-				}
-			});
-		} catch (InterruptedException e1) {
-			SimSystem.report(e1);
-		} catch (InvocationTargetException e1) {
-			SimSystem.report(e1);
-		}
-	}
-
-	/**
-	 * Has to be called to refresh GUI after a {@link ProjectionModel} has been
-	 * deleted.
-	 * 
-	 * @param deletedModel
-	 *            the model that has been deleted from the database
-	 */
-	public void projectionDeleted(ProjectionModel deletedModel) {
-		if (currentProjection.equals(deletedModel)) {
-			switchNavigationTreeTab(NavigationTreeTab.DB_OVERVIEW);
-			projTreePanel.setProjection(null);
-		}
-		dbOverviewPanel.totalRefresh();
-	}
-
-	/**
-	 * Switch the navigation tree tab.
-	 * 
-	 * @param targetTab
-	 *            the desired tab of the navigation tree
-	 */
-	public void switchNavigationTreeTab(NavigationTreeTab targetTab) {
-		tabbedPane.setSelectedIndex(targetTab.getTabIndex());
-	}
-
-	/**
-	 * Update UI in case configuration changed.
-	 */
-	private void updateFromConfig() {
-		this.getContentPane().removeAll();
-		initUI();
-	}
-
-	/**
-	 * Updates the summary of the execution preferences displayed on the buttons
-	 * that opens them.
-	 */
-	private void updateFromExecConfig() {
-		execPrefsButton.setText("#Trials:"
-				+ getConfigFile().get(Misc.PREF_NUM_TRIALS) + ", #Threads:"
-				+ getConfigFile().get(Misc.PREF_NUM_PARALLEL_THREADS)
-				+ ", Mode:" + getConfigFile().get(Misc.PREF_EXECUTION_MODE));
-	}
-
-	/**
-	 * Get the configuration file.
-	 * 
-	 * @return the configFile
-	 */
-	public P3JConfigFile getConfigFile() {
-		return configFile;
-	}
-
-	/**
-	 * Refreshes the navigation tree and selects the root node in the currently
-	 * selected tab, so that all relevant GUI elements are refreshed.
-	 */
-	public void refreshNavigationTree() {
-		NavigationTreeTab currentTab = NavigationTreeTab.values()[tabbedPane
-				.getSelectedIndex()];
-		setCurrentProjection(currentProjection);
-		switchNavigationTreeTab(currentTab);
-		switch (currentTab) {
-		case PROJECTION_OVERVIEW:
-			projTreePanel.selectRoot();
-			break;
-		case RESULTS_OVERVIEW:
-			resultsPanel.selectRoot();
-			break;
-		case DB_OVERVIEW:
-			dbOverviewPanel.selectRoot();
-			break;
-		default:
-			break;
-		}
-
-	}
+  /** Serialization ID. */
+  private static final long serialVersionUID = -142244898041811667L;
+
+  /** Initial window width. */
+  static final int INITIAL_WIDTH = 1024;
+
+  /** Initial window height. */
+  static final int INITIAL_HEIGHT = 768;
+
+  /** Initial width of the projection/result tree tab-pane. */
+  static final int INITIAL_TREE_WIDTH = 300;
+
+  /** Reference to singleton. */
+  private static P3J instance;
+
+  /** The splash screen to be shown at startup. */
+  private static SplashScreen splashScreen;
+
+  /** Current projection to be edited. */
+  private static ProjectionModel currentProjection;
+
+  /** Serialization tool. */
+  private final Serializer serializer = new Serializer();
+
+  // GUI elements
+
+  /** Icon for the run button. */
+  private final Icon runIcon = new ImageIcon(this.getClass().getResource(
+      "/p3j/icons/run.gif"));
+
+  /** The button to run a calculation. */
+  private final JButton runButton = new JButton(runIcon);
+  {
+    runButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        startExperiment();
+      }
+    });
+  }
+
+  /** The button in the toolbar shown the replication configurations. */
+  private JButton execPrefsButton = new JButton();
+  {
+    execPrefsButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editExecutionPreferences();
+      }
+    });
+  }
+
+  /** Main toolbar. */
+  private final JToolBar toolBar = new JToolBar();
+  {
+    toolBar.add(runButton);
+    toolBar.putClientProperty(Options.HEADER_STYLE_KEY, HeaderStyle.BOTH);
+    toolBar.putClientProperty(PlasticLookAndFeel.IS_3D_KEY, Boolean.FALSE);
+    toolBar.add(execPrefsButton);
+  }
+
+  /** The desktop. */
+  private final JDesktopPane desktop = new JDesktopPane();
+
+  /** File chooser to save scenario files. */
+  private final JFileChooser scenarioFileChooser = new JFileChooser();
+
+  // File menu
+
+  /** Menu to create a new scenario. */
+  private final JMenuItem newProjectionMenu = new JMenuItem("New projection",
+      KeyEvent.VK_N);
+  {
+    newProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+        ActionEvent.CTRL_MASK));
+    newProjectionMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        newProjection();
+      }
+    });
+  }
+
+  /** Menu to load a scenario. */
+  private final JMenuItem openProjectionMenu = new JMenuItem(
+      "Open/import projection...", KeyEvent.VK_O);
+  {
+    openProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+        ActionEvent.CTRL_MASK));
+    openProjectionMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        loadProjection();
+      }
+    });
+  }
+
+  /** Menu to quick-save. */
+  private final JMenuItem quickSaveProjectionMenu = new JMenuItem(
+      "Save projection", KeyEvent.VK_S);
+  {
+    quickSaveProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(
+        KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+    quickSaveProjectionMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (currentProjectionFile == null) {
+          saveProjection();
+        } else {
+          quickSaveProjection(currentProjectionFile);
+        }
+      }
+    });
+  }
+
+  /** Menu to save scenario. */
+  private final JMenuItem saveProjectionMenu = new JMenuItem(
+      "Save projection as...");
+  {
+    saveProjectionMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        saveProjection();
+      }
+    });
+  }
+
+  /** Menu to load results. */
+  private final JMenuItem loadResultsMenu = new JMenuItem("Load results...");
+  {
+    loadResultsMenu.setVisible(false); // TODO
+  }
+
+  /** Menu to save results. */
+  private final JMenuItem saveResultsMenu = new JMenuItem("Save results...");
+  {
+    saveResultsMenu.setVisible(false); // TODO
+  }
+
+  /** Menu to quick-save results. */
+  private final JMenuItem quickSaveResultsMenu = new JMenuItem("Save results");
+  {
+    quickSaveResultsMenu.setVisible(false); // TODO
+  }
+
+  /** Menu to open preferences dialog. */
+  private final JMenuItem preferencesMenu = new JMenuItem("Preferences...");
+  {
+    preferencesMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editPreferences();
+      }
+    });
+  }
+
+  /** Menu to open execution preferences dialog. */
+  private final JMenuItem execPreferencesMenu = new JMenuItem(
+      "Execution Preferences...");
+  {
+    execPreferencesMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        execPrefsButton.doClick();
+      }
+    });
+  }
+
+  /** Menu to quit. */
+  private final JMenuItem quitMenu = new JMenuItem("Quit", KeyEvent.VK_Q);
+  {
+    quitMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+        ActionEvent.CTRL_MASK));
+    quitMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        quitApplication();
+      }
+    });
+  }
+
+  /** File menu. */
+  private final JMenu fileMenu = new JMenu("File");
+  {
+    fileMenu.add(newProjectionMenu);
+    fileMenu.add(openProjectionMenu);
+    fileMenu.add(quickSaveProjectionMenu);
+    fileMenu.add(saveProjectionMenu);
+    // TODO: Implement binary result storage.
+    // fileMenu.add(new JSeparator());
+    fileMenu.add(loadResultsMenu);
+    fileMenu.add(quickSaveResultsMenu);
+    fileMenu.add(saveResultsMenu);
+    fileMenu.add(new JSeparator());
+    fileMenu.add(preferencesMenu);
+    fileMenu.add(execPreferencesMenu);
+    fileMenu.add(new JSeparator());
+    fileMenu.add(quitMenu);
+    fileMenu.setMnemonic(KeyEvent.VK_F);
+  }
+
+  // Parameter menu
+
+  /** Menu to edit sets. */
+  private final JMenuItem editSetsMenu = new JMenuItem("Edit Sets...");
+  {
+    editSetsMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editSets();
+      }
+    });
+  }
+
+  /** Menu to edit Settypes. */
+  private final JMenuItem editSetTypesMenu = new JMenuItem("Edit Settypes...");
+  {
+    editSetTypesMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editSetTypes();
+      }
+    });
+
+  }
+
+  /** Menu to input a matrix quickly. */
+  private final JMenuItem quickMatrixInput = new JMenuItem(
+      "Quick Matrix Input...");
+  {
+    quickMatrixInput.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        inputMatrixQuickly();
+      }
+    });
+  }
+
+  /** Menu to input a matrix quickly. */
+  private final JMenuItem copyGenerations = new JMenuItem("Copy Generations...");
+  {
+    copyGenerations.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        copyGenerations();
+      }
+    });
+  }
+
+  /** Parameter menu. */
+  private final JMenu parameterMenu = new JMenu("Parameters");
+  {
+    parameterMenu.add(new JSeparator());
+    parameterMenu.add(editSetTypesMenu);
+    parameterMenu.add(editSetsMenu);
+    parameterMenu.add(new JSeparator());
+    parameterMenu.add(quickMatrixInput);
+    parameterMenu.add(copyGenerations);
+  }
+
+  /** Menu to open info panel. */
+  private final JMenuItem infoMenu = new JMenuItem("Info (Welcome Screen)");
+  {
+    infoMenu.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        contentPanel.removeAll();
+        contentPanel.add(new WelcomePanel(), BorderLayout.CENTER);
+        pack();
+        repaint();
+      }
+    });
+  }
+
+  /** Help menu. */
+  private final JMenu helpMenu = new JMenu("Help");
+  {
+    helpMenu.add(infoMenu);
+  }
+
+  /** Main menu bar. */
+  private final JMenuBar menuBar = new JMenuBar();
+  {
+    menuBar.add(fileMenu);
+    // TODO: Redesign and refactor old parameter dialogs
+    // menuBar.add(parameterMenu);
+    menuBar.add(helpMenu);
+    menuBar.putClientProperty(Options.HEADER_STYLE_KEY, HeaderStyle.BOTH);
+    menuBar.putClientProperty(PlasticLookAndFeel.IS_3D_KEY, Boolean.FALSE);
+  }
+
+  // Dialogs to be used
+
+  /** Stores name of the last saved projection. */
+  private String currentProjectionFile;
+
+  /** Large panel for displaying the content of a selected element. */
+  private JPanel contentPanel = new JPanel(GUI.getStdBorderLayout());
+
+  /**
+   * The tabbed pane for viewing the different levels (database overview,
+   * structure of a single projection, etc).
+   */
+  private JTabbedPane tabbedPane = new JTabbedPane();
+
+  /** Panel that allows navigation through the current projection. */
+  private ProjectionTreePanel projTreePanel = new ProjectionTreePanel(
+      getCurrentProjection(), contentPanel);
+
+  /**
+   * Panel that allows navigation through the results of the current projection.
+   */
+  private ResultTreePanel resultsPanel = new ResultTreePanel(
+      getCurrentProjection(), contentPanel);
+
+  /**
+   * Panel that allows to navigate through the overall database and load
+   * projection models etc.
+   */
+  private DatabaseOverviewPanel dbOverviewPanel;
+
+  /** The configuration file. */
+  private final P3JConfigFile configFile = new P3JConfigFile();
+
+  /**
+   * Default constructor.
+   */
+  private P3J() {
+
+    try {
+      getConfigFile().readFile("./" + Misc.CONFIG_FILE);
+    } catch (Exception ex) {
+      SimSystem.report(ex);
+      getConfigFile().setFileName("./" + Misc.CONFIG_FILE);
+      GUI.printErrorMessage(this, "Error while loading configuration file.",
+          "An error occurred while attempting to read the file '"
+              + Misc.CONFIG_FILE + "' from the working directory:" + ex);
+    }
+
+    updateFromExecConfig();
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.initUI();
+  }
+
+  /**
+   * Edits the preferences.
+   */
+  protected void editPreferences() {
+    PreferencesDialog prefsDialog = new PreferencesDialog(this, getConfigFile());
+    prefsDialog.setVisible(true);
+    try {
+      getConfigFile().writeFile();
+    } catch (Exception ex) {
+      SimSystem.report(ex);
+      GUI.printErrorMessage(this, "Error writing configuration file.",
+          "An error occurred while attempting to write to file '"
+              + getConfigFile().getFileName() + "' in the working directory:"
+              + ex);
+    }
+    updateFromConfig();
+  }
+
+  /**
+   * Edits the execution preferences.
+   */
+  protected void editExecutionPreferences() {
+    ExecutionPreferencesDialog execPrefsDialog = new ExecutionPreferencesDialog(
+        this);
+    execPrefsDialog.setVisible(true);
+    try {
+      getConfigFile().writeFile();
+    } catch (Exception ex) {
+      SimSystem.report(Level.SEVERE, "Error writing configuration file.", ex);
+      GUI.printErrorMessage(this, "Error writing configuration file.",
+          "An error occurred while attempting to write to file '"
+              + getConfigFile().getFileName() + "' in the working directory:"
+              + ex);
+    }
+    updateFromExecConfig();
+  }
+
+  /**
+   * Displays a dialog to edit sets.
+   */
+  protected void editSets() {
+    // (new EditSetsDialog(this,
+    // P3J.getCurrentProjection())).setVisible(true);
+  }
+
+  /**
+   * Displays a dialog to edit Settypes.
+   */
+  protected void editSetTypes() {
+    // (new EditSetTypesDialog(this,
+    // getCurrentProjection())).setVisible(true);
+  }
+
+  /**
+   * Opens dialog to copy generations.
+   */
+  protected void copyGenerations() {
+    CopyGenerationsDialog cgd = new CopyGenerationsDialog(
+        getCurrentProjection(), this);
+    cgd.setVisible(true);
+  }
+
+  /**
+   * Create a new scenario in database.
+   */
+  protected void newProjection() {
+    NewProjectionDialog newProjectionDialog = new NewProjectionDialog(this,
+        DatabaseFactory.getDatabaseSingleton());
+    newProjectionDialog.setVisible(true);
+    if (newProjectionDialog.hasCreatedNewProjection()) {
+      currentProjection = newProjectionDialog.getNewProjection();
+      projTreePanel.setProjection(currentProjection);
+      switchNavigationTreeTab(NavigationTreeTab.PROJECTION_OVERVIEW);
+      dbOverviewPanel.totalRefresh();
+    }
+  }
+
+  /**
+   * Retrieves user interface singleton.
+   * 
+   * @return instance of P3J
+   */
+  public static P3J getInstance() {
+    if (instance == null) {
+      instance = new P3J();
+    }
+    return instance;
+  }
+
+  /**
+   * Initializes user interface.
+   */
+  private void initUI() {
+
+    this.setTitle("P3J : Probabilistic Population Projection");
+    this.setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
+
+    this.setJMenuBar(menuBar);
+    this.getContentPane().setLayout(new BorderLayout());
+    this.getContentPane().add(toolBar, BorderLayout.NORTH);
+    this.getContentPane().add(desktop, BorderLayout.CENTER);
+
+    DatabaseFactory.setDbConnData(getConfigFile().getDBConnectionData());
+    currentProjection = null;
+    dbOverviewPanel = new DatabaseOverviewPanel(contentPanel);
+    projTreePanel = new ProjectionTreePanel(getCurrentProjection(),
+        contentPanel);
+
+    tabbedPane.removeAll();
+    tabbedPane.addTab("Database", dbOverviewPanel);
+    tabbedPane.addTab("Projection", projTreePanel);
+    tabbedPane.addTab("Results", resultsPanel);
+    contentPanel.removeAll();
+    contentPanel.add(new WelcomePanel(), BorderLayout.CENTER);
+
+    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    splitPane.add(tabbedPane);
+    splitPane.setDividerLocation(INITIAL_TREE_WIDTH);
+    splitPane.add(contentPanel);
+
+    this.getContentPane().add(splitPane);
+
+    // Action handler: close window
+    this.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent l) {
+        P3J.this.quitApplication();
+      }
+    });
+
+    this.pack();
+    this.repaint();
+  }
+
+  /**
+   * Retrieves current PPP model.
+   * 
+   * @return the PPP model that is currently edited
+   */
+  public static ProjectionModel getCurrentProjection() {
+    return currentProjection;
+  }
+
+  /**
+   * Save current projection.
+   */
+  void saveProjection() {
+
+    if (currentProjection == null) {
+      GUI.printMessage(this, "No projection to save.",
+          "In order to save a projection, you first have to load it from the database.");
+      return;
+    }
+
+    int userReaction = this.scenarioFileChooser.showDialog(this, "Save");
+
+    if (userReaction != JFileChooser.ERROR_OPTION
+        && userReaction != JFileChooser.CANCEL_OPTION) {
+      File projectionFile = this.scenarioFileChooser.getSelectedFile();
+
+      String ending = Misc.getFileEnding(projectionFile);
+
+      if (ending.compareToIgnoreCase("p3j") != 0) {
+        projectionFile = new File(projectionFile.getAbsolutePath() + ".p3j");
+      }
+
+      if (projectionFile != null
+          && (!projectionFile.exists() || projectionFile.canWrite())) {
+        quickSaveProjection(projectionFile.getAbsolutePath());
+      }
+
+    }
+  }
+
+  /**
+   * Quick-save current scenario.
+   * 
+   * @param scenarioFile
+   *          the file to which the scenario shall be saved
+   */
+  void quickSaveProjection(String scenarioFile) {
+    try {
+      serializer.save(getCurrentProjection(), scenarioFile);
+      this.currentProjectionFile = scenarioFile;
+    } catch (Exception ex) {
+      SimSystem.report(Level.SEVERE, "Error while saving scenario file.", ex);
+      GUI.printErrorMessage(this, "Error while saving scenario file.",
+          "An error occurred while attempting to save file to '" + scenarioFile
+              + "': " + ex);
+    }
+
+  }
+
+  /**
+   * Load a scenario.
+   */
+  void loadProjection() {
+
+    int userReaction = this.scenarioFileChooser.showDialog(this, "Open");
+
+    if (userReaction != JFileChooser.ERROR_OPTION
+        && userReaction != JFileChooser.CANCEL_OPTION) {
+      File scenarioFile = this.scenarioFileChooser.getSelectedFile();
+
+      if (scenarioFile != null && scenarioFile.exists()) {
+        try {
+          currentProjection = serializer.loadProjection(
+              scenarioFile.getAbsolutePath(),
+              DatabaseFactory.getDatabaseSingleton());
+          currentProjectionFile = scenarioFile.getAbsolutePath();
+          projTreePanel.setProjection(currentProjection);
+        } catch (IOException | ClassNotFoundException ex) {
+          SimSystem.report(Level.SEVERE, "Error while opening scenario file.",
+              ex);
+          GUI.printErrorMessage(this, "Error while opening scenario file.",
+              "An error occurred while attempting to load file from '"
+                  + scenarioFile.getAbsolutePath() + "': " + ex.getMessage(),
+              ex);
+        } catch (LoadedProjectionFormatException ex) {
+          SimSystem.report(Level.SEVERE,
+              "Error while loading projection into database.", ex);
+          GUI.printErrorMessage(
+              this,
+              "Error while loading projection into database.",
+              "An error occurred while attempting to load the projection:"
+                  + ex.getMessage(), ex);
+        }
+      }
+    }
+  }
+
+  // Event Handler
+
+  /**
+   * Quit application.
+   */
+  public void quitApplication() {
+    if (GUI.printQuestion(this, "Quit?", "Do you really want to quit?")) {
+      System.exit(0);
+    }
+  }
+
+  /**
+   * Switches to a new projection model for editing.
+   * 
+   * @param newProjModel
+   *          the new projection model to be edited
+   */
+  public void setCurrentProjection(ProjectionModel newProjModel) {
+    if (currentProjection != null) {
+      DatabaseFactory.getDatabaseSingleton().saveProjection(currentProjection);
+    }
+    currentProjection = newProjModel;
+    projTreePanel.setProjection(currentProjection);
+    resultsPanel.setProjection(currentProjection);
+    switchNavigationTreeTab(NavigationTreeTab.PROJECTION_OVERVIEW);
+  }
+
+  /**
+   * Input a matrix quickly.
+   */
+  protected void inputMatrixQuickly() {
+    // (new QuickInputDialog(this,
+    // getCurrentProjection())).setVisible(true);
+  }
+
+  /**
+   * Executed to run a calculation.
+   */
+  protected void startExperiment() {
+    BaseExperiment baseExperiment = new BaseExperiment();
+    configureModelLocation(baseExperiment);
+    configureSimulator(baseExperiment);
+    configureMultiThreading(baseExperiment);
+    ExperimentExecutorThreadPool.getInstance().getExecutor()
+        .execute(new ExperimentThread(baseExperiment));
+  }
+
+  /**
+   * Configures the given experiment for multi-threading.
+   * 
+   * @param baseExperiment
+   *          the experiment to be configured
+   */
+  private void configureMultiThreading(BaseExperiment baseExperiment) {
+    int numOfTrials = (Integer) getConfigFile().get(Misc.PREF_NUM_TRIALS);
+    int numOfThreads = (Integer) getConfigFile().get(
+        Misc.PREF_NUM_PARALLEL_THREADS);
+    double stopTime = Math.ceil((double) numOfTrials / numOfThreads);
+
+    baseExperiment.setDefaultSimStopTime(stopTime);
+    baseExperiment.setRepeatRuns(numOfThreads);
+    baseExperiment
+        .setComputationInstrumenterFactory(new ExecProgressInstrFactory());
+    baseExperiment.setComputationInstrumenterParameters(new ParameterBlock(
+        numOfTrials, ExecProgressInstrFactory.NUM_OF_TRIALS));
+
+    if (numOfThreads > 1) {
+      baseExperiment
+          .setTaskRunnerFactory(new ParameterizedFactory<TaskRunnerFactory>(
+              new ParallelComputationTaskRunnerFactory(), new ParameterBlock(
+                  numOfThreads, ParallelComputationTaskRunnerFactory.NUM_CORES)));
+    }
+  }
+
+  /**
+   * Configures experiment to use PPPM simulator.
+   * 
+   * @param baseExperiment
+   *          the experiment to be configured
+   */
+  private void configureSimulator(BaseExperiment baseExperiment) {
+    ParameterBlock processorParameters = baseExperiment
+        .getParameters()
+        .getParameterBlock()
+        .addSubBlock(ProcessorFactory.class.getName(),
+            PPPMProcessorFactory.class.getName());
+    processorParameters.addSubBl(ParamAssignmentGenFactory.class.getName(),
+        ((ExecutionMode) getConfigFile().get(Misc.PREF_EXECUTION_MODE))
+            .getFactoryName());
+  }
+
+  /**
+   * Configures experiment regarding model location.
+   * 
+   * @param baseExperiment
+   *          the experiment to be configured
+   */
+  private void configureModelLocation(BaseExperiment baseExperiment) {
+    try {
+      DBConnectionData dbData = DatabaseFactory.getDbConnData();
+      String dbURL = DatabaseFactory.getDbConnData().getUrl();
+      SimSystem.report(Level.INFO, "Using database URL:" + dbURL);
+      dbURL = dbURL.substring(dbURL.indexOf('/')).substring(2);
+      baseExperiment.setModelLocation(new URI("db-p3j://" + dbData.getUser()
+          + ":" + dbData.getPassword() + "@" + dbURL + "?"
+          + currentProjection.getID()));
+    } catch (Exception ex) {
+      SimSystem.report(Level.SEVERE, "Configuration of model location failed.",
+          ex);
+    }
+  }
+
+  /**
+   * Main function.
+   * 
+   * @param argv
+   *          command line arguments
+   */
+  public static void main(String[] argv) {
+
+    showSplashScreen();
+    Locale.setDefault(Locale.US);
+
+    processCmdLineArgs(argv);
+
+    try {
+      String lf = LookUtils.IS_OS_WINDOWS ? Options
+          .getCrossPlatformLookAndFeelClassName() : Options
+          .getSystemLookAndFeelClassName();
+      UIManager.setLookAndFeel(lf);
+    } catch (Exception e) {
+      SimSystem.report(e);
+    }
+
+    P3J p3j = P3J.getInstance();
+    splashScreen.setVisible(false);
+    GUI.centerOnScreen(p3j);
+    p3j.setVisible(true);
+  }
+
+  /**
+   * Process cmd line arguments.
+   * 
+   * @param argv
+   *          the argv
+   */
+  private static void processCmdLineArgs(String[] argv) {
+    if (argv.length > 1) {
+      SimSystem
+          .report(
+              Level.WARNING,
+              "Only a single command line argument is allowed (which points to the database configuration file to be used). Arguments will be ignored.");
+    } else if (argv.length == 1) {
+      P3MDatabase.setHibernateConfigFile(argv[0]);
+    }
+  }
+
+  /**
+   * Shows splash screen.
+   */
+  private static void showSplashScreen() {
+    try {
+      BasicUtilities.invokeAndWaitOnEDT(new Runnable() {
+        @Override
+        public void run() {
+          Image image = null;
+          try {
+            image = IconManager.getImage("image:/p3j/splashscreen.png");
+          } catch (Exception ex) {
+            SimSystem.report(ex);
+          }
+          splashScreen = new SplashScreen(image, "", "Version 0.9.5", "", true);
+          splashScreen.setVisible(true);
+          splashScreen.pack();
+        }
+      });
+    } catch (InterruptedException e1) {
+      SimSystem.report(e1);
+    } catch (InvocationTargetException e1) {
+      SimSystem.report(e1);
+    }
+  }
+
+  /**
+   * Has to be called to refresh GUI after a {@link ProjectionModel} has been
+   * deleted.
+   * 
+   * @param deletedModel
+   *          the model that has been deleted from the database
+   */
+  public void projectionDeleted(ProjectionModel deletedModel) {
+    if (currentProjection.equals(deletedModel)) {
+      switchNavigationTreeTab(NavigationTreeTab.DB_OVERVIEW);
+      projTreePanel.setProjection(null);
+    }
+    dbOverviewPanel.totalRefresh();
+  }
+
+  /**
+   * Switch the navigation tree tab.
+   * 
+   * @param targetTab
+   *          the desired tab of the navigation tree
+   */
+  public void switchNavigationTreeTab(NavigationTreeTab targetTab) {
+    tabbedPane.setSelectedIndex(targetTab.getTabIndex());
+  }
+
+  /**
+   * Update UI in case configuration changed.
+   */
+  private void updateFromConfig() {
+    this.getContentPane().removeAll();
+    initUI();
+  }
+
+  /**
+   * Updates the summary of the execution preferences displayed on the buttons
+   * that opens them.
+   */
+  private void updateFromExecConfig() {
+    execPrefsButton.setText("#Trials:"
+        + getConfigFile().get(Misc.PREF_NUM_TRIALS) + ", #Threads:"
+        + getConfigFile().get(Misc.PREF_NUM_PARALLEL_THREADS) + ", Mode:"
+        + getConfigFile().get(Misc.PREF_EXECUTION_MODE));
+  }
+
+  /**
+   * Get the configuration file.
+   * 
+   * @return the configFile
+   */
+  public P3JConfigFile getConfigFile() {
+    return configFile;
+  }
+
+  /**
+   * Refreshes the navigation tree and selects the root node in the currently
+   * selected tab, so that all relevant GUI elements are refreshed.
+   */
+  public void refreshNavigationTree() {
+    NavigationTreeTab currentTab = NavigationTreeTab.values()[tabbedPane
+        .getSelectedIndex()];
+    setCurrentProjection(currentProjection);
+    switchNavigationTreeTab(currentTab);
+    switch (currentTab) {
+    case PROJECTION_OVERVIEW:
+      projTreePanel.selectRoot();
+      break;
+    case RESULTS_OVERVIEW:
+      resultsPanel.selectRoot();
+      break;
+    case DB_OVERVIEW:
+      dbOverviewPanel.selectRoot();
+      break;
+    default:
+      break;
+    }
+
+  }
 }
