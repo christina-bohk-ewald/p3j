@@ -183,7 +183,6 @@ public final class P3J extends JFrame {
 	private final JMenuItem openProjectionMenu = new JMenuItem(
 			"Open/import projection...", KeyEvent.VK_O);
 	{
-		openProjectionMenu.setVisible(true); 
 		openProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
 				ActionEvent.CTRL_MASK));
 		openProjectionMenu.addActionListener(new ActionListener() {
@@ -200,7 +199,6 @@ public final class P3J extends JFrame {
 	{
 		quickSaveProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(
 				KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-		quickSaveProjectionMenu.setVisible(true);
 		quickSaveProjectionMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -217,7 +215,6 @@ public final class P3J extends JFrame {
 	private final JMenuItem saveProjectionMenu = new JMenuItem(
 			"Save projection as...");
 	{
-		saveProjectionMenu.setVisible(true);
 		saveProjectionMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -596,6 +593,12 @@ public final class P3J extends JFrame {
 	 * Save current projection.
 	 */
 	void saveProjection() {
+
+		if (currentProjection == null) {
+			GUI.printMessage(this, "No projection to save.",
+					"In order to save a projection, you first have to load it from the database.");
+			return;
+		}
 
 		int userReaction = this.scenarioFileChooser.showDialog(this, "Save");
 
