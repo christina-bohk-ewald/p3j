@@ -15,6 +15,9 @@
  */
 package p3j.misc;
 
+import james.SimSystem;
+import james.core.util.misc.Strings;
+
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
@@ -27,10 +30,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -486,6 +492,7 @@ public class Serializer {
   public ProjectionModel loadProjection(String absolutePath,
       IP3MDatabase database) throws ClassNotFoundException, IOException,
       LoadedProjectionFormatException {
+    List<String> warnings = new ArrayList<>();
     ProjectionModel loadedProjection = (ProjectionModel) load(absolutePath);
 
     ProjectionModel newProjection = new ProjectionModel();
@@ -493,11 +500,16 @@ public class Serializer {
     database.newProjection(newProjection);
 
     Map<ParameterInstance, ParameterInstance> paramInstances = matchParameterInstances(
-        loadedProjection, newProjection);
+        loadedProjection, newProjection, warnings);
     Map<Set, Set> sets = saveSets(loadedProjection, newProjection,
         paramInstances);
     Map<SetType, SetType> setTypes = saveSetTypes(loadedProjection,
         newProjection, paramInstances, sets);
+
+    // TODO: Make this visible to user
+    for (String warning : warnings)
+      SimSystem.report(Level.WARNING, warning);
+
     return newProjection;
   }
 
@@ -508,41 +520,67 @@ public class Serializer {
    *          the loaded projection
    * @param newProjection
    *          the new projection
+   * @param warnings
+   *          the list of warnings to be handed over to the user
    * @return the map
    * @throws LoadedProjectionFormatException
    *           in case no exact one-to-one matching could be found
    */
   private Map<ParameterInstance, ParameterInstance> matchParameterInstances(
-      ProjectionModel loadedProjection, ProjectionModel newProjection)
-      throws LoadedProjectionFormatException {
+      ProjectionModel loadedProjection, ProjectionModel newProjection,
+      List<String> warnings) throws LoadedProjectionFormatException {
+
     Map<ParameterInstance, ParameterInstance> matching = new HashMap<>();
     List<ParameterInstance> oldInstances = new ArrayList<>(
         loadedProjection.getAllParameterInstances());
-    for (ParameterInstance newInstance : newProjection
+
+    for (final ParameterInstance newInstance : newProjection
         .getAllParameterInstances()) {
-      boolean oldInstanceFound = false;
-      for (ParameterInstance oldInstance : oldInstances) {
+
+      List<ParameterInstance> matchCandidates = new ArrayList<>();
+
+      for (ParameterInstance oldInstance : oldInstances)
         if (newInstance.getComparisonIndex() == oldInstance
             .getComparisonIndex()
             && newInstance.getGeneration() == oldInstance.getGeneration()
             && newInstance.getValueHeight() == oldInstance.getValueHeight()
             && newInstance.getValueWidth() == oldInstance.getValueWidth()
-            // TODO: Relax the following requirement? Should be
-            // adjustable interactively by user...
-            && newInstance.getParameter().getName()
-                .equals(oldInstance.getParameter().getName())
             && newInstance.getParameter().getPopulation() == oldInstance
                 .getParameter().getPopulation()
             && newInstance.getParameter().isGenerationDependent() == oldInstance
                 .getParameter().isGenerationDependent()) {
-          matching.put(oldInstance, newInstance);
-          oldInstances.remove(oldInstance);
-          oldInstanceFound = true;
+          matchCandidates.add(oldInstance);
         }
-        if (!oldInstanceFound)
-          throw new LoadedProjectionFormatException(
-              "No match found for parameter instance " + oldInstance);
-      }
+
+      if (matchCandidates.isEmpty())
+        throw new LoadedProjectionFormatException(
+            "No match found for parameter instance " + newInstance);
+
+      // Sort potential matches by smallest Levenshtein distance to parameter
+      // name
+      ParameterInstance bestMatch = Collections.min(matchCandidates,
+          new Comparator<ParameterInstance>() {
+            final String targetName = newInstance.getParameter().getName();
+
+            @Override
+            public int compare(ParameterInstance inst1, ParameterInstance inst2) {
+              return Integer.compare(Strings.getLevenshteinDistance(inst1
+                  .getParameter().getName(), targetName), Strings
+                  .getLevenshteinDistance(inst2.getParameter().getName(),
+                      targetName));
+            }
+          });
+
+      matching.put(bestMatch, newInstance);
+      System.err.println("Matched '" + bestMatch + "' to '" + newInstance
+          + "'.");
+      if (!bestMatch.getParameter().getName()
+          .equals(newInstance.getParameter().getName()))
+        warnings.add("Could not find perfect match for parameter '"
+            + newInstance.getParameter() + "', using best match '"
+            + bestMatch.getParameter());
+
+      oldInstances.remove(bestMatch);
     }
 
     return matching;

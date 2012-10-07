@@ -654,15 +654,11 @@ public final class P3J extends JFrame {
           currentProjectionFile = scenarioFile.getAbsolutePath();
           projTreePanel.setProjection(currentProjection);
         } catch (IOException | ClassNotFoundException ex) {
-          SimSystem.report(Level.SEVERE, "Error while opening scenario file.",
-              ex);
           GUI.printErrorMessage(this, "Error while opening scenario file.",
               "An error occurred while attempting to load file from '"
                   + scenarioFile.getAbsolutePath() + "': " + ex.getMessage(),
               ex);
         } catch (LoadedProjectionFormatException ex) {
-          SimSystem.report(Level.SEVERE,
-              "Error while loading projection into database.", ex);
           GUI.printErrorMessage(
               this,
               "Error while loading projection into database.",
