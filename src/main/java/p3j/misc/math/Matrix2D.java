@@ -34,7 +34,7 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 public class Matrix2D extends DenseDoubleMatrix2D {
 
   /** The step-size of the function to compute a hash value for a matrix. */
-  private static final int MATRIX_HASH_STEPSIZE = 10;
+  private static final int MATRIX_HASH_STEPSIZE = 5;
 
   /** Serialization ID. */
   private static final long serialVersionUID = 8686379106612322945L;
@@ -175,10 +175,10 @@ public class Matrix2D extends DenseDoubleMatrix2D {
   public static long calculateHashCode(Matrix2D val) {
     long result = 0;
     result += OFFSET_ROW * val.rows() + val.columns();
-    result *= 127;
-    for (int x = 0; x < val.rows; x += MATRIX_HASH_STEPSIZE)
-      for (int y = 0; y < val.columns; y += MATRIX_HASH_STEPSIZE)
-        result += (x ^ y);
+    for (int x = 1; x < val.rows(); x += MATRIX_HASH_STEPSIZE)
+      for (int y = 1; y < val.columns(); y += MATRIX_HASH_STEPSIZE)
+        result += (Double.doubleToLongBits(val.getQuick(x, y)) ^ Double
+            .doubleToLongBits(val.getQuick(x - 1, y - 1)));
     return result;
   }
 
@@ -187,12 +187,14 @@ public class Matrix2D extends DenseDoubleMatrix2D {
     if (!(o instanceof Matrix2D)) {
       return false;
     }
-    if (!super.equals(o)) {
+
+    Matrix2D val = (Matrix2D) o;
+    if (!rowLabel.equals(val.getRowLabel())
+        && columnLabel.equals(val.getColumnLabel())) {
       return false;
     }
-    Matrix2D val = (Matrix2D) o;
-    return rowLabel.equals(val.getRowLabel())
-        && columnLabel.equals(val.getColumnLabel());
+
+    return super.equals(o);
   }
 
   @Override
