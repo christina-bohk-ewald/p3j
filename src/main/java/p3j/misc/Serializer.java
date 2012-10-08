@@ -41,6 +41,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import p3j.database.IP3MDatabase;
+import p3j.misc.math.Matrix;
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
@@ -501,15 +502,17 @@ public class Serializer {
 
     Map<ParameterInstance, ParameterInstance> paramInstances = matchParameterInstances(
         loadedProjection, newProjection, warnings);
-    Map<Set, Set> sets = saveSets(loadedProjection, newProjection,
-        paramInstances);
     Map<SetType, SetType> setTypes = saveSetTypes(loadedProjection,
-        newProjection, paramInstances, sets);
+        newProjection, paramInstances);
+    database.saveProjection(newProjection);
+    saveSets(loadedProjection, newProjection, paramInstances, setTypes,
+        database);
 
     // TODO: Make this visible to user
     for (String warning : warnings)
       SimSystem.report(Level.WARNING, warning);
 
+    database.saveProjection(newProjection);
     return newProjection;
   }
 
@@ -588,17 +591,54 @@ public class Serializer {
 
   private Map<SetType, SetType> saveSetTypes(ProjectionModel loadedProjection,
       ProjectionModel newProjection,
-      Map<ParameterInstance, ParameterInstance> paramInstances,
-      Map<Set, Set> sets) {
-    // TODO Auto-generated method stub
-    return null;
+      Map<ParameterInstance, ParameterInstance> paramInstances) {
+
+    Map<SetType, SetType> setTypes = new HashMap<>();
+
+    setTypes.put(loadedProjection.getDefaultSetType(),
+        newProjection.getDefaultSetType());
+
+    for (SetType setType : loadedProjection.getUserDefinedTypes()) {
+      SetType newSetType = newProjection.createSetType(setType.getName(),
+          setType.getDescription());
+      setTypes.put(setType, newSetType);
+      for (ParameterInstance paramInst : setType.getDefinedParameters()) {
+        ParameterInstance newParamInst = paramInstances.get(paramInst);
+        newSetType.addInstance(newParamInst);
+        newProjection.assignParameterInstance(newParamInst, newSetType, false);
+      }
+    }
+
+    return setTypes;
   }
 
-  private Map<Set, Set> saveSets(ProjectionModel loadedProjection,
+  private void saveSets(ProjectionModel loadedProjection,
       ProjectionModel newProjection,
-      Map<ParameterInstance, ParameterInstance> paramInstances) {
-    // TODO Auto-generated method stub
-    return null;
+      Map<ParameterInstance, ParameterInstance> paramInstances,
+      Map<SetType, SetType> setTypes, IP3MDatabase database) {
+
+    for (SetType setType : loadedProjection.getAllSetTypes()) {
+      SetType newSetType = setTypes.get(setType);
+      for (Set set : setType.getSets()) {
+        Set newSet = set != loadedProjection.getDefaultSet() ? newSetType
+            .createSet(set.getName(), set.getDescription(),
+                set.getProbability()) : newProjection.getDefaultSet();
+        for (ParameterInstance paramInst : setType.getDefinedParameters()) {
+          ParameterAssignmentSet paramAssignSet = set
+              .getParameterAssignments(paramInst);
+          for (ParameterAssignment paramAssign : paramAssignSet
+              .getAssignments()) {
+            ParameterAssignment newParamAssign = database
+                .newParameterAssignment(paramInstances.get(paramInst),
+                    paramAssign.getName(), paramAssign.getDescription(),
+                    paramAssign.getProbability(), paramAssign.getDeviation(),
+                    paramAssign.getMatrixValue());
+            newSet.addParameterAssignment(newParamAssign);
+          }
+        }
+      }
+    }
+
   }
 
 }
