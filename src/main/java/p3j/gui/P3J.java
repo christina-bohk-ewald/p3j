@@ -59,6 +59,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import p3j.database.DatabaseFactory;
@@ -644,27 +645,34 @@ public final class P3J extends JFrame {
 
     if (userReaction != JFileChooser.ERROR_OPTION
         && userReaction != JFileChooser.CANCEL_OPTION) {
-      File scenarioFile = this.scenarioFileChooser.getSelectedFile();
-
+      final File scenarioFile = this.scenarioFileChooser.getSelectedFile();
+      final P3J owner = this;
       if (scenarioFile != null && scenarioFile.exists()) {
-        try {
-          currentProjection = serializer.loadProjection(
-              scenarioFile.getAbsolutePath(),
-              DatabaseFactory.getDatabaseSingleton());
-          currentProjectionFile = scenarioFile.getAbsolutePath();
-          projTreePanel.setProjection(currentProjection);
-        } catch (IOException | ClassNotFoundException ex) {
-          GUI.printErrorMessage(this, "Error while opening scenario file.",
-              "An error occurred while attempting to load file from '"
-                  + scenarioFile.getAbsolutePath() + "': " + ex.getMessage(),
-              ex);
-        } catch (LoadedProjectionFormatException ex) {
-          GUI.printErrorMessage(
-              this,
-              "Error while loading projection into database.",
-              "An error occurred while attempting to load the projection:"
-                  + ex.getMessage(), ex);
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              currentProjection = serializer.loadProjection(
+                  scenarioFile.getAbsolutePath(),
+                  DatabaseFactory.getDatabaseSingleton());
+              currentProjectionFile = scenarioFile.getAbsolutePath();
+              projTreePanel.setProjection(currentProjection);
+            } catch (IOException | ClassNotFoundException ex) {
+              GUI.printErrorMessage(
+                  owner,
+                  "Error while opening scenario file.",
+                  "An error occurred while attempting to load file from '"
+                      + scenarioFile.getAbsolutePath() + "': "
+                      + ex.getMessage(), ex);
+            } catch (LoadedProjectionFormatException ex) {
+              GUI.printErrorMessage(owner,
+                  "Error while loading projection into database.",
+                  "An error occurred while attempting to load the projection:"
+                      + ex.getMessage(), ex);
+            }
+
+          }
+        });
       }
     }
   }
