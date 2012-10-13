@@ -23,6 +23,8 @@ import james.core.experiments.taskrunner.plugintype.TaskRunnerFactory;
 import james.core.parameters.ParameterBlock;
 import james.core.parameters.ParameterizedFactory;
 import james.core.processor.plugintype.ProcessorFactory;
+import james.core.util.logging.ApplicationLogger;
+import james.core.util.logging.ILogListener;
 import james.gui.application.SplashScreen;
 import james.gui.application.resource.IconManager;
 import james.gui.experiment.ExperimentExecutorThreadPool;
@@ -41,8 +43,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -428,6 +432,19 @@ public final class P3J extends JFrame {
    */
   private P3J() {
 
+    ApplicationLogger.addLogListener(new ILogListener() {
+      @Override
+      public void publish(LogRecord record) {
+        System.err.println("log: " + record.getMessage()); // TODO: Warning &
+                                                           // severe: show error
+                                                           // message
+      }
+
+      @Override
+      public void flush() {
+      }
+    });
+
     try {
       getConfigFile().readFile("./" + Misc.CONFIG_FILE);
     } catch (Exception ex) {
@@ -776,13 +793,17 @@ public final class P3J extends JFrame {
    */
   private void configureModelLocation(BaseExperiment baseExperiment) {
     try {
+      StringBuilder uri = new StringBuilder("db-p3j://localhost");
       DBConnectionData dbData = DatabaseFactory.getDbConnData();
-      String dbURL = DatabaseFactory.getDbConnData().getUrl();
-      SimSystem.report(Level.INFO, "Using database URL:" + dbURL);
-      dbURL = dbURL.substring(dbURL.indexOf('/')).substring(2);
-      baseExperiment.setModelLocation(new URI("db-p3j://" + dbData.getUser()
-          + ":" + dbData.getPassword() + "@" + dbURL + "?"
-          + currentProjection.getID()));
+      uri.append("?url=" + URLEncoder.encode(dbData.getUrl(), "UTF-8"));
+      for (String[] elem : new String[][] { { "user", dbData.getUser() },
+          { "password", dbData.getPassword() },
+          { "projId", currentProjection.getID() + "" },
+          /*{ "driver", dbData.getDriver() }*/ })
+        uri.append("&" + elem[0] + "=" + URLEncoder.encode(elem[1], "UTF-8"));
+      String uriString = uri.toString();
+      SimSystem.report(Level.INFO, "Using URI:" + uriString);
+      baseExperiment.setModelLocation(new URI(uriString));
     } catch (Exception ex) {
       SimSystem.report(Level.SEVERE, "Configuration of model location failed.",
           ex);
