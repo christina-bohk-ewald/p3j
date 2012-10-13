@@ -28,13 +28,13 @@ import p3j.pppm.ProjectionModel;
 import p3j.pppm.SymbolicProjectionModel;
 
 /**
- * Factory for reader/writer of PPPM files.
+ * Factory for reader of PPPM files.
  * 
  * @author Christina Bohk
  * @author Roland Ewald
  * 
  */
-public class PPPModelDatabaseReaderWriterFactory extends ModelReaderFactory {
+public class PPPModelDatabaseReaderFactory extends ModelReaderFactory {
 
 	/** Serialization ID. */
 	private static final long serialVersionUID = 2423298767414579313L;
