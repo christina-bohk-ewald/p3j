@@ -183,7 +183,7 @@ public final class P3J extends JFrame {
 
   /** Menu to load a scenario. */
   private final JMenuItem openProjectionMenu = new JMenuItem(
-      "Open/import projection...", KeyEvent.VK_O);
+      "Open projection...", KeyEvent.VK_O);
   {
     openProjectionMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
         ActionEvent.CTRL_MASK));
