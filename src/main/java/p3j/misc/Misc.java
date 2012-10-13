@@ -105,7 +105,7 @@ public final class Misc {
 	public static final String PREF_DB_USER = "Database User Name";
 
 	/** The key for the database password. */
-	public static final String PREF_DB_PWD = "Database Password";
+	public static final String PREF_DB_PWD = "Database Password (currently stored unencrpyted!)";
 
 	/** The key for the number of trials. */
 	public static final String PREF_NUM_TRIALS = "Number of Trials";
