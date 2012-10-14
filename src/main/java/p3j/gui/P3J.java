@@ -696,14 +696,19 @@ public final class P3J extends JFrame {
    *          the new projection model to be edited
    */
   public void setCurrentProjection(ProjectionModel newProjModel) {
+
     if (currentProjection != null) {
       DatabaseFactory.getDatabaseSingleton().saveProjection(currentProjection);
     }
+
     currentProjection = newProjModel;
     dbOverviewPanel.totalRefresh();
-    projTreePanel.setProjection(currentProjection);
-    resultsPanel.setProjection(currentProjection);
-    switchNavigationTreeTab(NavigationTreeTab.PROJECTION_OVERVIEW);
+
+    if (currentProjection != null) {
+      projTreePanel.setProjection(currentProjection);
+      resultsPanel.setProjection(currentProjection);
+      switchNavigationTreeTab(NavigationTreeTab.PROJECTION_OVERVIEW);
+    }
   }
 
   /**
@@ -891,11 +896,11 @@ public final class P3J extends JFrame {
    *          the model that has been deleted from the database
    */
   public void projectionDeleted(ProjectionModel deletedModel) {
-    if (currentProjection.equals(deletedModel)) {
-      switchNavigationTreeTab(NavigationTreeTab.DB_OVERVIEW);
-      projTreePanel.setProjection(null);
-    }
     dbOverviewPanel.totalRefresh();
+    if (currentProjection != deletedModel) {
+      setCurrentProjection(null);
+      switchNavigationTreeTab(NavigationTreeTab.DB_OVERVIEW);
+    }
   }
 
   /**
