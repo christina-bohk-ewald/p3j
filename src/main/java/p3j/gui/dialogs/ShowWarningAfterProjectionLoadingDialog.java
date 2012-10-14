@@ -80,7 +80,8 @@ public class ShowWarningAfterProjectionLoadingDialog extends JDialog {
     setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
     GUI.centerOnScreen(this);
     contentPanel = new JPanel();
-    contentPanel.setLayout(new BorderLayout());
+    contentPanel.setLayout(new BorderLayout(GUI.STD_LAYOUT_GAP,
+        GUI.STD_LAYOUT_GAP));
     JTextArea explanation = new JTextArea(
         "Due to parameter name differences between versions, some parameter instances have been matched via name similarity to resolve ambiguity.\n"
             + "Please check if the matching is correct:");

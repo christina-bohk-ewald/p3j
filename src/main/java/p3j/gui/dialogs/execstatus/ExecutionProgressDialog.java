@@ -18,7 +18,6 @@ package p3j.gui.dialogs.execstatus;
 import james.core.base.IEntity;
 import james.core.experiments.tasks.IComputationTask;
 import james.core.observe.IObserver;
-import james.gui.utils.BasicUtilities;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -52,6 +51,9 @@ public class ExecutionProgressDialog extends JDialog implements IObserver {
   /** Serialization ID. */
   private static final long serialVersionUID = 6990212654769873627L;
 
+  /** The preferred height of the progress bar. */
+  public static final int PREFERRED_HEIGHT_PROGBAR = 40;
+
   /** Width of the dialog. */
   private static final int DIALOG_WIDTH = 400;
 
@@ -63,9 +65,6 @@ public class ExecutionProgressDialog extends JDialog implements IObserver {
 
   /** The font size of the status message. */
   private static final int FONT_SIZE_STATUS_MSG = 20;
-
-  /** The preffered height of the progress bar. */
-  private static final int PREFERRED_HEIGHT_PROGBAR = 40;
 
   /** The progress bar. */
   private final JProgressBar progressBar;
@@ -170,15 +169,7 @@ public class ExecutionProgressDialog extends JDialog implements IObserver {
     progressBar.setPreferredSize(new Dimension(0, PREFERRED_HEIGHT_PROGBAR));
     getContentPane().add(content);
 
-    final ExecutionProgressDialog thisDialog = this;
-
-    BasicUtilities.invokeLaterOnEDT(new Runnable() {
-      @Override
-      public void run() {
-        setVisible(true);
-        BasicUtilities.repaintOnEDT(thisDialog);
-      }
-    });
+    GUI.showModalDialog(this);
   }
 
   @Override

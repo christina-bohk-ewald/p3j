@@ -43,6 +43,8 @@ import java.util.zip.GZIPOutputStream;
 import p3j.database.IP3MDatabase;
 import p3j.gui.P3J;
 import p3j.gui.dialogs.ShowWarningAfterProjectionLoadingDialog;
+import p3j.gui.dialogs.SimpleProgressDialog;
+import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
@@ -666,15 +668,23 @@ public class Serializer {
       Map<ParameterInstance, ParameterInstance> paramInstances,
       Map<SetType, SetType> setTypes, IP3MDatabase database) {
 
+    int numAssignments = loadedProjection.countNumberOfParameterAssignments();
+    final SimpleProgressDialog progress = new SimpleProgressDialog(
+        P3J.getInstance(), "Loading projection '" + loadedProjection.getName()
+            + "'", "Loading " + numAssignments + " parameter assignments:",
+        numAssignments);
+
     for (SetType loadedSetType : loadedProjection.getAllSetTypes()) {
       SetType newSetType = setTypes.get(loadedSetType);
       for (Set loadedSet : loadedSetType.getSets()) {
         Set newSet = loadedSet != loadedProjection.getDefaultSet() ? newSetType
             .createSet(loadedSet.getName(), loadedSet.getDescription(),
                 loadedSet.getProbability()) : newProjection.getDefaultSet();
-        saveSet(loadedSet, newSet, loadedSetType, paramInstances, database);
+        saveSet(loadedSet, newSet, loadedSetType, paramInstances, database,
+            progress);
       }
     }
+    progress.taskFinished();
   }
 
   /**
@@ -690,10 +700,12 @@ public class Serializer {
    *          the mapping from old to new parameter instances
    * @param database
    *          the database
+   * @param progress
+   *          the dialog to show the progress
    */
   private void saveSet(Set loadedSet, Set newSet, SetType loadedSetType,
       Map<ParameterInstance, ParameterInstance> paramInstances,
-      IP3MDatabase database) {
+      IP3MDatabase database, SimpleProgressDialog progress) {
     for (ParameterInstance paramInst : loadedSetType.getDefinedParameters()) {
       ParameterAssignmentSet paramAssignSet = loadedSet
           .getParameterAssignments(paramInst);
@@ -703,6 +715,8 @@ public class Serializer {
             paramAssign.getDescription(), paramAssign.getProbability(),
             paramAssign.getDeviation(), paramAssign.getMatrixValue());
         newSet.addParameterAssignment(newParamAssign);
+        progress.incrementProgress("Assignment '" + newParamAssign.getName()
+            + "'");
       }
     }
   }
