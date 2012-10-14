@@ -41,7 +41,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import p3j.database.IP3MDatabase;
-import p3j.misc.math.Matrix;
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;

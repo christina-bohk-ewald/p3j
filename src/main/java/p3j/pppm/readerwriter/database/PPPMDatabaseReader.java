@@ -20,15 +20,13 @@ import james.core.data.DBConnectionData;
 import james.core.data.model.IModelReader;
 import james.core.model.IModel;
 import james.core.model.symbolic.ISymbolicModel;
-import james.core.util.misc.Pair;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 import p3j.database.IP3MDatabase;
 import p3j.database.hibernate.P3MDatabase;
+import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.SymbolicProjectionModel;
 
@@ -40,30 +38,47 @@ import p3j.pppm.SymbolicProjectionModel;
  */
 public class PPPMDatabaseReader implements IModelReader {
 
+  /** The data about the connection to the database. */
+  private final DBConnectionData connData;
+
+  /** The ID of the projection to be loaded. */
+  private final int projID;
+
+  /**
+   * Instantiates a new PPPM database reader.
+   * 
+   * @param connectionData
+   *          the connection data
+   * @param projectionID
+   *          the projection id
+   */
+  public PPPMDatabaseReader(DBConnectionData connectionData,
+      Integer projectionID) {
+    connData = connectionData;
+    projID = projectionID;
+  }
+
   @Override
   public ISymbolicModel<?> read(URI ident) {
 
     ProjectionModel model = null;
 
     try {
-      // Analyse model location, open DB connection
-      Pair<DBConnectionData, Integer> readerInfo = resolveModelDBURI(ident);
       IP3MDatabase sqlDatabase = new P3MDatabase();
-      sqlDatabase.init(readerInfo.getFirstValue());
+      sqlDatabase.init(connData);
       try {
         sqlDatabase.open();
-        model = sqlDatabase.getProjectionByID(readerInfo.getSecondValue());
+        model = sqlDatabase.getProjectionByID(projID);
       } catch (Exception ex) {
         SimSystem.report(ex);
         return null;
       }
       if (model == null) {
-        throw new IllegalArgumentException("PPP Model with ID '"
-            + readerInfo.getSecondValue() + "' was not found.");
+        throw new IllegalArgumentException("PPP Model with ID '" + projID
+            + "' was not found.");
       }
     } catch (Throwable t) {
-      t.printStackTrace();
-      SimSystem.report(Level.SEVERE, "Could not load model", t);
+      GUI.printErrorMessage("Could not load model", t);
     }
     return new SymbolicProjectionModel(model);
   }
@@ -73,29 +88,4 @@ public class PPPMDatabaseReader implements IModelReader {
     return (IModel) read(source).getAsDataStructure();
   }
 
-  /**
-   * Returns important information for the reader, extracted from the
-   * {@link URI}.
-   * 
-   * @param modelURI
-   *          the URI of the model
-   * @return a tuple containing DB connection information and the ID of the
-   *         {@link ProjectionModel} to be read
-   */
-  protected static Pair<DBConnectionData, Integer> resolveModelDBURI(
-      URI modelURI) {
-    String[] queryElems = modelURI.getQuery().split("&");
-    Map<String, String> queryData = new HashMap<>();
-    for (String queryElement : queryElems) {
-      String[] keyValPair = queryElement.split("=");
-      queryData.put(keyValPair[0], keyValPair.length < 2 ? "" : keyValPair[1]);
-    }
-    String dbURL = modelURI.getHost() + modelURI.getPath();
-    DBConnectionData dbConnData = new DBConnectionData(queryData.get("url"),
-        queryData.get("user"), queryData.get("password"), null); 
-    // TODO: unique constants, move creation here
-    // as well!
-    return new Pair<DBConnectionData, Integer>(dbConnData,
-        Integer.parseInt(queryData.get("projId")));
-  }
 }

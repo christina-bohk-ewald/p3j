@@ -16,15 +16,13 @@
 package p3j.gui;
 
 import james.SimSystem;
-import james.core.data.DBConnectionData;
 import james.core.experiments.BaseExperiment;
+import james.core.experiments.RunInformation;
 import james.core.experiments.taskrunner.parallel.ParallelComputationTaskRunnerFactory;
 import james.core.experiments.taskrunner.plugintype.TaskRunnerFactory;
 import james.core.parameters.ParameterBlock;
 import james.core.parameters.ParameterizedFactory;
 import james.core.processor.plugintype.ProcessorFactory;
-import james.core.util.logging.ApplicationLogger;
-import james.core.util.logging.ILogListener;
 import james.gui.application.SplashScreen;
 import james.gui.application.resource.IconManager;
 import james.gui.experiment.ExperimentExecutorThreadPool;
@@ -43,10 +41,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.net.URLEncoder;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -84,6 +81,7 @@ import p3j.misc.Misc;
 import p3j.misc.Serializer;
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.readerwriter.database.PPPModelDatabaseReaderFactory;
 import p3j.simulation.ExecutionMode;
 import p3j.simulation.PPPMProcessorFactory;
 import p3j.simulation.assignments.plugintype.ParamAssignmentGenFactory;
@@ -432,27 +430,13 @@ public final class P3J extends JFrame {
    */
   private P3J() {
 
-    ApplicationLogger.addLogListener(new ILogListener() {
-      @Override
-      public void publish(LogRecord record) {
-        System.err.println("log: " + record.getMessage()); // TODO: Warning &
-                                                           // severe: show error
-                                                           // message
-      }
-
-      @Override
-      public void flush() {
-      }
-    });
-
     try {
       getConfigFile().readFile("./" + Misc.CONFIG_FILE);
     } catch (Exception ex) {
-      SimSystem.report(ex);
       getConfigFile().setFileName("./" + Misc.CONFIG_FILE);
       GUI.printErrorMessage(this, "Error while loading configuration file.",
           "An error occurred while attempting to read the file '"
-              + Misc.CONFIG_FILE + "' from the working directory:" + ex);
+              + Misc.CONFIG_FILE + "' from the working directory:" + ex, ex);
     }
 
     updateFromExecConfig();
@@ -738,7 +722,18 @@ public final class P3J extends JFrame {
     configureSimulator(baseExperiment);
     configureMultiThreading(baseExperiment);
     ExperimentExecutorThreadPool.getInstance().getExecutor()
-        .execute(new ExperimentThread(baseExperiment));
+        .execute(new ExperimentThread(baseExperiment) {
+          @Override
+          protected List<List<RunInformation>> doInBackground() {
+            List<List<RunInformation>> results = null;
+            try {
+              results = super.doInBackground();
+            } catch (Throwable t) {
+              GUI.printErrorMessage("Error executing model", t);
+            }
+            return results;
+          }
+        });
   }
 
   /**
@@ -793,20 +788,14 @@ public final class P3J extends JFrame {
    */
   private void configureModelLocation(BaseExperiment baseExperiment) {
     try {
-      StringBuilder uri = new StringBuilder("db-p3j://localhost");
-      DBConnectionData dbData = DatabaseFactory.getDbConnData();
-      uri.append("?url=" + URLEncoder.encode(dbData.getUrl(), "UTF-8"));
-      for (String[] elem : new String[][] { { "user", dbData.getUser() },
-          { "password", dbData.getPassword() },
-          { "projId", currentProjection.getID() + "" },
-          /*{ "driver", dbData.getDriver() }*/ })
-        uri.append("&" + elem[0] + "=" + URLEncoder.encode(elem[1], "UTF-8"));
-      String uriString = uri.toString();
-      SimSystem.report(Level.INFO, "Using URI:" + uriString);
-      baseExperiment.setModelLocation(new URI(uriString));
+      baseExperiment.setModelLocation(new URI(
+          PPPModelDatabaseReaderFactory.DEFAULT_URI));
+      baseExperiment.setModelRWParameters(PPPModelDatabaseReaderFactory
+          .createReaderParams(DatabaseFactory.getDbConnData(),
+              currentProjection.getID()));
     } catch (Exception ex) {
-      SimSystem.report(Level.SEVERE, "Configuration of model location failed.",
-          ex);
+      GUI.printErrorMessage(this, "Could not configure model location",
+          "Configuration of model reader failed.", ex);
     }
   }
 

@@ -15,12 +15,14 @@
  */
 package p3j.pppm.readerwriter.database;
 
+import james.core.data.DBConnectionData;
 import james.core.data.model.IModelReader;
 import james.core.data.model.read.plugintype.IMIMEType;
 import james.core.data.model.read.plugintype.ModelReaderFactory;
 import james.core.model.IModel;
 import james.core.model.symbolic.ISymbolicModel;
 import james.core.parameters.ParameterBlock;
+import james.core.util.misc.Pair;
 
 import java.net.URI;
 
@@ -36,32 +38,100 @@ import p3j.pppm.SymbolicProjectionModel;
  */
 public class PPPModelDatabaseReaderFactory extends ModelReaderFactory {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 2423298767414579313L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 2423298767414579313L;
 
-	@Override
-	public IModelReader create(ParameterBlock params) {
-		return new PPPMDatabaseReader();
-	}
+  /** Scheme for all supported database URIs. */
+  private static final String GENERAL_DB_URI_SCHEME = "db-p3j";
 
-	@Override
-	public boolean supportsModel(IModel model) {
-		return model instanceof ProjectionModel;
-	}
+  /**
+   * The actual parameters of the {@link PPPMDatabaseReader} are encoded in the
+   * query of this default URL.
+   */
+  public static final String DEFAULT_URI = GENERAL_DB_URI_SCHEME
+      + "://localhost";
 
-	@Override
-	public boolean supportsModel(ISymbolicModel<?> model) {
-		return model instanceof SymbolicProjectionModel;
-	}
+  /** The parameter block name to store the url in. */
+  private static final String KEY_CONN_DATA_URL = "url";
 
-	@Override
-	public boolean supportsURI(URI uri) {
-		return uri.getScheme().equals("db-p3j");
-	}
+  /** The parameter block name to store the user name for the database in. */
+  private static final String KEY_CONN_DATA_USER = "user";
 
-	@Override
-	public boolean supportsMIMEType(IMIMEType mime) {
-		return false;
-	}
+  /** The parameter block name to store the password for the database in. */
+  private static final String KEY_CONN_DATA_PWD = "pwd";
+
+  /**
+   * The parameter block name to store the name of the database driver class in.
+   */
+  private static final String KEY_CONN_DATA_DRIVER = "driver";
+
+  /** The parameter block name to store the projection ID in. */
+  private static final String KEY_PROJECT_ID = "projId";
+
+  @Override
+  public IModelReader create(ParameterBlock params) {
+    Pair<DBConnectionData, Integer> readerParams = retrieveReaderParams(params);
+    return new PPPMDatabaseReader(readerParams.getFirstValue(),
+        readerParams.getSecondValue());
+  }
+
+  @Override
+  public boolean supportsModel(IModel model) {
+    return model instanceof ProjectionModel;
+  }
+
+  @Override
+  public boolean supportsModel(ISymbolicModel<?> model) {
+    return model instanceof SymbolicProjectionModel;
+  }
+
+  @Override
+  public boolean supportsURI(URI uri) {
+    return uri.getScheme().equals(GENERAL_DB_URI_SCHEME);
+  }
+
+  @Override
+  public boolean supportsMIMEType(IMIMEType mime) {
+    return false;
+  }
+
+  /**
+   * Creates a parameter block that contains all relevant data for a database
+   * model reader.
+   * 
+   * @param connData
+   *          the connection data
+   * @param projectionID
+   *          the projection id
+   * @return the parameter block all relevant parameters for the database model
+   *         reader
+   */
+  public static ParameterBlock createReaderParams(DBConnectionData connData,
+      int projectionID) {
+    ParameterBlock readerParams = new ParameterBlock();
+    readerParams.addSubBlock(KEY_CONN_DATA_URL, connData.getUrl());
+    readerParams.addSubBlock(KEY_CONN_DATA_USER, connData.getUser());
+    readerParams.addSubBlock(KEY_CONN_DATA_PWD, connData.getPassword());
+    readerParams.addSubBlock(KEY_CONN_DATA_DRIVER, connData.getDriver());
+    readerParams.addSubBlock(KEY_PROJECT_ID, projectionID);
+    return readerParams;
+  }
+
+  /**
+   * Retrieve reader parameters from parameter block.
+   * 
+   * @param params
+   *          the parameter block
+   * @return the connection data and the projection id
+   */
+  public static Pair<DBConnectionData, Integer> retrieveReaderParams(
+      ParameterBlock params) {
+    return new Pair<DBConnectionData, Integer>(new DBConnectionData(
+        params.getSubBlockValue(KEY_CONN_DATA_URL, ""),
+        params.getSubBlockValue(KEY_CONN_DATA_USER, ""),
+        params.getSubBlockValue(KEY_CONN_DATA_PWD, ""),
+        params.getSubBlockValue(KEY_CONN_DATA_DRIVER, "")),
+        params.getSubBlockValue(KEY_PROJECT_ID, -1));
+  }
 
 }

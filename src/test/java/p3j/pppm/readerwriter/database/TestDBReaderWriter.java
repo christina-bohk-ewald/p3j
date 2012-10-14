@@ -39,16 +39,25 @@ public class TestDBReaderWriter extends TestCase {
    * @throws URISyntaxException
    *           if test URI has a wrong syntax
    */
-  public void testURIInterpretation() throws URISyntaxException {
+  public void testURIInterpretation() throws Exception {
+
     String dbUser = "root";
     String dbPasswd = "pass";
-    Pair<DBConnectionData, Integer> modelReaderInfo = PPPMDatabaseReader
-        .resolveModelDBURI(new URI("db-p3m://" + dbUser + ":" + dbPasswd
-            + "@localhost/pppm_db?12"));
-    assertEquals(12, modelReaderInfo.getSecondValue().intValue());
+    String dbURL = "jdbc:mysql://localhost/pppm_db";
+    String dbDrv = "some.Driver";
+    int projectionID = 12;
+
+    Pair<DBConnectionData, Integer> modelReaderInfo = PPPModelDatabaseReaderFactory
+        .retrieveReaderParams((PPPModelDatabaseReaderFactory
+            .createReaderParams(new DBConnectionData(dbURL, dbUser, dbPasswd,
+                dbDrv), projectionID)));
+
     DBConnectionData dbConn = modelReaderInfo.getFirstValue();
     assertEquals(dbUser, dbConn.getUser());
     assertEquals(dbPasswd, dbConn.getPassword());
-    assertEquals("jdbc:mysql://localhost/pppm_db", dbConn.getUrl());
+    assertEquals(dbURL, dbConn.getUrl());
+    assertEquals(dbDrv, dbConn.getDriver());
+
+    assertEquals(projectionID, modelReaderInfo.getSecondValue().intValue());
   }
 }
