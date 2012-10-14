@@ -22,7 +22,6 @@ import james.core.util.StopWatch;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -34,7 +33,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
-import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;
 import p3j.database.IProjectionResultsIterator;
 import p3j.experiment.results.ResultsOfTrial;
@@ -72,7 +70,7 @@ public class P3MDatabase implements IP3MDatabase {
   private boolean alwaysFlush = true;
 
   /** Hibernate configuration. */
-  private Configuration config;
+  private final Configuration config;
 
   /** Factory to create sessions. */
   private SessionFactory sessionFactory;
@@ -111,10 +109,10 @@ public class P3MDatabase implements IP3MDatabase {
 
   @Override
   public void init(DBConnectionData dbConn) {
-    config.setProperty("hibernate.connection.username", dbConn.getUser())
+    getConfig().setProperty("hibernate.connection.username", dbConn.getUser())
         .setProperty("hibernate.connection.password", dbConn.getPassword())
         .setProperty("hibernate.connection.url", dbConn.getUrl());
-    sessionFactory = config.buildSessionFactory();
+    sessionFactory = getConfig().buildSessionFactory();
   }
 
   @Override
@@ -127,7 +125,7 @@ public class P3MDatabase implements IP3MDatabase {
   @Override
   public void clear() {
     SimSystem.report(Level.INFO, "CLEARING DB...");
-    SchemaExport export = new SchemaExport(config);
+    SchemaExport export = new SchemaExport(getConfig());
     export.create(true, true);
   }
 
@@ -567,5 +565,9 @@ public class P3MDatabase implements IP3MDatabase {
    */
   public static void setHibernateConfigFile(String hibernateConfigFile) {
     P3MDatabase.hibernateConfigFile = hibernateConfigFile;
+  }
+
+  public Configuration getConfig() {
+    return config;
   }
 }
