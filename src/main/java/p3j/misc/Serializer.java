@@ -41,6 +41,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import p3j.database.IP3MDatabase;
+import p3j.gui.P3J;
+import p3j.gui.dialogs.ShowWarningAfterProjectionLoadingDialog;
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
@@ -507,11 +509,12 @@ public class Serializer {
     saveSets(loadedProjection, newProjection, paramInstances, setTypes,
         database);
 
-    // TODO: Make this visible to user
-    for (String warning : warnings)
-      SimSystem.report(Level.WARNING, warning);
-
     database.saveProjection(newProjection);
+
+    if (!warnings.isEmpty())
+      new ShowWarningAfterProjectionLoadingDialog(P3J.getInstance(), warnings)
+          .setVisible(true);
+
     return newProjection;
   }
 
