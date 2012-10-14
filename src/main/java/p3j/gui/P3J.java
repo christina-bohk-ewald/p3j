@@ -808,7 +808,7 @@ public final class P3J extends JFrame {
   public static void main(String[] argv) {
 
     showSplashScreen();
-    Locale.setDefault(Locale.US);
+    configureEnglishAsUILanguage();
 
     processCmdLineArgs(argv);
 
@@ -825,6 +825,18 @@ public final class P3J extends JFrame {
     splashScreen.setVisible(false);
     GUI.centerOnScreen(p3j);
     p3j.setVisible(true);
+  }
+
+  /**
+   * Configures English as UI language. Settings for localized names of default
+   * buttons are overridden.
+   */
+  private static void configureEnglishAsUILanguage() {
+    Locale.setDefault(Locale.US);
+    UIManager.put("OptionPane.yesButtonText", "Yes");
+    UIManager.put("OptionPane.noButtonText", "No");
+    UIManager.put("OptionPane.okButtonText", "OK");
+    UIManager.put("OptionPane.cancelButtonText", "Cancel");
   }
 
   /**
