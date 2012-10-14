@@ -558,36 +558,69 @@ public class Serializer {
         throw new LoadedProjectionFormatException(
             "No match found for parameter instance " + newInstance);
 
-      // Sort potential matches by smallest Levenshtein distance to parameter
-      // name
-      ParameterInstance bestMatch = Collections.min(matchCandidates,
-          new Comparator<ParameterInstance>() {
-            final String targetName = newInstance.getParameter().getName();
-
-            @Override
-            public int compare(ParameterInstance inst1, ParameterInstance inst2) {
-              return Integer.compare(Strings.getLevenshteinDistance(inst1
-                  .getParameter().getName(), targetName), Strings
-                  .getLevenshteinDistance(inst2.getParameter().getName(),
-                      targetName));
-            }
-          });
-
-      matching.put(bestMatch, newInstance);
-      System.err.println("Matched '" + bestMatch + "' to '" + newInstance
-          + "'.");
-      if (!bestMatch.getParameter().getName()
-          .equals(newInstance.getParameter().getName()))
-        warnings.add("Could not find perfect match for parameter '"
-            + newInstance.getParameter() + "', using best match '"
-            + bestMatch.getParameter());
-
-      oldInstances.remove(bestMatch);
+      oldInstances.remove(matchParameterInstances(matching, newInstance,
+          matchCandidates, warnings));
     }
 
     return matching;
   }
 
+  /**
+   * Match parameter instances. Sort potential matches by smallest Levenshtein
+   * distance to parameter name. If there is no exact matching, a line is added
+   * to the warnings.
+   * 
+   * @param matching
+   *          the mapping from old to new parameter instance, representing the
+   *          current matching
+   * @param targetInstance
+   *          the parameter instance to be matched
+   * @param matchCandidates
+   *          the match candidates that have been found
+   * @param warnings
+   *          the list of all warnings
+   */
+  private ParameterInstance matchParameterInstances(
+      Map<ParameterInstance, ParameterInstance> matching,
+      final ParameterInstance targetInstance,
+      List<ParameterInstance> matchCandidates, List<String> warnings) {
+
+    ParameterInstance bestMatch = Collections.min(matchCandidates,
+        new Comparator<ParameterInstance>() {
+          final String targetName = targetInstance.getParameter().getName();
+
+          @Override
+          public int compare(ParameterInstance inst1, ParameterInstance inst2) {
+            return Integer.compare(Strings.getLevenshteinDistance(inst1
+                .getParameter().getName(), targetName), Strings
+                .getLevenshteinDistance(inst2.getParameter().getName(),
+                    targetName));
+          }
+        });
+
+    matching.put(bestMatch, targetInstance);
+    SimSystem.report(Level.INFO, "Matched '" + bestMatch + "' to '"
+        + targetInstance + "'.");
+    if (!bestMatch.getParameter().getName()
+        .equals(targetInstance.getParameter().getName()))
+      warnings.add("Could not find perfect match for parameter '"
+          + targetInstance.getParameter() + "', using best match '"
+          + bestMatch.getParameter());
+
+    return bestMatch;
+  }
+
+  /**
+   * Save set types.
+   * 
+   * @param loadedProjection
+   *          the loaded projection
+   * @param newProjection
+   *          the new projection
+   * @param paramInstances
+   *          the mapping from old to new parameter instances
+   * @return the mapping from old to new set types
+   */
   private Map<SetType, SetType> saveSetTypes(ProjectionModel loadedProjection,
       ProjectionModel newProjection,
       Map<ParameterInstance, ParameterInstance> paramInstances) {
@@ -611,33 +644,64 @@ public class Serializer {
     return setTypes;
   }
 
+  /**
+   * Save sets.
+   * 
+   * @param loadedProjection
+   *          the loaded projection
+   * @param newProjection
+   *          the new projection
+   * @param paramInstances
+   *          the mapping from old to new parameter instances
+   * @param setTypes
+   *          the mapping from old to new set types
+   * @param database
+   *          the database
+   */
   private void saveSets(ProjectionModel loadedProjection,
       ProjectionModel newProjection,
       Map<ParameterInstance, ParameterInstance> paramInstances,
       Map<SetType, SetType> setTypes, IP3MDatabase database) {
 
-    for (SetType setType : loadedProjection.getAllSetTypes()) {
-      SetType newSetType = setTypes.get(setType);
-      for (Set set : setType.getSets()) {
-        Set newSet = set != loadedProjection.getDefaultSet() ? newSetType
-            .createSet(set.getName(), set.getDescription(),
-                set.getProbability()) : newProjection.getDefaultSet();
-        for (ParameterInstance paramInst : setType.getDefinedParameters()) {
-          ParameterAssignmentSet paramAssignSet = set
-              .getParameterAssignments(paramInst);
-          for (ParameterAssignment paramAssign : paramAssignSet
-              .getAssignments()) {
-            ParameterAssignment newParamAssign = database
-                .newParameterAssignment(paramInstances.get(paramInst),
-                    paramAssign.getName(), paramAssign.getDescription(),
-                    paramAssign.getProbability(), paramAssign.getDeviation(),
-                    paramAssign.getMatrixValue());
-            newSet.addParameterAssignment(newParamAssign);
-          }
-        }
+    for (SetType loadedSetType : loadedProjection.getAllSetTypes()) {
+      SetType newSetType = setTypes.get(loadedSetType);
+      for (Set loadedSet : loadedSetType.getSets()) {
+        Set newSet = loadedSet != loadedProjection.getDefaultSet() ? newSetType
+            .createSet(loadedSet.getName(), loadedSet.getDescription(),
+                loadedSet.getProbability()) : newProjection.getDefaultSet();
+        saveSet(loadedSet, newSet, loadedSetType, paramInstances, database);
       }
     }
+  }
 
+  /**
+   * Save single set.
+   * 
+   * @param loadedSet
+   *          the loaded set
+   * @param newSet
+   *          the new set
+   * @param loadedSetType
+   *          the set type
+   * @param paramInstances
+   *          the mapping from old to new parameter instances
+   * @param database
+   *          the database
+   */
+  private void saveSet(Set loadedSet, Set newSet, SetType loadedSetType,
+      Map<ParameterInstance, ParameterInstance> paramInstances,
+      IP3MDatabase database) {
+    for (ParameterInstance paramInst : loadedSetType.getDefinedParameters()) {
+      ParameterAssignmentSet paramAssignSet = loadedSet
+          .getParameterAssignments(paramInst);
+      for (ParameterAssignment paramAssign : paramAssignSet.getAssignments()) {
+        ParameterAssignment newParamAssign = database.newParameterAssignment(
+            paramInstances.get(paramInst), paramAssign.getName(),
+            paramAssign.getDescription(), paramAssign.getProbability(),
+            paramAssign.getDeviation(), paramAssign.getMatrixValue());
+        newSet.addParameterAssignment(newParamAssign);
+      }
+    }
   }
 
 }
