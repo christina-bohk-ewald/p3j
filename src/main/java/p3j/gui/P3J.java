@@ -653,11 +653,11 @@ public final class P3J extends JFrame {
           @Override
           public void run() {
             try {
-              currentProjection = serializer.loadProjection(
+              ProjectionModel loadedModel = serializer.loadProjection(
                   scenarioFile.getAbsolutePath(),
                   DatabaseFactory.getDatabaseSingleton());
               currentProjectionFile = scenarioFile.getAbsolutePath();
-              projTreePanel.setProjection(currentProjection);
+              setCurrentProjection(loadedModel);
             } catch (IOException | ClassNotFoundException ex) {
               GUI.printErrorMessage(
                   owner,
@@ -700,6 +700,7 @@ public final class P3J extends JFrame {
       DatabaseFactory.getDatabaseSingleton().saveProjection(currentProjection);
     }
     currentProjection = newProjModel;
+    dbOverviewPanel.totalRefresh();
     projTreePanel.setProjection(currentProjection);
     resultsPanel.setProjection(currentProjection);
     switchNavigationTreeTab(NavigationTreeTab.PROJECTION_OVERVIEW);
