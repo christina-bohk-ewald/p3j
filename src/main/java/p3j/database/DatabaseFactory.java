@@ -15,10 +15,18 @@
  */
 package p3j.database;
 
-import org.hibernate.cfg.Configuration;
-
 import james.SimSystem;
 import james.core.data.DBConnectionData;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.logging.Level;
+
+import org.hibernate.cfg.Configuration;
+
 import p3j.database.hibernate.P3MDatabase;
 import p3j.misc.Misc;
 import p3j.misc.gui.GUI;
@@ -33,6 +41,18 @@ import p3j.misc.gui.GUI;
  * 
  */
 public final class DatabaseFactory {
+
+  /** The hibernate property to read out the dialect that is used. */
+  private static final String HIBERNATE_DIALECT_PROPERTY = "dialect";
+
+  /** The MySQL dialect supported for specific optimizations. */
+  private static final String HIBERNATE_MYSQL_DIALECT = "org.hibernate.dialect.MySQL5Dialect";
+
+  /**
+   * The name of the index that is manually created for the 'matrices' table in
+   * case a MySQL database is used.
+   */
+  private static final String MYSQL_MATRIX_INDEX_NAME = "hash_index";
 
   /**
    * This class should not be instantiated.
@@ -68,7 +88,7 @@ public final class DatabaseFactory {
     database.init(dbConnData);
     try {
       database.open();
-      attemptDBSpecificOptimizations(database.getConfig());
+      attemptDBSpecificOptimizations(database.getConfig(), dbConnData);
     } catch (Exception ex) {
       SimSystem.report(ex);
     }
@@ -83,15 +103,48 @@ public final class DatabaseFactory {
    * 
    * @param config
    *          the hibernate configuration
+   * @param connData
+   *          the connection data
    */
-  private static void attemptDBSpecificOptimizations(Configuration config) {
-    // TODO: add strings as constants, make this easier in the preferences
-    // dialog
-    if (config.getProperty("dialect").equals(
-        "org.hibernate.dialect.MySQL5Dialect")) {
-      // TODO: open JDBC connection and add index on matrices ID+hash
+  private static void attemptDBSpecificOptimizations(Configuration config,
+      DBConnectionData connData) {
+    if (config.getProperty(HIBERNATE_DIALECT_PROPERTY).equals(
+        HIBERNATE_MYSQL_DIALECT)) {
+      createMatrixIndex(connData);
     }
+  }
 
+  /**
+   * Creates an index on the matrix table of a MySQL database schema (unless it
+   * already exists). The index is defined on the id (pk) and the hash code, to
+   * make retrieving matrices with certain hash codes faster.
+   * 
+   * @param connData
+   *          the database connection data
+   */
+  private static void createMatrixIndex(DBConnectionData connData) {
+
+    Properties connectionProps = new Properties();
+    connectionProps.put("user", connData.getUser());
+    connectionProps.put("password", connData.getPassword());
+
+    try (Connection conn = DriverManager.getConnection(dbConnData.getUrl(),
+        connectionProps)) {
+      ResultSet rs = conn.createStatement().executeQuery(
+          "SHOW INDEX FROM matrices WHERE KEY_NAME = '"
+              + MYSQL_MATRIX_INDEX_NAME + "'");
+      if (!rs.first()) {
+        SimSystem.report(Level.INFO, "Attempting to create index '"
+            + MYSQL_MATRIX_INDEX_NAME + "'");
+        conn.createStatement()
+            .executeUpdate(
+                "CREATE INDEX " + MYSQL_MATRIX_INDEX_NAME
+                    + " ON matrices(ID,hash)");
+        SimSystem.report(Level.INFO, "Index creation successful.");
+      }
+    } catch (SQLException e) {
+      SimSystem.report(e);
+    }
   }
 
   /**
