@@ -16,8 +16,8 @@
 package p3j.gui;
 
 import james.SimSystem;
-import james.core.data.DBConnectionData;
 import james.core.experiments.BaseExperiment;
+import james.core.experiments.RunInformation;
 import james.core.experiments.taskrunner.parallel.ParallelComputationTaskRunnerFactory;
 import james.core.experiments.taskrunner.plugintype.TaskRunnerFactory;
 import james.core.parameters.ParameterBlock;
@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -59,6 +60,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import p3j.database.DatabaseFactory;
@@ -79,6 +81,7 @@ import p3j.misc.Misc;
 import p3j.misc.Serializer;
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.readerwriter.database.PPPModelDatabaseReaderFactory;
 import p3j.simulation.ExecutionMode;
 import p3j.simulation.PPPMProcessorFactory;
 import p3j.simulation.assignments.plugintype.ParamAssignmentGenFactory;
@@ -430,11 +433,10 @@ public final class P3J extends JFrame {
     try {
       getConfigFile().readFile("./" + Misc.CONFIG_FILE);
     } catch (Exception ex) {
-      SimSystem.report(ex);
       getConfigFile().setFileName("./" + Misc.CONFIG_FILE);
       GUI.printErrorMessage(this, "Error while loading configuration file.",
           "An error occurred while attempting to read the file '"
-              + Misc.CONFIG_FILE + "' from the working directory:" + ex);
+              + Misc.CONFIG_FILE + "' from the working directory:" + ex, ex);
     }
 
     updateFromExecConfig();
@@ -644,27 +646,34 @@ public final class P3J extends JFrame {
 
     if (userReaction != JFileChooser.ERROR_OPTION
         && userReaction != JFileChooser.CANCEL_OPTION) {
-      File scenarioFile = this.scenarioFileChooser.getSelectedFile();
-
+      final File scenarioFile = this.scenarioFileChooser.getSelectedFile();
+      final P3J owner = this;
       if (scenarioFile != null && scenarioFile.exists()) {
-        try {
-          currentProjection = serializer.loadProjection(
-              scenarioFile.getAbsolutePath(),
-              DatabaseFactory.getDatabaseSingleton());
-          currentProjectionFile = scenarioFile.getAbsolutePath();
-          projTreePanel.setProjection(currentProjection);
-        } catch (IOException | ClassNotFoundException ex) {
-          GUI.printErrorMessage(this, "Error while opening scenario file.",
-              "An error occurred while attempting to load file from '"
-                  + scenarioFile.getAbsolutePath() + "': " + ex.getMessage(),
-              ex);
-        } catch (LoadedProjectionFormatException ex) {
-          GUI.printErrorMessage(
-              this,
-              "Error while loading projection into database.",
-              "An error occurred while attempting to load the projection:"
-                  + ex.getMessage(), ex);
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              currentProjection = serializer.loadProjection(
+                  scenarioFile.getAbsolutePath(),
+                  DatabaseFactory.getDatabaseSingleton());
+              currentProjectionFile = scenarioFile.getAbsolutePath();
+              projTreePanel.setProjection(currentProjection);
+            } catch (IOException | ClassNotFoundException ex) {
+              GUI.printErrorMessage(
+                  owner,
+                  "Error while opening scenario file.",
+                  "An error occurred while attempting to load file from '"
+                      + scenarioFile.getAbsolutePath() + "': "
+                      + ex.getMessage(), ex);
+            } catch (LoadedProjectionFormatException ex) {
+              GUI.printErrorMessage(owner,
+                  "Error while loading projection into database.",
+                  "An error occurred while attempting to load the projection:"
+                      + ex.getMessage(), ex);
+            }
+
+          }
+        });
       }
     }
   }
@@ -713,7 +722,18 @@ public final class P3J extends JFrame {
     configureSimulator(baseExperiment);
     configureMultiThreading(baseExperiment);
     ExperimentExecutorThreadPool.getInstance().getExecutor()
-        .execute(new ExperimentThread(baseExperiment));
+        .execute(new ExperimentThread(baseExperiment) {
+          @Override
+          protected List<List<RunInformation>> doInBackground() {
+            List<List<RunInformation>> results = null;
+            try {
+              results = super.doInBackground();
+            } catch (Throwable t) {
+              GUI.printErrorMessage("Error executing model", t);
+            }
+            return results;
+          }
+        });
   }
 
   /**
@@ -768,16 +788,14 @@ public final class P3J extends JFrame {
    */
   private void configureModelLocation(BaseExperiment baseExperiment) {
     try {
-      DBConnectionData dbData = DatabaseFactory.getDbConnData();
-      String dbURL = DatabaseFactory.getDbConnData().getUrl();
-      SimSystem.report(Level.INFO, "Using database URL:" + dbURL);
-      dbURL = dbURL.substring(dbURL.indexOf('/')).substring(2);
-      baseExperiment.setModelLocation(new URI("db-p3j://" + dbData.getUser()
-          + ":" + dbData.getPassword() + "@" + dbURL + "?"
-          + currentProjection.getID()));
+      baseExperiment.setModelLocation(new URI(
+          PPPModelDatabaseReaderFactory.DEFAULT_URI));
+      baseExperiment.setModelRWParameters(PPPModelDatabaseReaderFactory
+          .createReaderParams(DatabaseFactory.getDbConnData(),
+              currentProjection.getID()));
     } catch (Exception ex) {
-      SimSystem.report(Level.SEVERE, "Configuration of model location failed.",
-          ex);
+      GUI.printErrorMessage(this, "Could not configure model location",
+          "Configuration of model reader failed.", ex);
     }
   }
 

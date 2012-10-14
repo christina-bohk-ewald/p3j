@@ -15,16 +15,12 @@
  */
 package p3j.pppm.parameters;
 
-import james.SimSystem;
-import james.core.util.misc.Base64;
+import james.core.experiments.SimulationRunConfiguration;
+import james.core.serialization.IConstructorParameterProvider;
+import james.core.serialization.SerialisationUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.logging.Level;
 
 import p3j.misc.Misc;
 import p3j.misc.math.Matrix;
@@ -50,233 +46,251 @@ import p3j.pppm.IStochasticOccurrence;
  * 
  */
 public class ParameterAssignment implements Serializable, IStochasticOccurrence {
+  static {
+    SerialisationUtils.addDelegateForConstructor(ParameterAssignment.class,
+        new IConstructorParameterProvider<ParameterAssignment>() {
+          @Override
+          public Object[] getParameters(ParameterAssignment assignment) {
+            Object[] params = null;
+            try {
+              params = new Object[] { assignment.getMatrixBinary(),
+                  assignment.getParamInstance(), assignment.getName(),
+                  assignment.getDescription(), assignment.getProbability(),
+                  assignment.getDeviation() };
+            } catch (IOException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            return params;
+          }
+        });
+  }
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 5672796759108189718L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 5672796759108189718L;
 
-	/** ID of the assignment. */
-	private int id;
+  /** ID of the assignment. */
+  private int id;
 
-	/** Reference to parameter instance. */
-	private ParameterInstance paramInstance;
+  /** Reference to parameter instance. */
+  private ParameterInstance paramInstance;
 
-	/** Assigned value. */
-	private Matrix matrix;
+  /** Assigned value. */
+  private Matrix matrix;
 
-	/** Name of this alternative. */
-	private String name = "";
+  /** Name of this alternative. */
+  private String name = "";
 
-	/** Description of this alternative. */
-	private String description = "";
+  /** Description of this alternative. */
+  private String description = "";
 
-	/** Probability of this alternative. */
-	private double probability;
+  /** Probability of this alternative. */
+  private double probability;
 
-	/**
-	 * The deviation variable. It represents extra noise that should be included
-	 * in the calculation. Default is zero, i.e. the same numbers that are put in
-	 * are also returned.
-	 */
-	private double deviation;
+  /**
+   * The deviation variable. It represents extra noise that should be included
+   * in the calculation. Default is zero, i.e. the same numbers that are put in
+   * are also returned.
+   */
+  private double deviation;
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param instance
-	 *          parameter instance to which this assignment belongs
-	 */
-	public ParameterAssignment(ParameterInstance instance) {
-		paramInstance = instance;
-	}
+  /**
+   * Default constructor.
+   * 
+   * @param instance
+   *          parameter instance to which this assignment belongs
+   */
+  public ParameterAssignment(ParameterInstance instance) {
+    paramInstance = instance;
+  }
 
-	/**
-	 * Full constructor.
-	 * 
-	 * @param instance
-	 *          the associated instance
-	 * @param assignName
-	 *          the name of the assignment
-	 * @param desc
-	 *          the description of the assignment
-	 * @param prob
-	 *          the probability of the assignment
-	 * @param dev
-	 *          the assumption-inherent deviation
-	 * @param val
-	 *          the assigned value
-	 */
-	public ParameterAssignment(ParameterInstance instance, String assignName,
-	    String desc, double prob, double dev, Matrix val) {
-		paramInstance = instance;
-		name = assignName;
-		description = desc;
-		probability = prob;
-		deviation = dev;
-		matrix = val;
-	}
+  /**
+   * Full constructor.
+   * 
+   * @param instance
+   *          the associated instance
+   * @param assignName
+   *          the name of the assignment
+   * @param desc
+   *          the description of the assignment
+   * @param prob
+   *          the probability of the assignment
+   * @param dev
+   *          the assumption-inherent deviation
+   * @param val
+   *          the assigned value
+   */
+  public ParameterAssignment(ParameterInstance instance, String assignName,
+      String desc, double prob, double dev, Matrix val) {
+    paramInstance = instance;
+    name = assignName;
+    description = desc;
+    probability = prob;
+    deviation = dev;
+    matrix = val;
+  }
 
-	/**
-	 * Constructor for bean compatibility.
-	 */
-	public ParameterAssignment() {
+  public ParameterAssignment() {
+  }
 
-	}
+  /**
+   * Constructor for bean compatibility.
+   * 
+   * @throws IOException
+   * @throws ClassNotFoundException
+   */
+  public ParameterAssignment(String matrixString, ParameterInstance instance,
+      String assignName, String desc, double prob, double dev)
+      throws ClassNotFoundException, IOException {
+    this(instance, assignName, desc, prob, dev, (Matrix) SerialisationUtils
+        .deserializeFromB64String(matrixString));
+  }
 
-	/**
-	 * Sets matrix from a byte array (for deserialization).
-	 * 
-	 * @param byteArray
-	 *          the byte array which contains the persistent matrix object
-	 */
-	public void setMatrixBinary(String byteArray) {
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64.decode(byteArray));
-		try {
-			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-			matrix = (Matrix) objectInputStream.readObject();
-			objectInputStream.close();
-		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE, "Deserialization of matrix failed.", ex);
-		}
-	}
+  /**
+   * Sets matrix from a byte array (for deserialization).
+   * 
+   * @param matrixString
+   *          the byte array which contains the persistent matrix object
+   * @throws IOException
+   * @throws ClassNotFoundException
+   */
+  public void setMatrixBinary(String matrixString)
+      throws ClassNotFoundException, IOException {
+    matrix = (Matrix) SerialisationUtils.deserializeFromB64String(matrixString);
+    System.err.println("loaded matrix hash:" + matrix.getHash());
+  }
 
-	/**
-	 * Returns the matrix value as a byte array (for serialization).
-	 * 
-	 * @return byte representation of assignment value (a matrix object)
-	 */
-	public String getMatrixBinary() {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		try {
-			ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-			    outputStream);
-			objectOutputStream.writeObject(matrix);
-			objectOutputStream.close();
-		} catch (IOException ex) {
-			SimSystem.report(Level.SEVERE, "Serialization of matrix failed.", ex);
-		}
-		return Base64.encode(outputStream.toByteArray());
-	}
+  /**
+   * Returns the matrix value as a byte array (for serialization).
+   * 
+   * @return byte representation of assignment value (a matrix object)
+   * @throws IOException
+   */
+  public String getMatrixBinary() throws IOException {
+    return SerialisationUtils.serializeToB64String(matrix);
+  }
 
-	/**
-	 * Copies the assignment. This produces a deep copy, i.e., the value matrix is
-	 * copied too.
-	 * 
-	 * @return a copy of the parameter assignment
-	 */
-	public ParameterAssignment getCopy() {
+  /**
+   * Copies the assignment. This produces a deep copy, i.e., the value matrix is
+   * copied too.
+   * 
+   * @return a copy of the parameter assignment
+   */
+  public ParameterAssignment getCopy() {
 
-		ParameterAssignment returnAssignment = new ParameterAssignment(
-		    getParamInstance());
-		returnAssignment.description = description;
-		returnAssignment.name = name;
-		returnAssignment.probability = probability;
-		returnAssignment.matrix = matrix.copy();
+    ParameterAssignment returnAssignment = new ParameterAssignment(
+        getParamInstance());
+    returnAssignment.description = description;
+    returnAssignment.name = name;
+    returnAssignment.probability = probability;
+    returnAssignment.matrix = matrix.copy();
 
-		return returnAssignment;
-	}
+    return returnAssignment;
+  }
 
-	@Override
-	public String toString() {
-		return getName() + " (" + Misc.round(getProbability(), 2) + ")";
-	}
+  @Override
+  public String toString() {
+    return getName() + " (" + Misc.round(getProbability(), 2) + ")";
+  }
 
-	// Getter/Setter for bean compatibility
+  // Getter/Setter for bean compatibility
 
-	@Override
-	public double getProbability() {
-		return probability;
-	}
+  @Override
+  public double getProbability() {
+    return probability;
+  }
 
-	@Override
-	public void setProbability(double probability) {
-		this.probability = probability;
-	}
+  @Override
+  public void setProbability(double probability) {
+    this.probability = probability;
+  }
 
-	public String getDescription() {
-		return description;
-	}
+  public String getDescription() {
+    return description;
+  }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public Matrix getMatrix() {
-		return matrix;
-	}
+  public Matrix getMatrix() {
+    return matrix;
+  }
 
-	public void setMatrix(Matrix matrix) {
-		this.matrix = matrix;
-	}
+  public void setMatrix(Matrix matrix) {
+    this.matrix = matrix;
+  }
 
-	/**
-	 * Sets the matrix value.
-	 * 
-	 * @param matrix2D
-	 *          the new matrix value
-	 */
-	public void setMatrixValue(Matrix2D matrix2D) {
-		if (matrix == null) {
-			matrix = new Matrix(matrix2D);
-		} else {
-			matrix.setValue(matrix2D);
-		}
-	}
+  /**
+   * Sets the matrix value.
+   * 
+   * @param matrix2D
+   *          the new matrix value
+   */
+  public void setMatrixValue(Matrix2D matrix2D) {
+    if(matrix2D.rows() == 0 && matrix2D.columns() == 0) {
+      System.err.println("xml-enc tried to insert empty matrix");
+      return;
+    }
+    if (matrix == null) {
+      matrix = new Matrix(matrix2D);
+    } else {
+      matrix.setValue(matrix2D);
+    }
+  }
 
-	/**
-	 * This method returns the fixed matrix values, as entered by the user. It
-	 * should NOT be called to get values for any calculations, only for editing.
-	 * For calculations, call {@link
-	 * ParameterAssignment#getMatrixValueForExecution(...)}.
-	 * 
-	 * @return the matrix values entered by the user
-	 */
-	public Matrix2D getMatrixValue() {
-		return matrix.getValue();
-	}
+  /**
+   * This method returns the fixed matrix values, as entered by the user.
+   * 
+   * @return the matrix values entered by the user
+   */
+  public Matrix2D getMatrixValue() {
+    return matrix.getValue();
+  }
 
-	public ParameterInstance getParamInstance() {
-		return paramInstance;
-	}
+  public ParameterInstance getParamInstance() {
+    return paramInstance;
+  }
 
-	public void setParamInstance(ParameterInstance paramInstance) {
-		this.paramInstance = paramInstance;
-	}
+  public void setParamInstance(ParameterInstance paramInstance) {
+    this.paramInstance = paramInstance;
+  }
 
-	public int getID() {
-		return id;
-	}
+  public int getID() {
+    return id;
+  }
 
-	public void setID(int uniqueID) {
-		id = uniqueID;
-	}
+  public void setID(int uniqueID) {
+    id = uniqueID;
+  }
 
-	public double getDeviation() {
-		return deviation;
-	}
+  public double getDeviation() {
+    return deviation;
+  }
 
-	/**
-	 * Sets deviation. Compatibility with older databases (which do not
-	 * necessarily include this field) is ensured by taking a {@link Double} as a
-	 * parameter, which can be null. This is checked, and the primitive is set
-	 * accordingly.
-	 * 
-	 * @param newDeviation
-	 *          the deviation
-	 */
-	public void setDeviation(Double newDeviation) {
-		if (newDeviation == null || newDeviation < 0) {
-			this.deviation = 0;
-		} else {
-			this.deviation = newDeviation;
-		}
-	}
+  /**
+   * Sets deviation. Compatibility with older databases (which do not
+   * necessarily include this field) is ensured by taking a {@link Double} as a
+   * parameter, which can be null. This is checked, and the primitive is set
+   * accordingly.
+   * 
+   * @param newDeviation
+   *          the deviation
+   */
+  public void setDeviation(Double newDeviation) {
+    if (newDeviation == null || newDeviation < 0) {
+      this.deviation = 0;
+    } else {
+      this.deviation = newDeviation;
+    }
+  }
 
 }
