@@ -15,7 +15,7 @@
  */
 package p3j.pppm.parameters;
 
-import james.core.experiments.SimulationRunConfiguration;
+import james.SimSystem;
 import james.core.serialization.IConstructorParameterProvider;
 import james.core.serialization.SerialisationUtils;
 
@@ -58,8 +58,7 @@ public class ParameterAssignment implements Serializable, IStochasticOccurrence 
                   assignment.getDescription(), assignment.getProbability(),
                   assignment.getDeviation() };
             } catch (IOException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              SimSystem.report(e);
             }
             return params;
           }
@@ -157,7 +156,6 @@ public class ParameterAssignment implements Serializable, IStochasticOccurrence 
   public void setMatrixBinary(String matrixString)
       throws ClassNotFoundException, IOException {
     matrix = (Matrix) SerialisationUtils.deserializeFromB64String(matrixString);
-    System.err.println("loaded matrix hash:" + matrix.getHash());
   }
 
   /**
@@ -236,10 +234,12 @@ public class ParameterAssignment implements Serializable, IStochasticOccurrence 
    *          the new matrix value
    */
   public void setMatrixValue(Matrix2D matrix2D) {
-    if(matrix2D.rows() == 0 && matrix2D.columns() == 0) {
-      System.err.println("xml-enc tried to insert empty matrix");
+    // An empty matrix is not a valid value, but set by the xml decoder - ignore
+    // this
+    if (matrix2D.rows() == 0 && matrix2D.columns() == 0) {
       return;
     }
+
     if (matrix == null) {
       matrix = new Matrix(matrix2D);
     } else {
