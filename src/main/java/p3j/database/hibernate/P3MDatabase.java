@@ -34,6 +34,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
+import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;
 import p3j.database.IProjectionResultsIterator;
 import p3j.experiment.results.ResultsOfTrial;
@@ -411,6 +412,7 @@ public class P3MDatabase implements IP3MDatabase {
 
   @Override
   public boolean deleteProjection(ProjectionModel projection) {
+    deleteAllResults(projection);
     delete(projection);
     return true;
   }
