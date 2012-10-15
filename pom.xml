@@ -173,6 +173,20 @@
 	<build>
 		<finalName>${project.artifactId}-${project.version}</finalName>
 
+		<!-- Plugin files from JAMES II are included as resources -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/plugin.xml</include>
+					<include>**/plugintype.xml</include>
+				</includes>
+			</resource>
+		</resources>
+
 		<plugins>
 
 			<!-- Compile -->
@@ -271,7 +285,7 @@
 							<artifactId>maven-project-info-reports-plugin</artifactId>
 							<version>${maven.inforeports.v}</version>
 							<configuration>
-							<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+								<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 							</configuration>
 							<reportSets>
 								<reportSet>
