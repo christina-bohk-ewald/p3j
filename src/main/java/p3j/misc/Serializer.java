@@ -496,26 +496,31 @@ public class Serializer {
   public ProjectionModel loadProjection(String absolutePath,
       IP3MDatabase database) throws ClassNotFoundException, IOException,
       LoadedProjectionFormatException {
-    List<String> warnings = new ArrayList<>();
-    ProjectionModel loadedProjection = (ProjectionModel) load(absolutePath);
-
     ProjectionModel newProjection = new ProjectionModel();
-    copySimpleFields(loadedProjection, newProjection);
-    database.newProjection(newProjection);
 
-    Map<ParameterInstance, ParameterInstance> paramInstances = matchParameterInstances(
-        loadedProjection, newProjection, warnings);
-    Map<SetType, SetType> setTypes = saveSetTypes(loadedProjection,
-        newProjection, paramInstances);
-    database.saveProjection(newProjection);
-    saveSets(loadedProjection, newProjection, paramInstances, setTypes,
-        database);
+    try {
+      List<String> warnings = new ArrayList<>();
+      ProjectionModel loadedProjection = (ProjectionModel) load(absolutePath);
 
-    database.saveProjection(newProjection);
+      copySimpleFields(loadedProjection, newProjection);
+      database.newProjection(newProjection);
 
-    if (!warnings.isEmpty())
-      new ShowWarningAfterProjectionLoadingDialog(P3J.getInstance(), warnings)
-          .setVisible(true);
+      Map<ParameterInstance, ParameterInstance> paramInstances = matchParameterInstances(
+          loadedProjection, newProjection, warnings);
+      Map<SetType, SetType> setTypes = saveSetTypes(loadedProjection,
+          newProjection, paramInstances);
+      database.saveProjection(newProjection);
+      saveSets(loadedProjection, newProjection, paramInstances, setTypes,
+          database);
+
+      database.saveProjection(newProjection);
+
+      if (!warnings.isEmpty())
+        new ShowWarningAfterProjectionLoadingDialog(P3J.getInstance(), warnings)
+            .setVisible(true);
+    } catch (Exception ex) {
+      GUI.printErrorMessage("Loading the projection failed", ex);
+    }
 
     return newProjection;
   }
