@@ -23,5 +23,8 @@ Sonar is free and simple to install.
 Making a Release:
 
 To make a release, do the following:
-1. Update version number in pom.xml and in splash screen (see p3j.gui.P3J)
-2. Execute "mvn clean site package" (in *this* order, so that the API documentation is included in the relasse)
+1. Update version number in pom.xml (remove -SNAPSHOT)
+2. Commit the change and add an appropriate tag ('p3j-x.y.z')
+3. Execute "mvn clean site package" (in *this* order, so that the API documentation is included in the relasse)
+4. Update version number to the new version in the splash screen (see p3j.gui.P3J) and also update it with an additional '-SNAPSHOT' suffix in the pom.xml
+5. Commit the change, push changes and upload new files to 'Downloads'
