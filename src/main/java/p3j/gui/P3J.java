@@ -876,7 +876,7 @@ public final class P3J extends JFrame {
           } catch (Exception ex) {
             SimSystem.report(ex);
           }
-          splashScreen = new SplashScreen(image, "", "Version 0.9.5", "", true);
+          splashScreen = new SplashScreen(image, "", "Version 0.9.7", "", true);
           splashScreen.setVisible(true);
           splashScreen.pack();
         }
