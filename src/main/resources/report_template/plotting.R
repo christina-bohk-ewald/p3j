@@ -47,8 +47,12 @@ densityPlot <- function(myData, years){
 	dens[,1] <- myData[,1]
 
 	#Select the data
-	for(i in 0:8){
-		dens[,i+2] <- myData[,(4 + 5*i)]
+	col <- 4
+	densCol <- 0
+	while(col <= dim(myData)[2]){
+		dens[, densCol + 2] <- myData[,col]
+		col <- col + 5
+		densCol <- densCol + 1
 	} 
 	
 	#Create the plots
