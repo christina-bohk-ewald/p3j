@@ -259,7 +259,7 @@ public class SingleExecution {
 		    .setMigrantsXm(getGenIndepParameter(Parameters.IMMIG_M));
 		immigrantsParameters
 		    .setMigrantsXf(getGenIndepParameter(Parameters.IMMIG_F));
-		setupBasicEmigrantParameters(immigrantsParameters, 0);
+		setupBasicImmigrantParameters(immigrantsParameters, 0);
 
 		MigPopulation migPopulation = new MigPopulation();
 		experimentSummary.setFirstImmigrantParameters(immigrantsParameters);
