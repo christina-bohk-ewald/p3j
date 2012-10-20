@@ -640,15 +640,13 @@ public class Serializer {
     setTypes.put(loadedProjection.getDefaultSetType(),
         newProjection.getDefaultSetType());
 
-    for (SetType setType : loadedProjection.getUserDefinedTypes()) {
-      SetType newSetType = newProjection.createSetType(setType.getName(),
-          setType.getDescription());
-      setTypes.put(setType, newSetType);
-      for (ParameterInstance paramInst : setType.getDefinedParameters()) {
-        ParameterInstance newParamInst = paramInstances.get(paramInst);
-        newSetType.addInstance(newParamInst);
-        newProjection.assignParameterInstance(newParamInst, newSetType, false);
-      }
+    for (SetType loadedSetType : loadedProjection.getUserDefinedTypes()) {
+      SetType newSetType = newProjection.createSetType(loadedSetType.getName(),
+          loadedSetType.getDescription());
+      setTypes.put(loadedSetType, newSetType);
+      for (ParameterInstance paramInst : loadedSetType.getDefinedParameters())
+        newProjection.assignParameterInstance(paramInstances.get(paramInst),
+            newSetType, false);
     }
 
     return setTypes;
