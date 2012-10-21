@@ -15,8 +15,6 @@
  */
 package p3j.pppm.parameters;
 
-import james.SimSystem;
-import james.core.serialization.IConstructorParameterProvider;
 import james.core.serialization.SerialisationUtils;
 
 import java.io.IOException;
@@ -46,24 +44,6 @@ import p3j.pppm.IStochasticOccurrence;
  * 
  */
 public class ParameterAssignment implements Serializable, IStochasticOccurrence {
-  static {
-    SerialisationUtils.addDelegateForConstructor(ParameterAssignment.class,
-        new IConstructorParameterProvider<ParameterAssignment>() {
-          @Override
-          public Object[] getParameters(ParameterAssignment assignment) {
-            Object[] params = null;
-            try {
-              params = new Object[] { assignment.getMatrixBinary(),
-                  assignment.getParamInstance(), assignment.getName(),
-                  assignment.getDescription(), assignment.getProbability(),
-                  assignment.getDeviation() };
-            } catch (IOException e) {
-              SimSystem.report(e);
-            }
-            return params;
-          }
-        });
-  }
 
   /** Serialization ID. */
   private static final long serialVersionUID = 5672796759108189718L;
@@ -272,7 +252,7 @@ public class ParameterAssignment implements Serializable, IStochasticOccurrence 
     id = uniqueID;
   }
 
-  public double getDeviation() {
+  public Double getDeviation() {
     return deviation;
   }
 
