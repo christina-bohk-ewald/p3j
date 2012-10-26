@@ -529,11 +529,14 @@ public class P3MDatabase implements IP3MDatabase {
 
   @Override
   public void deleteAllResults(ProjectionModel projection) {
-    Transaction t = session.beginTransaction();
-    for (ResultsOfTrial results : getAllResults(projection)) {
-      session.delete(results);
+    List<ResultsOfTrial> results = getAllResults(projection);
+    while (!results.isEmpty()) {
+      ResultsOfTrial result = results.remove(results.size() - 1);
+      Transaction t = session.beginTransaction();
+      session.delete(result);
+      t.commit();
+      session.evict(result);
     }
-    t.commit();
     dbChanged();
   }
 
