@@ -198,6 +198,11 @@ public class ResultExport {
     progress.incrementProgress("Data aggregation...");
     Map<String, Object> aggregationInfoMap = aggregateData(aggregatedDirectory,
         selectors, progress);
+    if (aggregationInfoMap.isEmpty()) {
+      GUI.printMessage(P3J.getInstance(), "No results to report",
+          "No results could be reported, as none matched you filter.");
+      return;
+    }
     if (progress.isCancelled())
       return;
     progress.incrementProgress("Coppy plotting library...");
@@ -259,7 +264,7 @@ public class ResultExport {
     initializeSelectors(projection, selectors);
     List<Triple<Integer, Double, int[]>> trialAssumptions = analyzeResults(
         projection, selectors, assumptionEncoder, progress);
-    if (progress.isCancelled())
+    if (progress.isCancelled() || trialAssumptions.isEmpty())
       return results;
 
     storeData(destinationDir, selectors, trialAssumptions);
