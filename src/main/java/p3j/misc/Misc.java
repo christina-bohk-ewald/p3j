@@ -115,10 +115,10 @@ public final class Misc {
   public static final String PREF_DB_PWD = "Database Password (currently stored unencrpyted!)";
 
   /** The key for the number of trials. */
-  public static final String PREF_NUM_TRIALS = "Number of Trials";
+  public static final String PREF_NUM_TRIALS = "Number of Trials (multiples of Parallel Threads only)";
 
   /** The key for the number of parallel threads. */
-  public static final String PREF_NUM_PARALLEL_THREADS = "Parallel Threads (Monte-Carlo)";
+  public static final String PREF_NUM_PARALLEL_THREADS = "Parallel Threads (Monte-Carlo only)";
 
   /** The key for the execution mode. */
   public static final String PREF_EXECUTION_MODE = "Execution Mode";
