@@ -27,8 +27,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.tree.TreePath;
 
-import freemarker.template.utility.Execute;
-
 import p3j.database.DatabaseFactory;
 import p3j.experiment.results.ResultExport;
 import p3j.experiment.results.ResultsOfTrial;

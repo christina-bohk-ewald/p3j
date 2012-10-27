@@ -3,54 +3,25 @@
 <hibernate-configuration>
 	<session-factory>
 
-		<!-- HSQLDB:'org.hibernate.dialect.HSQLDialect' -->
-		<!-- MySQL:'org.hibernate.dialect.MySQL5Dialect' -->
-		<property name="dialect">
-			org.hibernate.dialect.HSQLDialect
+		<!-- Create table structure automatically -->
+		<property name="hibernate.hbm2ddl.auto">
+			update
 		</property>
 
-		<!-- HSQLDB:'org.hsqldb.jdbcDriver' -->
-		<!-- MySQL:'com.mysql.jdbc.Driver' -->
-		<property name="connection.driver_class">
-			org.hsqldb.jdbcDriver
-		</property>
-
-		<!-- HSQLDB:'sa' -->
-		<!-- MySQL:'user' -->
-		<property name="connection.username">
-			sa
-		</property>
-
-		<property name="connection.password">
-		</property>
-
-		<!-- HSQLDB: e.g. 'jdbc:hsqldb:mem:ppm_db' -->
-		<!-- HSQLDB: e.g. 'jdbc:hsqldb:file:pppm_db' -->
-		<!-- HSQLDB: e.g. 'jdbc://localhost/pppm_db' -->
-		<property name="connection.url">
-			jdbc:hsqldb:file:./pppm_db
-		</property>
-
+		<!-- Hibernate Performance -->
 		<property name="connection.url.rewriteBatchedStatements">
 			true
 		</property>
 		<property name="hibernate.bytecode.use_reflection_optimizer">
 			true
 		</property>
-		<property name="hibernate.show_sql">
-			false
-		</property>
-		<property name="hibernate.hbm2ddl.auto">
-			update
-		</property>
-
-		<!-- Hibernate Performance -->
 		<property name="hibernate.cache.use_query_cache">
 			false
 		</property>
 		<property name="hibernate.cache.use_second_level_cache">
 			false
 		</property>
+
 		<!-- Disable the second-level cache -->
 		<property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
@@ -68,6 +39,7 @@
 		<mapping resource="p3j/database/hibernate/Set.hbm.xml" />
 		<mapping resource="p3j/database/hibernate/SetType.hbm.xml" />
 		<mapping resource="p3j/database/hibernate/Projection.hbm.xml" />
+		
 		<!-- Result database: -->
 		<mapping resource="p3j/database/hibernate/BasicResults.hbm.xml" />
 		<mapping resource="p3j/database/hibernate/ResultsOfTrial.hbm.xml" />

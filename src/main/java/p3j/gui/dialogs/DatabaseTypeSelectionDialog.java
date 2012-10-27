@@ -16,8 +16,6 @@
 package p3j.gui.dialogs;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,10 +52,10 @@ public class DatabaseTypeSelectionDialog extends JDialog {
 
   private final JPanel contentPanel = new JPanel(GUI.getStdBorderLayout());
 
-  private DatabaseType dbType = DatabaseType.FILE_BASED;
+  private DatabaseType dbType = DatabaseType.HSQLDB;
 
   public DatabaseTypeSelectionDialog(Frame owner, DatabaseType currentDBType) {
-    super(owner, "Select Database type", true);
+    super(owner, "Select Database Type", true);
     setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
     GUI.centerOnScreen(this);
 

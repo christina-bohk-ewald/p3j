@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;
 import p3j.experiment.results.ExecutionSummary;
+import p3j.gui.P3J;
 import p3j.misc.errors.GeneratorError;
 import p3j.pppm.IProjectionModel;
 import p3j.simulation.assignments.plugintype.IParamAssignmentGenerator;
@@ -81,7 +82,7 @@ public class PPPMProcessor extends RunnableProcessor {
 		model = mod;
 		generator = gen;
 		generator.init(model);
-		dataBase = DatabaseFactory.createDatabase();
+		dataBase = DatabaseFactory.createDatabase(P3J.getInstance().getConfigFile());
 	}
 
 	@Override

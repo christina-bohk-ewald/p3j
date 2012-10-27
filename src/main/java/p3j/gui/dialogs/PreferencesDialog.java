@@ -15,7 +15,6 @@
  */
 package p3j.gui.dialogs;
 
-import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -59,6 +57,9 @@ public class PreferencesDialog extends JDialog {
   /** The content panel. */
   private final JPanel contentPanel;
 
+  /** The chosen database type. */
+  private final DatabaseType dbType;
+
   /**
    * Instantiates a new preferences dialog.
    * 
@@ -66,11 +67,15 @@ public class PreferencesDialog extends JDialog {
    *          the owner
    * @param p3jConfiguration
    *          the p3j configuration
+   * @param databaseType
+   *          the chosen database type
    */
-  public PreferencesDialog(Frame owner, final P3JConfigFile p3jConfiguration) {
+  public PreferencesDialog(Frame owner, final P3JConfigFile p3jConfiguration,
+      DatabaseType databaseType) {
     super(owner, "Edit Preferences", true);
     setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
     GUI.centerOnScreen(this);
+    dbType = databaseType;
 
     // Create new assignment
     JButton apply = new JButton("Apply");
@@ -151,13 +156,13 @@ public class PreferencesDialog extends JDialog {
     resetToDefaults.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        dbURL.setText(Misc.DEFAULT_DB_URL);
-        dbUserName.setText(Misc.DEFAULT_DB_USER);
-        dbPassword.setText(Misc.DEFAULT_DB_PWD);
+        dbURL.setText(Misc.DEFAULT_DB_URLS.get(dbType)); // TODO: Make this
+                                                         // dbType-specific
+        dbUserName.setText(Misc.DEFAULT_DB_USERS.get(dbType));
+        dbPassword.setText(Misc.DEFAULT_DB_PWDS.get(dbType));
         contentPanel.repaint();
       }
     });
-
 
     contentPanel = pspf.constructPanel();
     this.getContentPane().add(contentPanel);

@@ -25,8 +25,8 @@ package p3j.database;
  */
 public enum DatabaseType {
 
-  /** File-based (default) data storage. */
-  FILE_BASED,
+  /** HyperSQL data storage (default, file-based). */
+  HSQLDB,
 
   /** MySQL-based data storage. */
   MYSQL,
@@ -37,7 +37,7 @@ public enum DatabaseType {
   @Override
   public String toString() {
     switch (this) {
-    case FILE_BASED:
+    case HSQLDB:
       return "File-based (default, relatively slow)";
     case MYSQL:
       return "MySQL (requires access to MySQL server)";

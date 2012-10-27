@@ -65,7 +65,6 @@ import javax.swing.UIManager;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.DatabaseType;
-import p3j.database.hibernate.P3MDatabase;
 import p3j.gui.dialogs.CopyGenerationsDialog;
 import p3j.gui.dialogs.DatabaseTypeSelectionDialog;
 import p3j.gui.dialogs.ExecutionPreferencesDialog;
@@ -436,6 +435,15 @@ public final class P3J extends JFrame {
       getConfigFile().readFile("./" + Misc.CONFIG_FILE);
     } catch (Exception ex) {
       getConfigFile().setFileName("./" + Misc.CONFIG_FILE);
+      getConfigFile().setDefaults();
+      try {
+        getConfigFile().writeFile();
+      } catch (Exception e) {
+        GUI.printErrorMessage(this,
+            "Error while writing default configuration file.",
+            "An error occurred while attempting to write the file '"
+                + Misc.CONFIG_FILE + "':" + ex, ex);
+      }
       GUI.printErrorMessage(this, "Error while loading configuration file.",
           "An error occurred while attempting to read the file '"
               + Misc.CONFIG_FILE + "' from the working directory:" + ex, ex);
@@ -443,7 +451,6 @@ public final class P3J extends JFrame {
 
     updateFromExecConfig();
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    this.initUI();
   }
 
   /**
@@ -452,13 +459,14 @@ public final class P3J extends JFrame {
   protected void editPreferences() {
 
     DatabaseTypeSelectionDialog dbTypeDialog = new DatabaseTypeSelectionDialog(
-        this, DatabaseType.FILE_BASED);
+        this, (DatabaseType) getConfigFile().get(Misc.PREF_DB_TYPE));
     dbTypeDialog.setVisible(true);
     // Check whether user cancelled
     if (dbTypeDialog.getDBType() == null)
       return;
-    
-    PreferencesDialog prefsDialog = new PreferencesDialog(this, getConfigFile());
+
+    PreferencesDialog prefsDialog = new PreferencesDialog(this,
+        getConfigFile(), dbTypeDialog.getDBType());
     prefsDialog.setVisible(true);
     try {
       getConfigFile().writeFile();
@@ -539,6 +547,7 @@ public final class P3J extends JFrame {
   public static P3J getInstance() {
     if (instance == null) {
       instance = new P3J();
+      instance.initUI();
     }
     return instance;
   }
@@ -870,13 +879,10 @@ public final class P3J extends JFrame {
    *          the argv
    */
   private static void processCmdLineArgs(String[] argv) {
-    if (argv.length > 1) {
+    if (argv.length > 0) {
       SimSystem
-          .report(
-              Level.WARNING,
-              "Only a single command line argument is allowed (which points to the database configuration file to be used). Arguments will be ignored.");
-    } else if (argv.length == 1) {
-      P3MDatabase.setHibernateConfigFile(argv[0]);
+          .report(Level.WARNING,
+              "No command line arguments are currently supported. Arguments will be ignored.");
     }
   }
 

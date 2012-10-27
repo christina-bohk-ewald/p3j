@@ -26,8 +26,11 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.hibernate.cfg.Configuration;
+import org.hibernate.dialect.MySQL5Dialect;
 
 import p3j.database.hibernate.P3MDatabase;
+import p3j.gui.P3J;
+import p3j.gui.misc.P3JConfigFile;
 import p3j.misc.Misc;
 import p3j.misc.gui.GUI;
 
@@ -41,12 +44,6 @@ import p3j.misc.gui.GUI;
  * 
  */
 public final class DatabaseFactory {
-
-  /** The hibernate property to read out the dialect that is used. */
-  private static final String HIBERNATE_DIALECT_PROPERTY = "dialect";
-
-  /** The MySQL dialect supported for specific optimizations. */
-  private static final String HIBERNATE_MYSQL_DIALECT = "org.hibernate.dialect.MySQL5Dialect";
 
   /**
    * The name of the index that is manually created for the 'matrices' table in
@@ -73,7 +70,7 @@ public final class DatabaseFactory {
    */
   public static IP3MDatabase getDatabaseSingleton() {
     if (sqlDatabase == null) {
-      sqlDatabase = createDatabase();
+      sqlDatabase = createDatabase(P3J.getInstance().getConfigFile());
     }
     return sqlDatabase;
   }
@@ -81,11 +78,13 @@ public final class DatabaseFactory {
   /**
    * Creates a new Database object.
    * 
+   * @param configFile
+   *          the config file
    * @return the newly created database interface object
    */
-  public static IP3MDatabase createDatabase() {
+  public static IP3MDatabase createDatabase(P3JConfigFile configFile) {
     P3MDatabase database = new P3MDatabase();
-    database.init(dbConnData);
+    database.init(dbConnData, configFile);
     try {
       database.open();
       attemptDBSpecificOptimizations(database.getConfig(), dbConnData);
@@ -108,8 +107,8 @@ public final class DatabaseFactory {
    */
   private static void attemptDBSpecificOptimizations(Configuration config,
       DBConnectionData connData) {
-    if (config.getProperty(HIBERNATE_DIALECT_PROPERTY).equals(
-        HIBERNATE_MYSQL_DIALECT)) {
+    if (config.getProperty(Misc.PREF_HIBERNATE_DIALECT_PROPERTY).equals(
+        Misc.HIBERNATE_DIALECTS.get(DatabaseType.MYSQL))) {
       createMatrixIndex(connData);
     }
   }
@@ -158,7 +157,7 @@ public final class DatabaseFactory {
    */
   public static IP3MDatabase createDatabase(String hibernateConfigFile) {
     P3MDatabase.setHibernateConfigFile(hibernateConfigFile);
-    return createDatabase();
+    return createDatabase(P3J.getInstance().getConfigFile());
   }
 
   /**

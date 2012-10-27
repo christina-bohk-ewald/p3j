@@ -20,8 +20,10 @@ import james.core.data.DBConnectionData;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,8 +35,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.hibernate.dialect.HSQLDialect;
+import org.hibernate.dialect.MySQL5Dialect;
+import org.hsqldb.jdbcDriver;
 import org.w3c.dom.Document;
 
+import com.mysql.jdbc.Driver;
+
+import p3j.database.DatabaseType;
 import p3j.simulation.ExecutionMode;
 
 /**
@@ -68,21 +76,8 @@ public final class Misc {
   /** The name of the configuration file. */
   public static final String CONFIG_FILE = "conf/config.xml";
 
-  /** The default datbase URL. */
-  public static final String DEFAULT_DB_URL = "jdbc:hsqldb:file:./pppm_db";
-
-  /** The default database user name. */
-  public static final String DEFAULT_DB_USER = "root";
-
-  /** The default database password. */
-  public static final String DEFAULT_DB_PWD = "";
-
   /** The default execution mode. */
   public static final ExecutionMode DEFAULT_EXEC_MODE = ExecutionMode.MONTE_CARLO;
-
-  /** Default setup for database connection. */
-  public static final DBConnectionData DEFAULT_DB_CONN = new DBConnectionData(
-      DEFAULT_DB_URL, DEFAULT_DB_USER, DEFAULT_DB_PWD, null);
 
   /** The default location of the hibernate configuration file. */
   public static final String DEFAULT_HIBERNATE_CONFIG_FILE = "conf/hibernate.cfg.xml";
@@ -105,6 +100,9 @@ public final class Misc {
 
   // Keys for the configuration file:
 
+  /** The key for the number of trials. */
+  public static final String PREF_DB_TYPE = "Database Type";
+
   /** The key for the database URL. */
   public static final String PREF_DB_URL = "Database URL";
 
@@ -122,6 +120,59 @@ public final class Misc {
 
   /** The key for the execution mode. */
   public static final String PREF_EXECUTION_MODE = "Execution Mode";
+
+  // Default database configuration
+
+  /** The hibernate property to read out the dialect that is used. */
+  public static final String PREF_HIBERNATE_DIALECT_PROPERTY = "hibernate.dialect";
+
+  /** The hibernate property to read out the JDBC driver that is used. */
+  public static final String PREF_HIBERNATE_DRIVER_PROPERTY = "hibernate.connection.driver_class";
+
+  /** The default database type. */
+  public static final DatabaseType DEFAULT_DB_TYPE = DatabaseType.HSQLDB;
+
+  /** The supported database dialects. */
+  public static final Map<DatabaseType, String> HIBERNATE_DIALECTS = new HashMap<>();
+  static {
+    HIBERNATE_DIALECTS.put(DatabaseType.HSQLDB,
+        HSQLDialect.class.getCanonicalName());
+    HIBERNATE_DIALECTS.put(DatabaseType.MYSQL,
+        MySQL5Dialect.class.getCanonicalName());
+  }
+
+  public static final Map<DatabaseType, String> JDBC_DRIVERS = new HashMap<>();
+  static {
+    JDBC_DRIVERS.put(DatabaseType.HSQLDB, jdbcDriver.class.getCanonicalName());
+    JDBC_DRIVERS.put(DatabaseType.MYSQL, Driver.class.getCanonicalName());
+  }
+
+  /** The default database URLs. */
+  public static final Map<DatabaseType, String> DEFAULT_DB_URLS = new HashMap<>();
+  static {
+    DEFAULT_DB_URLS.put(DatabaseType.HSQLDB, "jdbc:hsqldb:file:./pppm_db");
+    DEFAULT_DB_URLS.put(DatabaseType.MYSQL, "jdbc:mysql://localhost/pppm_db");
+  }
+
+  /** The default database user names. */
+  public static final Map<DatabaseType, String> DEFAULT_DB_USERS = new HashMap<>();
+  static {
+    DEFAULT_DB_USERS.put(DatabaseType.HSQLDB, "sa");
+    DEFAULT_DB_USERS.put(DatabaseType.MYSQL, "root");
+  }
+
+  /** The default database passwords. */
+  public static final Map<DatabaseType, String> DEFAULT_DB_PWDS = new HashMap<>();
+  static {
+    DEFAULT_DB_PWDS.put(DatabaseType.HSQLDB, "");
+    DEFAULT_DB_PWDS.put(DatabaseType.MYSQL, "root");
+  }
+
+  /** Default setup for database connection. */
+  public static final DBConnectionData DEFAULT_DB_CONN = new DBConnectionData(
+      DEFAULT_DB_URLS.get(DEFAULT_DB_TYPE),
+      DEFAULT_DB_USERS.get(DEFAULT_DB_TYPE),
+      DEFAULT_DB_PWDS.get(DEFAULT_DB_TYPE), JDBC_DRIVERS.get(DEFAULT_DB_TYPE));
 
   // Some common GUI Labels
 

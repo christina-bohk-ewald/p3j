@@ -26,6 +26,7 @@ import java.util.Map;
 
 import p3j.database.IP3MDatabase;
 import p3j.database.hibernate.P3MDatabase;
+import p3j.gui.P3J;
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.SymbolicProjectionModel;
@@ -65,7 +66,7 @@ public class PPPMDatabaseReader implements IModelReader {
 
     try {
       IP3MDatabase sqlDatabase = new P3MDatabase();
-      sqlDatabase.init(connData);
+      sqlDatabase.init(connData, P3J.getInstance().getConfigFile());
       try {
         sqlDatabase.open();
         model = sqlDatabase.getProjectionByID(projID);

@@ -17,7 +17,6 @@ package p3j.misc;
 
 import james.SimSystem;
 import james.core.util.misc.Strings;
-import james.gui.utils.BasicUtilities;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;

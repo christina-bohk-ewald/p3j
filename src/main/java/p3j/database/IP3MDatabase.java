@@ -20,6 +20,7 @@ import james.core.data.DBConnectionData;
 import java.util.List;
 
 import p3j.experiment.results.ResultsOfTrial;
+import p3j.gui.misc.P3JConfigFile;
 import p3j.misc.IProgressObserver;
 import p3j.misc.MatrixDimension;
 import p3j.misc.math.Matrix;
@@ -50,8 +51,10 @@ public interface IP3MDatabase {
    * 
    * @param dbConn
    *          the connection details
+   * @param configFile
+   *          the config file with additional information
    */
-  void init(DBConnectionData dbConn);
+  void init(DBConnectionData dbConn, P3JConfigFile configFile);
 
   /**
    * Establishes database connection.

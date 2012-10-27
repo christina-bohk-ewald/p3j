@@ -36,6 +36,7 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 import p3j.database.IP3MDatabase;
 import p3j.database.IProjectionResultsIterator;
 import p3j.experiment.results.ResultsOfTrial;
+import p3j.gui.misc.P3JConfigFile;
 import p3j.misc.IProgressObserver;
 import p3j.misc.MatrixDimension;
 import p3j.misc.Misc;
@@ -109,10 +110,18 @@ public class P3MDatabase implements IP3MDatabase {
   }
 
   @Override
-  public void init(DBConnectionData dbConn) {
-    getConfig().setProperty("hibernate.connection.username", dbConn.getUser())
-        .setProperty("hibernate.connection.password", dbConn.getPassword())
-        .setProperty("hibernate.connection.url", dbConn.getUrl());
+  public void init(DBConnectionData dbConn, P3JConfigFile configFile) {
+    getConfig()
+        .setProperty("hibernate.connection.username", dbConn.getUser())
+        .setProperty("hibernate.connection.url", dbConn.getUrl())
+        .setProperty(Misc.PREF_HIBERNATE_DRIVER_PROPERTY, dbConn.getDriver())
+        .setProperty(Misc.PREF_HIBERNATE_DIALECT_PROPERTY,
+            Misc.HIBERNATE_DIALECTS.get(configFile.get(Misc.PREF_DB_TYPE)));
+
+    if (!dbConn.getPassword().isEmpty())
+      getConfig().setProperty("hibernate.connection.password",
+          dbConn.getPassword());
+
     sessionFactory = getConfig().buildSessionFactory();
   }
 

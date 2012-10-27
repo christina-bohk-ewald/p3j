@@ -30,9 +30,18 @@ public class P3JConfigFile extends ConfFile {
 
   @Override
   public void setDefaults() {
-    values.put(Misc.PREF_DB_URL, Misc.DEFAULT_DB_URL);
-    values.put(Misc.PREF_DB_USER, Misc.DEFAULT_DB_USER);
-    values.put(Misc.PREF_DB_PWD, Misc.DEFAULT_DB_PWD);
+
+    // Database default settings
+    values.put(Misc.PREF_DB_TYPE, Misc.DEFAULT_DB_TYPE);
+    values.put(Misc.PREF_DB_URL, Misc.DEFAULT_DB_CONN.getUrl());
+    values.put(Misc.PREF_DB_USER, Misc.DEFAULT_DB_CONN.getUser());
+    values.put(Misc.PREF_DB_PWD, Misc.DEFAULT_DB_CONN.getPassword());
+    values.put(Misc.PREF_HIBERNATE_DRIVER_PROPERTY,
+        Misc.DEFAULT_DB_CONN.getDriver());
+    values.put(Misc.PREF_HIBERNATE_DIALECT_PROPERTY,
+        Misc.HIBERNATE_DIALECTS.get(Misc.DEFAULT_DB_TYPE));
+
+    // Other settings
     values.put(Misc.PREF_NUM_TRIALS, Misc.DEFAULT_NUM_TRIALS);
     values.put(Misc.PREF_NUM_PARALLEL_THREADS,
         Misc.DEFAULT_NUM_PARALLEL_THREADS);
@@ -46,7 +55,8 @@ public class P3JConfigFile extends ConfFile {
    */
   public DBConnectionData getDBConnectionData() {
     return new DBConnectionData((String) get(Misc.PREF_DB_URL),
-        (String) get(Misc.PREF_DB_USER), (String) get(Misc.PREF_DB_PWD), null);
+        (String) get(Misc.PREF_DB_USER), (String) get(Misc.PREF_DB_PWD),
+        (String) get(Misc.PREF_HIBERNATE_DRIVER_PROPERTY));
   }
 
 }
