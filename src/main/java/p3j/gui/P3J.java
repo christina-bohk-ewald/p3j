@@ -64,8 +64,10 @@ import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
 import p3j.database.DatabaseFactory;
+import p3j.database.DatabaseType;
 import p3j.database.hibernate.P3MDatabase;
 import p3j.gui.dialogs.CopyGenerationsDialog;
+import p3j.gui.dialogs.DatabaseTypeSelectionDialog;
 import p3j.gui.dialogs.ExecutionPreferencesDialog;
 import p3j.gui.dialogs.NewProjectionDialog;
 import p3j.gui.dialogs.PreferencesDialog;
@@ -448,6 +450,14 @@ public final class P3J extends JFrame {
    * Edits the preferences.
    */
   protected void editPreferences() {
+
+    DatabaseTypeSelectionDialog dbTypeDialog = new DatabaseTypeSelectionDialog(
+        this, DatabaseType.FILE_BASED);
+    dbTypeDialog.setVisible(true);
+    // Check whether user cancelled
+    if (dbTypeDialog.getDBType() == null)
+      return;
+    
     PreferencesDialog prefsDialog = new PreferencesDialog(this, getConfigFile());
     prefsDialog.setVisible(true);
     try {
