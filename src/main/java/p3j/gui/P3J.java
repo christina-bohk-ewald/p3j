@@ -60,7 +60,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
 import p3j.database.DatabaseFactory;
@@ -649,9 +649,9 @@ public final class P3J extends JFrame {
       final File scenarioFile = this.scenarioFileChooser.getSelectedFile();
       final P3J owner = this;
       if (scenarioFile != null && scenarioFile.exists()) {
-        SwingUtilities.invokeLater(new Runnable() {
+        (new SwingWorker<Void, Void>() {
           @Override
-          public void run() {
+          protected Void doInBackground() throws Exception {
             try {
               ProjectionModel loadedModel = serializer.loadProjection(
                   scenarioFile.getAbsolutePath(),
@@ -671,9 +671,9 @@ public final class P3J extends JFrame {
                   "An error occurred while attempting to load the projection:"
                       + ex.getMessage(), ex);
             }
-
+            return null;
           }
-        });
+        }).execute();
       }
     }
   }

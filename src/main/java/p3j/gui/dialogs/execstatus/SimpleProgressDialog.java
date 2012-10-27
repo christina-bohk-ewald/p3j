@@ -15,6 +15,8 @@
  */
 package p3j.gui.dialogs.execstatus;
 
+import james.gui.utils.BasicUtilities;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -55,8 +57,10 @@ public class SimpleProgressDialog extends JDialog {
   /** Height of the dialog. */
   private static final int DIALOG_HEIGHT = 130;
 
+  /** The number of way points to show. */
   final int waypoints;
 
+  /** The actual progress bar. */
   final JProgressBar progressBar;
 
   /** Button to close the dialog. */
@@ -70,6 +74,18 @@ public class SimpleProgressDialog extends JDialog {
     });
   }
 
+  /**
+   * Instantiates a new simple progress dialog.
+   * 
+   * @param owner
+   *          the owner of the dialog
+   * @param processName
+   *          the process name
+   * @param detailedDescription
+   *          the detailed description
+   * @param numOfWaypoints
+   *          the number of waypoints
+   */
   public SimpleProgressDialog(Frame owner, String processName,
       String detailedDescription, int numOfWaypoints) {
     super(owner, processName, false);
@@ -102,13 +118,44 @@ public class SimpleProgressDialog extends JDialog {
     okButton.setEnabled(true);
   }
 
-  public void updateProgress(int waypoint, String status) {
-    progressBar.setValue(waypoint);
-    progressBar.setString(status);
+  public void updateProgress(final int waypoint, final String status) {
+    BasicUtilities.invokeLaterOnEDT(new Runnable() {
+      @Override
+      public void run() {
+        progressBar.setValue(waypoint);
+        progressBar.setString(status);
+      }
+    });
   }
 
   public void incrementProgress(String status) {
     updateProgress(progressBar.getValue() + 1, status);
+  }
+
+  /**
+   * Shows the progress dialog.
+   * 
+   * @param owner
+   *          the owner of the dialog
+   * @param processName
+   *          the process name
+   * @param detailedDescription
+   *          the detailed description
+   * @param numOfWaypoints
+   *          the number of waypoints to be shown
+   * @return the simple progress dialog
+   */
+  public static SimpleProgressDialog showDialog(Frame owner,
+      String processName, String detailedDescription, int numOfWaypoints) {
+    final SimpleProgressDialog theDialog = new SimpleProgressDialog(owner,
+        processName, detailedDescription, numOfWaypoints);
+    BasicUtilities.invokeLaterOnEDT(new Runnable() {
+      @Override
+      public void run() {
+        theDialog.setVisible(true);
+      }
+    });
+    return theDialog;
   }
 
 }
