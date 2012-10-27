@@ -27,6 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.tree.TreePath;
 
+import freemarker.template.utility.Execute;
+
 import p3j.database.DatabaseFactory;
 import p3j.experiment.results.ResultExport;
 import p3j.experiment.results.ResultsOfTrial;
@@ -73,20 +75,30 @@ public class ResultTreeRoot extends ProjectionTreeNode<ProjectionModel> {
     generateReport.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        JFileChooser fileChooser = GUI
-            .getDirectoryChooser("Determine in which directory to store the report");
-        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-          ResultExport resultExport = configureResultExport(getEntity(),
-              fileChooser.getSelectedFile());
-          if (resultExport == null) {
-            return;
+        (new SwingWorker<Void, Void>() {
+          @Override
+          protected Void doInBackground() throws Exception {
+            JFileChooser fileChooser = GUI
+                .getDirectoryChooser("Determine in which directory to store the report");
+            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+              ResultExport resultExport = configureResultExport(getEntity(),
+                  fileChooser.getSelectedFile());
+              if (resultExport == null) {
+                return null;
+              }
+              try {
+                IProgressObserver progress = SimpleProgressDialog.showDialog(
+                    P3J.getInstance(), "Generating results report", "", 1, true);
+                resultExport.createResultReport(progress);
+                progress.taskFinished();
+              } catch (Exception ex) {
+                GUI.printErrorMessage("Report Generation Failed", ex);
+              }
+            }
+            return null;
           }
-          try {
-            resultExport.createResultReport();
-          } catch (Exception ex) {
-            GUI.printErrorMessage("Report Generation Failed", ex);
-          }
-        }
+
+        }).execute();
       }
     });
 
@@ -94,21 +106,32 @@ public class ResultTreeRoot extends ProjectionTreeNode<ProjectionModel> {
     exportAggregatedData.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        JFileChooser fileChooser = GUI
-            .getDirectoryChooser("Select directory for aggregated data");
-        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-          ResultExport resultExport = configureResultExport(getEntity(),
-              fileChooser.getSelectedFile());
-          // TODO: Add dialog for aggregated data
-          if (resultExport == null) {
-            return;
+        (new SwingWorker<Void, Void>() {
+          @Override
+          protected Void doInBackground() throws Exception {
+            JFileChooser fileChooser = GUI
+                .getDirectoryChooser("Select directory for aggregated data");
+            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+              ResultExport resultExport = configureResultExport(getEntity(),
+                  fileChooser.getSelectedFile());
+              // TODO: Add dialog for aggregated data
+              if (resultExport == null) {
+                return null;
+              }
+              try {
+                IProgressObserver progress = SimpleProgressDialog.showDialog(
+                    P3J.getInstance(), "Aggregating results", "", 1, true);
+                resultExport.exportAggregatedResults(progress);
+                progress.taskFinished();
+
+              } catch (Exception ex) {
+                GUI.printErrorMessage("Aggregated Data Export Failed", ex);
+              }
+            }
+            return null;
           }
-          try {
-            resultExport.exportAggregatedResults();
-          } catch (Exception ex) {
-            GUI.printErrorMessage("Aggregated Data Export Failed", ex);
-          }
-        }
+
+        }).execute();
       }
     });
 

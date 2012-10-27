@@ -40,6 +40,7 @@ import p3j.database.DatabaseFactory;
 import p3j.database.IProjectionResultsIterator;
 import p3j.experiment.results.filters.IResultFilter;
 import p3j.gui.P3J;
+import p3j.misc.IProgressObserver;
 import p3j.misc.gui.GUI;
 import p3j.misc.math.Matrix2D;
 import p3j.pppm.ProjectionModel;
@@ -159,16 +160,19 @@ public class ResultExport {
   /**
    * Exports aggregated data.
    * 
-   * @param selectedDir
-   *          the selected directory for export
+   * @param progress
+   *          the progress observer
    * @throws IOException
    *           if data storage failed
    */
-  public void exportAggregatedResults() throws IOException {
+  public void exportAggregatedResults(IProgressObserver progress)
+      throws IOException {
     File aggregatedDirectory = initializeSubDirectory("aggregated_data");
     aggregateData(aggregatedDirectory,
         (new ResultAggregation(projection.getGenerations(), numOfYears))
-            .getSelectorsForAggregatedDataExport());
+            .getSelectorsForAggregatedDataExport(), progress);
+    if (progress.isCancelled())
+      return;
     GUI.printMessage(P3J.getInstance(), "Aggregated Results Export Finished",
         "Aggregated results export is finished.");
   }
@@ -176,18 +180,29 @@ public class ResultExport {
   /**
    * Creates result report displaying aggregated results.
    * 
+   * @param progress
+   *          the progress observation mechanism
    * @throws IOException
    *           if aggregation of data fails
    * @throws TemplateException
    *           if processing of report template fails
    */
-  public void createResultReport() throws IOException, TemplateException {
+  public void createResultReport(IProgressObserver progress)
+      throws IOException, TemplateException {
+    progress.addWaypoints(5);
+    progress.incrementProgress("Initializing sub-directory...");
     File aggregatedDirectory = initializeSubDirectory("aggregated");
+    progress.incrementProgress("Retrieving data selectors...");
     IAggregationSelector[] selectors = (new ResultAggregation(
         projection.getGenerations(), numOfYears)).getSelectorsForReport();
+    progress.incrementProgress("Data aggregation...");
     Map<String, Object> aggregationInfoMap = aggregateData(aggregatedDirectory,
-        selectors);
+        selectors, progress);
+    if (progress.isCancelled())
+      return;
+    progress.incrementProgress("Coppy plotting library...");
     copyPlottingLib();
+    progress.incrementProgress("Creating Sweave file...");
     createSweaveFile(aggregationInfoMap);
     GUI.printMessage(
         P3J.getInstance(),
@@ -221,15 +236,17 @@ public class ResultExport {
    * 
    * @param destinationDir
    *          the destination directory
-   * @param projection
-   *          the projection
-   * 
+   * @param selectors
+   *          the selectors
+   * @param progress
+   *          the progress observer
    * @return a map containing the data to parse into the report template
    * @throws IOException
    *           if data storage failed
    */
   private Map<String, Object> aggregateData(File destinationDir,
-      IAggregationSelector[] selectors) throws IOException {
+      IAggregationSelector[] selectors, IProgressObserver progress)
+      throws IOException {
 
     // Create assumption encoder
     ParameterAssumptionEncoder assumptionEncoder = storeAssumptionEncoding(
@@ -241,7 +258,10 @@ public class ResultExport {
 
     initializeSelectors(projection, selectors);
     List<Triple<Integer, Double, int[]>> trialAssumptions = analyzeResults(
-        projection, selectors, assumptionEncoder);
+        projection, selectors, assumptionEncoder, progress);
+    if (progress.isCancelled())
+      return results;
+
     storeData(destinationDir, selectors, trialAssumptions);
 
     results.put(
@@ -330,36 +350,52 @@ public class ResultExport {
    *          the selectors
    * @param assumptionEncoder
    *          the assumption encoder
-   * 
+   * @param progress
+   *          the progress observer
    * @return the assumptions of the trials - triples of (#trial, probability,
    *         encoded assumptions) - in correct order
    */
   private List<Triple<Integer, Double, int[]>> analyzeResults(
       ProjectionModel projection, IAggregationSelector[] selectors,
-      ParameterAssumptionEncoder assumptionEncoder) {
+      ParameterAssumptionEncoder assumptionEncoder, IProgressObserver progress) {
+
+    // This does not read out all results completely, as they are accessed
+    // lazily...
+    progress.addWaypoints(DatabaseFactory.getDatabaseSingleton()
+        .getAllResults(projection).size());
+
+    // ... using an iterator
     IProjectionResultsIterator resultsIterator = DatabaseFactory
         .getDatabaseSingleton().getResultIterator(projection);
+
     ResultsOfTrial result = resultsIterator.getNextResult();
     int trialCount = 0;
     List<Triple<Integer, Double, int[]>> trialAssumptions = new ArrayList<Triple<Integer, Double, int[]>>();
 
     while (result != null) {
+
+      // If user cancelled the task, stop
+      if (progress.isCancelled()) {
+        progress.taskCanceled();
+        break;
+      }
+
       if (!resultFilter.considerResult(result)) {
-        SimSystem.report(
-            Level.INFO,
+        publishInfo(
+            progress,
             "Results with ID " + result.getID()
                 + " are dismissed by the result filter '"
                 + Strings.dispClassName(resultFilter.getClass()));
         result = resultsIterator.getNextResult();
         continue;
       }
-      SimSystem.report(Level.INFO, "Analyzing trial #" + (trialCount + 1));
+      publishInfo(progress, "Analyzing trial #" + (trialCount + 1));
       try {
         trialAssumptions.add(new Triple<Integer, Double, int[]>(trialCount,
             result.getAssignmentProbability(), assumptionEncoder.encode(result
                 .getAssignment())));
       } catch (RuntimeException ex) {
-        SimSystem.report(Level.WARNING, "Encoding trial failed.", ex);
+        GUI.printErrorMessage("Encoding trial failed.", ex);
         result = resultsIterator.getNextResult();
         continue;
       }
@@ -372,6 +408,19 @@ public class ResultExport {
       result = resultsIterator.getNextResult();
     }
     return trialAssumptions;
+  }
+
+  /**
+   * Publishes information to the logging mechanism and the progress observer.
+   * 
+   * @param progress
+   *          the progress observer
+   * @param msg
+   *          the information message
+   */
+  private void publishInfo(IProgressObserver progress, String msg) {
+    progress.incrementProgress(msg);
+    SimSystem.report(Level.INFO, msg);
   }
 
   /**
@@ -724,8 +773,8 @@ public class ResultExport {
    */
   private void copyPlottingLib() throws IOException {
 
-    //TODO: User JAMESII result reporting instead
-    
+    // TODO: User JAMESII result reporting instead
+
     String sourcePath = '/' + TEMPLATE_DIRECTORY + '/' + R_LIBRARY;
     String targetPath = targetDir.getAbsolutePath() + File.separatorChar
         + R_LIBRARY;
