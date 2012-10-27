@@ -85,7 +85,7 @@ public class MoveAssignmentToSetDialog extends ProjectionDialog {
 	private final IProjectionTree projectionTree;
 
 	/** The select box to choose the destination set. */
-	private final JComboBox desitnationSetSelector = new JComboBox();
+	private final JComboBox<Set> desitnationSetSelector = new JComboBox<Set>();
 
 	/**
 	 * Instantiates a new move assignment to set dialog.

@@ -24,6 +24,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.tree.TreePath;
 
 import p3j.database.DatabaseFactory;
@@ -47,143 +48,150 @@ import p3j.pppm.ProjectionModel;
  */
 public class ResultTreeRoot extends ProjectionTreeNode<ProjectionModel> {
 
-	/** The key width (left column) of the panel. */
-	private static final int PANEL_KEY_WIDTH = 50;
+  /** The key width (left column) of the panel. */
+  private static final int PANEL_KEY_WIDTH = 50;
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = -425870180408032392L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = -425870180408032392L;
 
-	/**
-	 * Instantiates a new result tree root.
-	 * 
-	 * @param projectionModel
-	 *          the projection model
-	 */
-	public ResultTreeRoot(ProjectionModel projectionModel) {
-		super(projectionModel, "Overall Results");
-	}
+  /**
+   * Instantiates a new result tree root.
+   * 
+   * @param projectionModel
+   *          the projection model
+   */
+  public ResultTreeRoot(ProjectionModel projectionModel) {
+    super(projectionModel, "Overall Results");
+  }
 
-	@Override
-	public JPanel selected(TreePath selectionPath, final IProjectionTree projTree) {
+  @Override
+  public JPanel selected(TreePath selectionPath, final IProjectionTree projTree) {
 
-		JButton generateReport = new JButton("<html><b>Generate Report</b></html>");
-		generateReport.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fileChooser = GUI
-				    .getDirectoryChooser("Determine in which directory to store the report");
-				if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-					ResultExport resultExport = configureResultExport(getEntity(),
-					    fileChooser.getSelectedFile());
-					if (resultExport == null) {
-						return;
-					}
-					try {
-						resultExport.createResultReport();
-					} catch (Exception ex) {
-						GUI.printErrorMessage("Report Generation Failed", ex);
-					}
-				}
-			}
-		});
+    JButton generateReport = new JButton("<html><b>Generate Report</b></html>");
+    generateReport.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JFileChooser fileChooser = GUI
+            .getDirectoryChooser("Determine in which directory to store the report");
+        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+          ResultExport resultExport = configureResultExport(getEntity(),
+              fileChooser.getSelectedFile());
+          if (resultExport == null) {
+            return;
+          }
+          try {
+            resultExport.createResultReport();
+          } catch (Exception ex) {
+            GUI.printErrorMessage("Report Generation Failed", ex);
+          }
+        }
+      }
+    });
 
-		JButton exportAggregatedData = new JButton("Aggregate");
-		exportAggregatedData.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fileChooser = GUI
-				    .getDirectoryChooser("Select directory for aggregated data");
-				if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-					ResultExport resultExport = configureResultExport(getEntity(),
-					    fileChooser.getSelectedFile());
-					// TODO: Add dialog for aggregated data
-					if (resultExport == null) {
-						return;
-					}
-					try {
-						resultExport.exportAggregatedResults();
-					} catch (Exception ex) {
-						GUI.printErrorMessage("Aggregated Data Export Failed", ex);
-					}
-				}
-			}
-		});
+    JButton exportAggregatedData = new JButton("Aggregate");
+    exportAggregatedData.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JFileChooser fileChooser = GUI
+            .getDirectoryChooser("Select directory for aggregated data");
+        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+          ResultExport resultExport = configureResultExport(getEntity(),
+              fileChooser.getSelectedFile());
+          // TODO: Add dialog for aggregated data
+          if (resultExport == null) {
+            return;
+          }
+          try {
+            resultExport.exportAggregatedResults();
+          } catch (Exception ex) {
+            GUI.printErrorMessage("Aggregated Data Export Failed", ex);
+          }
+        }
+      }
+    });
 
-		JButton exportData = new JButton("Export");
-		exportData.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fileChooser = GUI
-				    .getDirectoryChooser("Select directory for export");
-				if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-					ResultExport resultExport = configureResultExport(getEntity(),
-					    fileChooser.getSelectedFile());
-					if (resultExport == null) {
-						return;
-					}
-					try {
-						resultExport.exportAllResults();
-					} catch (Exception ex) {
-						GUI.printErrorMessage("Data Export Failed", ex);
-					}
-				}
-			}
-		});
+    JButton exportData = new JButton("Export");
+    exportData.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JFileChooser fileChooser = GUI
+            .getDirectoryChooser("Select directory for export");
+        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+          ResultExport resultExport = configureResultExport(getEntity(),
+              fileChooser.getSelectedFile());
+          if (resultExport == null) {
+            return;
+          }
+          try {
+            resultExport.exportAllResults();
+          } catch (Exception ex) {
+            GUI.printErrorMessage("Data Export Failed", ex);
+          }
+        }
+      }
+    });
 
-		JButton clearResults = new JButton("Clear Results");
-		clearResults.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (GUI.printQuestion(P3J.getInstance(), "Really delete all results?",
-				    "Approving this will delete ALL results associated with this projection.")) {
-					try {
-						DatabaseFactory.getDatabaseSingleton()
-						    .deleteAllResults(getEntity());
-					} catch (Exception ex) {
-						GUI.printErrorMessage("Result Deletion Failed", ex);
-					}
-				}
-				P3J.getInstance().refreshNavigationTree();
-			}
-		});
+    JButton clearResults = new JButton("Clear Results");
+    clearResults.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        (new SwingWorker<Void, Void>() {
+          @Override
+          protected Void doInBackground() throws Exception {
+            if (GUI.printQuestion(P3J.getInstance(),
+                "Really delete all results?",
+                "Approving this will delete ALL results associated with this projection.")) {
+              try {
+                DatabaseFactory.getDatabaseSingleton().deleteAllResults(
+                    getEntity());
+                P3J.getInstance().refreshNavigationTree();
+              } catch (Exception ex) {
+                GUI.printErrorMessage("Result Deletion Failed", ex);
+              }
+            }
+            return null;
+          }
+        }).execute();
+      }
+    });
 
-		List<JButton> buttons = new ArrayList<JButton>();
-		buttons.add(clearResults);
-		buttons.add(exportData);
-		buttons.add(exportAggregatedData);
-		buttons.add(generateReport);
+    List<JButton> buttons = new ArrayList<JButton>();
+    buttons.add(clearResults);
+    buttons.add(exportData);
+    buttons.add(exportAggregatedData);
+    buttons.add(generateReport);
 
-		PropertiesShowPanelFactory pspf = new PropertiesShowPanelFactory(
-		    PANEL_KEY_WIDTH, buttons, 0);
-		pspf.sep("General Information");
-		pspf.app("Projection:", getEntity().getName());
-		pspf.app("#Trials:", getChildCount());
-		pspf.appPreview(new SubNodeSummary<ResultsOfTrial>(this, projTree,
-		    ResultsOfTrial.class));
-		return pspf.constructPanel();
-	}
+    PropertiesShowPanelFactory pspf = new PropertiesShowPanelFactory(
+        PANEL_KEY_WIDTH, buttons, 0);
+    pspf.sep("General Information");
+    pspf.app("Projection:", getEntity().getName());
+    pspf.app("#Trials:", getChildCount());
+    pspf.appPreview(new SubNodeSummary<ResultsOfTrial>(this, projTree,
+        ResultsOfTrial.class));
+    return pspf.constructPanel();
+  }
 
-	/**
-	 * Configures result export.
-	 * 
-	 * @param projection
-	 *          the projection
-	 * @param targetDir
-	 *          the target directory
-	 * 
-	 * @return the result export
-	 */
-	protected ResultExport configureResultExport(ProjectionModel projection,
-	    File targetDir) {
-		ConfigureResultFilterDialog resultFilterDialog = new ConfigureResultFilterDialog(
-		    null, getEntity());
-		resultFilterDialog.setVisible(true);
-		return resultFilterDialog.isCancelled() ? null : new ResultExport(
-		    projection, targetDir, resultFilterDialog.getConfiguredResultFilter());
-	}
+  /**
+   * Configures result export.
+   * 
+   * @param projection
+   *          the projection
+   * @param targetDir
+   *          the target directory
+   * 
+   * @return the result export
+   */
+  protected ResultExport configureResultExport(ProjectionModel projection,
+      File targetDir) {
+    ConfigureResultFilterDialog resultFilterDialog = new ConfigureResultFilterDialog(
+        null, getEntity());
+    resultFilterDialog.setVisible(true);
+    return resultFilterDialog.isCancelled() ? null : new ResultExport(
+        projection, targetDir, resultFilterDialog.getConfiguredResultFilter());
+  }
 
-	@Override
-	public void deselected() {
-	}
+  @Override
+  public void deselected() {
+  }
 
 }

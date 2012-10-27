@@ -18,6 +18,7 @@ package p3j.gui.misc;
 import javax.swing.AbstractListModel;
 
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.sets.SetType;
 
 /**
  * Model of the list of Settypes.
@@ -28,7 +29,7 @@ import p3j.pppm.ProjectionModel;
  * @author Roland Ewald
  * 
  */
-public class SetTypesListModel extends AbstractListModel {
+public class SetTypesListModel extends AbstractListModel<SetType> {
 
 	/** Serialization ID. */
 	private static final long serialVersionUID = 8369935030761632549L;
@@ -47,7 +48,7 @@ public class SetTypesListModel extends AbstractListModel {
 	}
 
 	@Override
-	public Object getElementAt(int index) {
+	public SetType getElementAt(int index) {
 		return this.projection.getSetType(index);
 	}
 

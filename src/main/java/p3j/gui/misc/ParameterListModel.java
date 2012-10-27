@@ -32,51 +32,51 @@ import p3j.pppm.sets.SetType;
  * @author Roland Ewald
  * 
  */
-public class ParameterListModel extends AbstractListModel {
+public class ParameterListModel extends AbstractListModel<ParameterInstance> {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 5605809577849847910L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 5605809577849847910L;
 
-	/** List of parameters. */
-	private List<ParameterInstance> parameters;
+  /** List of parameters. */
+  private List<ParameterInstance> parameters;
 
-	/** An empty list. */
-	private static final List<ParameterInstance> EMPTY_LIST = new ArrayList<ParameterInstance>();
+  /** An empty list. */
+  private static final List<ParameterInstance> EMPTY_LIST = new ArrayList<ParameterInstance>();
 
-	@Override
-	public Object getElementAt(int index) {
-		if (parameters == null) {
-			return null;
-		}
-		return parameters.get(index);
-	}
+  @Override
+  public ParameterInstance getElementAt(int index) {
+    if (parameters == null) {
+      return null;
+    }
+    return parameters.get(index);
+  }
 
-	@Override
-	public int getSize() {
-		if (parameters == null) {
-			return 0;
-		}
-		return parameters.size();
-	}
+  @Override
+  public int getSize() {
+    if (parameters == null) {
+      return 0;
+    }
+    return parameters.size();
+  }
 
-	/**
-	 * Updates with content from a new Settype.
-	 * 
-	 * @param newSetType
-	 *          the new Settype
-	 */
-	public void updateSetType(SetType newSetType) {
-		int oldIndex = this.parameters == null ? 0 : this.parameters.size();
-		this.parameters = newSetType == null ? EMPTY_LIST : newSetType
-		    .getDefinedParameters();
-		this.fireContentsChanged(this, 0, Math.max(oldIndex, getSize()));
-	}
+  /**
+   * Updates with content from a new Settype.
+   * 
+   * @param newSetType
+   *          the new Settype
+   */
+  public void updateSetType(SetType newSetType) {
+    int oldIndex = this.parameters == null ? 0 : this.parameters.size();
+    this.parameters = newSetType == null ? EMPTY_LIST : newSetType
+        .getDefinedParameters();
+    this.fireContentsChanged(this, 0, Math.max(oldIndex, getSize()));
+  }
 
-	/**
-	 * Refresh the list.
-	 */
-	public void refresh() {
-		this.fireContentsChanged(this, 0, getSize());
-	}
+  /**
+   * Refresh the list.
+   */
+  public void refresh() {
+    this.fireContentsChanged(this, 0, getSize());
+  }
 
 }
