@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 
 import p3j.gui.panels.projections.IProjectionTree;
 import p3j.gui.panels.projections.ProjectionTreeNode;
+import p3j.misc.Misc;
 import p3j.misc.gui.GUI;
 
 /**
@@ -44,45 +45,51 @@ import p3j.misc.gui.GUI;
  */
 public class SubNodeSummary<E> extends JPanel {
 
-	/**
-	 * Serialization ID.
-	 */
-	private static final long serialVersionUID = 6979550281628665829L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 6979550281628665829L;
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param node
-	 *          the current node
-	 * @param projTree
-	 *          the overall projection tree
-	 * @param desiredClass
-	 *          the class of the target entities
-	 */
-	public SubNodeSummary(ProjectionTreeNode<?> node, IProjectionTree projTree,
-	    Class<E> desiredClass) {
-		setLayout(GUI.getStdBorderLayout());
+  /** Label that to signal that the displayed number of nodes has been cut off. */
+  private static final String SUBNODE_CUTOFF_LABEL = "...";
 
-		JPanel panel = new JPanel();
-		BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
-		panel.setLayout(bl);
+  /**
+   * Default constructor.
+   * 
+   * @param node
+   *          the current node
+   * @param projTree
+   *          the overall projection tree
+   * @param desiredClass
+   *          the class of the target entities
+   */
+  public SubNodeSummary(ProjectionTreeNode<?> node, IProjectionTree projTree,
+      Class<E> desiredClass) {
+    setLayout(GUI.getStdBorderLayout());
 
-		List<ProjectionTreeNode<E>> children = node.getChildsByType(desiredClass);
+    JPanel panel = new JPanel();
+    BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
+    panel.setLayout(bl);
 
-		for (ProjectionTreeNode<E> child : children) {
-			String str = child.getEntityLabel();
-			JLabel label = new JLabel("<html><u>" + str + "</u></html>");
-			label.setForeground(Color.BLUE);
-			label.addMouseListener(new ClickAssignmentListener<E>(child.getEntity(),
-			    node, projTree));
+    List<ProjectionTreeNode<E>> children = node.getChildsByType(desiredClass);
 
-			panel.add(label);
-		}
+    int childCounter = 0;
+    for (ProjectionTreeNode<E> child : children) {
+      String str = child.getEntityLabel();
+      JLabel label = new JLabel("<html><u>" + str + "</u></html>");
+      label.setForeground(Color.BLUE);
+      label.addMouseListener(new ClickAssignmentListener<E>(child.getEntity(),
+          node, projTree));
+      panel.add(label);
+      childCounter++;
+      if (childCounter >= Misc.MAX_SUBNODE_SUMMARY_ELEMENTS) {
+        panel.add(new JLabel(SUBNODE_CUTOFF_LABEL));
+        break;
+      }
+    }
 
-		JScrollPane scrollPane = new JScrollPane(panel);
-		scrollPane.setBorder(BorderFactory.createEmptyBorder());
-		add(scrollPane, BorderLayout.CENTER);
-	}
+    JScrollPane scrollPane = new JScrollPane(panel);
+    scrollPane.setBorder(BorderFactory.createEmptyBorder());
+    add(scrollPane, BorderLayout.CENTER);
+  }
 
 }
 
@@ -101,24 +108,24 @@ public class SubNodeSummary<E> extends JPanel {
  */
 class ClickAssignmentListener<E> extends MouseAdapter {
 
-	/** The target entity. */
-	private final E entity;
+  /** The target entity. */
+  private final E entity;
 
-	/** The current node. */
-	private final ProjectionTreeNode<?> node;
+  /** The current node. */
+  private final ProjectionTreeNode<?> node;
 
-	/** Reference to the projection tree. */
-	private final IProjectionTree projectionTree;
+  /** Reference to the projection tree. */
+  private final IProjectionTree projectionTree;
 
-	ClickAssignmentListener(E targetEntity, ProjectionTreeNode<?> piNode,
-	    IProjectionTree projTree) {
-		entity = targetEntity;
-		node = piNode;
-		projectionTree = projTree;
-	}
+  ClickAssignmentListener(E targetEntity, ProjectionTreeNode<?> piNode,
+      IProjectionTree projTree) {
+    entity = targetEntity;
+    node = piNode;
+    projectionTree = projTree;
+  }
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		projectionTree.selectNode(node.getChildWithEntity(entity));
-	}
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    projectionTree.selectNode(node.getChildWithEntity(entity));
+  }
 }
