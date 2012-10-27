@@ -259,7 +259,7 @@ public final class P3J extends JFrame {
 
   /** Menu to open execution preferences dialog. */
   private final JMenuItem execPreferencesMenu = new JMenuItem(
-      "Execution Preferences...");
+      "Execution preferences...");
   {
     execPreferencesMenu.addActionListener(new ActionListener() {
       @Override
