@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 
+import p3j.misc.IProgressObserver;
 import p3j.misc.gui.GUI;
 
 /**
@@ -46,7 +47,7 @@ import p3j.misc.gui.GUI;
  * @author Christina Bohk
  * @author Roland Ewald
  */
-public class SimpleProgressDialog extends JDialog {
+public class SimpleProgressDialog extends JDialog implements IProgressObserver {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 6832108832051608722L;
@@ -56,9 +57,6 @@ public class SimpleProgressDialog extends JDialog {
 
   /** Height of the dialog. */
   private static final int DIALOG_HEIGHT = 130;
-
-  /** The number of way points to show. */
-  final int waypoints;
 
   /** The actual progress bar. */
   final JProgressBar progressBar;
@@ -93,7 +91,6 @@ public class SimpleProgressDialog extends JDialog {
         - (detailedDescription.isEmpty() ? 20 : 0));
     GUI.centerOnScreen(this);
 
-    waypoints = numOfWaypoints;
     progressBar = new JProgressBar(0, numOfWaypoints);
     okButton.setEnabled(false);
 
@@ -114,11 +111,13 @@ public class SimpleProgressDialog extends JDialog {
     getContentPane().add(content);
   }
 
+  @Override
   public void taskFinished() {
-    updateProgress(waypoints, "Done");
+    updateProgress(progressBar.getMaximum(), "Done");
     okButton.setEnabled(true);
   }
 
+  @Override
   public void updateProgress(final int waypoint, final String status) {
     BasicUtilities.invokeLaterOnEDT(new Runnable() {
       @Override
@@ -129,6 +128,17 @@ public class SimpleProgressDialog extends JDialog {
     });
   }
 
+  @Override
+  public int getCurrentWaypoint() {
+    return progressBar.getValue();
+  }
+
+  @Override
+  public void addWaypoints(int additionalWayPoints) {
+    progressBar.setMaximum(progressBar.getMaximum() + additionalWayPoints);
+  }
+
+  @Override
   public void incrementProgress(String status) {
     updateProgress(progressBar.getValue() + 1, status);
   }
@@ -146,8 +156,8 @@ public class SimpleProgressDialog extends JDialog {
    *          the number of waypoints to be shown
    * @return the simple progress dialog
    */
-  public static SimpleProgressDialog showDialog(Frame owner,
-      String processName, String detailedDescription, int numOfWaypoints) {
+  public static IProgressObserver showDialog(Frame owner, String processName,
+      String detailedDescription, int numOfWaypoints) {
     final SimpleProgressDialog theDialog = new SimpleProgressDialog(owner,
         processName, detailedDescription, numOfWaypoints);
     BasicUtilities.invokeLaterOnEDT(new Runnable() {
