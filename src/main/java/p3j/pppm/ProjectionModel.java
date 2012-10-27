@@ -220,12 +220,18 @@ public class ProjectionModel extends Model implements IProjectionModel {
    */
   private void migrateAssignmentsFromDefaultType(ParameterInstance instance,
       SetType newType) {
+    ParameterAssignmentSet paramAssignmentSet = getDefaultSet()
+        .getParameterAssignments(instance);
+
+    // Stop if there is nothing to migrate
+    if (paramAssignmentSet.getAssignments().isEmpty())
+      return;
+
     Set set = newType.getNumOfSets() == 0 ? newType.createSet(
         "Migrated parameter assignments",
         "Automatically created during Settype definition.", 0.0) : newType
         .getSets().get(0);
-    ParameterAssignmentSet paramAssignmentSet = getDefaultSet()
-        .getParameterAssignments(instance);
+
     for (ParameterAssignment pa : paramAssignmentSet.getAssignments()) {
       set.addParameterAssignment(pa);
     }
