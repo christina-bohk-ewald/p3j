@@ -247,7 +247,7 @@ public class Serializer {
 
     IProgressObserver progress = SimpleProgressDialog.showDialog(
         P3J.getInstance(), "Saving projection '" + original.getName() + "'",
-        "", 6);
+        "", 6, false);
     progress.incrementProgress("General properties...");
     copySimpleFields(original, copy);
     progress.incrementProgress("Parameter instances...");
@@ -687,7 +687,7 @@ public class Serializer {
     IProgressObserver progress = SimpleProgressDialog.showDialog(
         P3J.getInstance(), "Loading projection '" + loadedProjection.getName()
             + "'", "Loading " + numAssignments + " parameter assignments:",
-        numAssignments);
+        numAssignments, false);
 
     for (SetType loadedSetType : loadedProjection.getAllSetTypes()) {
       SetType newSetType = setTypes.get(loadedSetType);

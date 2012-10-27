@@ -550,6 +550,10 @@ public class P3MDatabase implements IP3MDatabase {
       session.evict(result);
       if (observer != null) {
         observer.incrementProgress("Deleted result with ID " + result.getID());
+        if (observer.isCancelled()) {
+          observer.taskCanceled();
+          break;
+        }
       }
     }
     dbChanged();

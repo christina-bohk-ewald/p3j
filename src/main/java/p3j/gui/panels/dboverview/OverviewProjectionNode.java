@@ -84,7 +84,8 @@ public class OverviewProjectionNode extends ProjectionTreeNode<ProjectionModel> 
                   "Do you really want to delete the projection'"
                       + getEntity().getName() + "'? This cannot be undone!")) {
                 IProgressObserver progress = SimpleProgressDialog.showDialog(
-                    P3J.getInstance(), "Deleting projection and its results", "", 2);                
+                    P3J.getInstance(), "Deleting projection and its results",
+                    "", 2, true);
                 DatabaseFactory.getDatabaseSingleton().deleteProjection(
                     getEntity(), progress);
                 progress.incrementProgress("Updating user interface...");

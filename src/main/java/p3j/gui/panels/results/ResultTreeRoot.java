@@ -146,7 +146,7 @@ public class ResultTreeRoot extends ProjectionTreeNode<ProjectionModel> {
               try {
                 IProgressObserver progress = SimpleProgressDialog.showDialog(
                     P3J.getInstance(), "Clearing Results",
-                    "Clearing all trial results:", 1);
+                    "Clearing all trial results:", 1, true);
                 DatabaseFactory.getDatabaseSingleton().deleteAllResults(
                     getEntity(), progress);
                 P3J.getInstance().refreshNavigationTree();

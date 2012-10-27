@@ -53,4 +53,16 @@ public interface IProgressObserver {
    * Call this method to indicate that the task is finished.
    */
   void taskFinished();
+
+  /**
+   * Can be used to preemptively abort a long-running task.
+   * 
+   * @return true if process has been cancelled by user
+   */
+  boolean isCancelled();
+
+  /**
+   * Deal with progress display in case the task is cancelled.
+   */
+  void taskCanceled();
 }

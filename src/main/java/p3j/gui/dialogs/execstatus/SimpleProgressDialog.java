@@ -61,6 +61,12 @@ public class SimpleProgressDialog extends JDialog implements IProgressObserver {
   /** The actual progress bar. */
   final JProgressBar progressBar;
 
+  /** Flag to determine whether this process can be cancelled. */
+  final boolean cancellationAllowed;
+
+  /** Flag to signal cancellation. */
+  private boolean cancelled = false;
+
   /** Button to close the dialog. */
   private JButton okButton = new JButton("OK");
   {
@@ -68,6 +74,17 @@ public class SimpleProgressDialog extends JDialog implements IProgressObserver {
       @Override
       public void actionPerformed(ActionEvent e) {
         setVisible(false);
+      }
+    });
+  }
+
+  /** Button to cancel the task. */
+  private JButton cancelButton = new JButton("Cancel");
+  {
+    cancelButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        cancelled = true;
       }
     });
   }
@@ -83,10 +100,14 @@ public class SimpleProgressDialog extends JDialog implements IProgressObserver {
    *          the detailed description
    * @param numOfWaypoints
    *          the number of waypoints
+   * @param cancellationAllowed
+   *          flag to allow cancellation
    */
   public SimpleProgressDialog(Frame owner, String processName,
-      String detailedDescription, int numOfWaypoints) {
+      String detailedDescription, int numOfWaypoints,
+      boolean cancellationAllowed) {
     super(owner, processName, false);
+    this.cancellationAllowed = cancellationAllowed;
     setSize(DIALOG_WIDTH, DIALOG_HEIGHT
         - (detailedDescription.isEmpty() ? 20 : 0));
     GUI.centerOnScreen(this);
@@ -96,6 +117,8 @@ public class SimpleProgressDialog extends JDialog implements IProgressObserver {
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.add(okButton);
+    if (cancellationAllowed)
+      buttonPanel.add(cancelButton);
 
     JPanel content = new JPanel(new BorderLayout(GUI.STD_LAYOUT_GAP,
         GUI.STD_LAYOUT_GAP));
@@ -115,6 +138,12 @@ public class SimpleProgressDialog extends JDialog implements IProgressObserver {
   public void taskFinished() {
     updateProgress(progressBar.getMaximum(), "Done");
     okButton.setEnabled(true);
+    cancelButton.setEnabled(false);
+  }
+
+  @Override
+  public void taskCanceled() {
+    setVisible(false);
   }
 
   @Override
@@ -143,6 +172,11 @@ public class SimpleProgressDialog extends JDialog implements IProgressObserver {
     updateProgress(progressBar.getValue() + 1, status);
   }
 
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
+
   /**
    * Shows the progress dialog.
    * 
@@ -154,12 +188,15 @@ public class SimpleProgressDialog extends JDialog implements IProgressObserver {
    *          the detailed description
    * @param numOfWaypoints
    *          the number of waypoints to be shown
+   * @param cancellationAllowed
+   *          the flag to allow cancellation
    * @return the simple progress dialog
    */
   public static IProgressObserver showDialog(Frame owner, String processName,
-      String detailedDescription, int numOfWaypoints) {
+      String detailedDescription, int numOfWaypoints,
+      boolean cancellationAllowed) {
     final SimpleProgressDialog theDialog = new SimpleProgressDialog(owner,
-        processName, detailedDescription, numOfWaypoints);
+        processName, detailedDescription, numOfWaypoints, cancellationAllowed);
     BasicUtilities.invokeLaterOnEDT(new Runnable() {
       @Override
       public void run() {
