@@ -624,16 +624,24 @@ public final class P3J extends JFrame {
    * @param scenarioFile
    *          the file to which the scenario shall be saved
    */
-  void quickSaveProjection(String scenarioFile) {
-    try {
-      serializer.save(getCurrentProjection(), scenarioFile);
-      this.currentProjectionFile = scenarioFile;
-    } catch (Exception ex) {
-      SimSystem.report(Level.SEVERE, "Error while saving scenario file.", ex);
-      GUI.printErrorMessage(this, "Error while saving scenario file.",
-          "An error occurred while attempting to save file to '" + scenarioFile
-              + "': " + ex);
-    }
+  void quickSaveProjection(final String scenarioFile) {
+    (new SwingWorker<Void, Void>() {
+      @Override
+      protected Void doInBackground() throws Exception {
+        try {
+          serializer.save(getCurrentProjection(), scenarioFile);
+          currentProjectionFile = scenarioFile;
+        } catch (Exception ex) {
+          SimSystem.report(Level.SEVERE, "Error while saving scenario file.",
+              ex);
+          GUI.printErrorMessage(P3J.getInstance(),
+              "Error while saving scenario file.",
+              "An error occurred while attempting to save file to '"
+                  + scenarioFile + "': " + ex);
+        }
+        return null;
+      }
+    }).execute();
 
   }
 

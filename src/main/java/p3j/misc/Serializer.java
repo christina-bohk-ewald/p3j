@@ -244,13 +244,24 @@ public class Serializer {
    */
   private ProjectionModel copyProjection(ProjectionModel original) {
     ProjectionModel copy = new ProjectionModel();
+
+    SimpleProgressDialog progress = SimpleProgressDialog.showDialog(
+        P3J.getInstance(), "Saving projection '" + original.getName() + "'",
+        "", 6);
+    progress.updateProgress(1, "General properties...");
     copySimpleFields(original, copy);
+    progress.updateProgress(2, "Parameter instances...");
     Map<ParameterInstance, ParameterInstance> paramInstances = copyParameterInstances(
         original, copy);
+    progress.updateProgress(3, "Sets...");
     Map<Set, Set> sets = copySets(original, copy, paramInstances);
+    progress.updateProgress(4, "Set Types...");
     Map<SetType, SetType> setTypes = copySetTypes(original, copy,
         paramInstances, sets);
+    progress.updateProgress(5, "Set Type Mapping...");
     copyParamInstToSetTypeMapping(original, copy, paramInstances, setTypes);
+    progress.updateProgress(6, "Done");
+    progress.taskFinished();
     return copy;
   }
 

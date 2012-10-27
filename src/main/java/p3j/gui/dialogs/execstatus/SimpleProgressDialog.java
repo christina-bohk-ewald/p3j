@@ -89,7 +89,8 @@ public class SimpleProgressDialog extends JDialog {
   public SimpleProgressDialog(Frame owner, String processName,
       String detailedDescription, int numOfWaypoints) {
     super(owner, processName, false);
-    setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+    setSize(DIALOG_WIDTH, DIALOG_HEIGHT
+        - (detailedDescription.isEmpty() ? 20 : 0));
     GUI.centerOnScreen(this);
 
     waypoints = numOfWaypoints;
