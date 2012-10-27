@@ -36,6 +36,7 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 import p3j.database.IP3MDatabase;
 import p3j.database.IProjectionResultsIterator;
 import p3j.experiment.results.ResultsOfTrial;
+import p3j.misc.IProgressObserver;
 import p3j.misc.MatrixDimension;
 import p3j.misc.Misc;
 import p3j.misc.math.Matrix;
@@ -409,8 +410,13 @@ public class P3MDatabase implements IP3MDatabase {
   }
 
   @Override
-  public boolean deleteProjection(ProjectionModel projection) {
-    deleteAllResults(projection);
+  public boolean deleteProjection(ProjectionModel projection,
+      IProgressObserver observer) {
+    deleteAllResults(projection, observer);
+    if (observer != null) {
+      observer.addWaypoints(1);
+      observer.incrementProgress("Deleting projection...");
+    }
     delete(projection);
     return true;
   }
@@ -528,14 +534,23 @@ public class P3MDatabase implements IP3MDatabase {
   }
 
   @Override
-  public void deleteAllResults(ProjectionModel projection) {
+  public void deleteAllResults(ProjectionModel projection,
+      IProgressObserver observer) {
     List<ResultsOfTrial> results = getAllResults(projection);
+
+    if (observer != null) {
+      observer.addWaypoints(results.size());
+    }
+
     while (!results.isEmpty()) {
       ResultsOfTrial result = results.remove(results.size() - 1);
       Transaction t = session.beginTransaction();
       session.delete(result);
       t.commit();
       session.evict(result);
+      if (observer != null) {
+        observer.incrementProgress("Deleted result with ID " + result.getID());
+      }
     }
     dbChanged();
   }

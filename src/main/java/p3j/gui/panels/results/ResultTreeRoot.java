@@ -32,10 +32,12 @@ import p3j.experiment.results.ResultExport;
 import p3j.experiment.results.ResultsOfTrial;
 import p3j.gui.P3J;
 import p3j.gui.dialogs.ConfigureResultFilterDialog;
+import p3j.gui.dialogs.execstatus.SimpleProgressDialog;
 import p3j.gui.misc.SubNodeSummary;
 import p3j.gui.panels.PropertiesShowPanelFactory;
 import p3j.gui.panels.projections.IProjectionTree;
 import p3j.gui.panels.projections.ProjectionTreeNode;
+import p3j.misc.IProgressObserver;
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
 
@@ -142,9 +144,13 @@ public class ResultTreeRoot extends ProjectionTreeNode<ProjectionModel> {
                 "Really delete all results?",
                 "Approving this will delete ALL results associated with this projection.")) {
               try {
+                IProgressObserver progress = SimpleProgressDialog.showDialog(
+                    P3J.getInstance(), "Clearing Results",
+                    "Clearing all trial results:", 1);
                 DatabaseFactory.getDatabaseSingleton().deleteAllResults(
-                    getEntity());
+                    getEntity(), progress);
                 P3J.getInstance().refreshNavigationTree();
+                progress.taskFinished();
               } catch (Exception ex) {
                 GUI.printErrorMessage("Result Deletion Failed", ex);
               }

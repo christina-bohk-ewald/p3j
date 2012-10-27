@@ -245,22 +245,22 @@ public class Serializer {
   private ProjectionModel copyProjection(ProjectionModel original) {
     ProjectionModel copy = new ProjectionModel();
 
-    SimpleProgressDialog progress = SimpleProgressDialog.showDialog(
+    IProgressObserver progress = SimpleProgressDialog.showDialog(
         P3J.getInstance(), "Saving projection '" + original.getName() + "'",
         "", 6);
-    progress.updateProgress(1, "General properties...");
+    progress.incrementProgress("General properties...");
     copySimpleFields(original, copy);
-    progress.updateProgress(2, "Parameter instances...");
+    progress.incrementProgress("Parameter instances...");
     Map<ParameterInstance, ParameterInstance> paramInstances = copyParameterInstances(
         original, copy);
-    progress.updateProgress(3, "Sets...");
+    progress.incrementProgress("Sets...");
     Map<Set, Set> sets = copySets(original, copy, paramInstances);
-    progress.updateProgress(4, "Set Types...");
+    progress.incrementProgress("Set Types...");
     Map<SetType, SetType> setTypes = copySetTypes(original, copy,
         paramInstances, sets);
-    progress.updateProgress(5, "Set Type Mapping...");
+    progress.incrementProgress("Set Type Mapping...");
     copyParamInstToSetTypeMapping(original, copy, paramInstances, setTypes);
-    progress.updateProgress(6, "Done");
+    progress.incrementProgress("Done");
     progress.taskFinished();
     return copy;
   }
@@ -684,7 +684,7 @@ public class Serializer {
       Map<SetType, SetType> setTypes, IP3MDatabase database) {
 
     int numAssignments = loadedProjection.countNumberOfParameterAssignments();
-    SimpleProgressDialog progress = SimpleProgressDialog.showDialog(
+    IProgressObserver progress = SimpleProgressDialog.showDialog(
         P3J.getInstance(), "Loading projection '" + loadedProjection.getName()
             + "'", "Loading " + numAssignments + " parameter assignments:",
         numAssignments);
@@ -720,7 +720,7 @@ public class Serializer {
    */
   private void saveSet(Set loadedSet, Set newSet, SetType loadedSetType,
       Map<ParameterInstance, ParameterInstance> paramInstances,
-      IP3MDatabase database, SimpleProgressDialog progress) {
+      IP3MDatabase database, IProgressObserver progress) {
     for (ParameterInstance paramInst : loadedSetType.getDefinedParameters()) {
       ParameterAssignmentSet paramAssignSet = loadedSet
           .getParameterAssignments(paramInst);

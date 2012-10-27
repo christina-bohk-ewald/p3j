@@ -15,8 +15,6 @@
  */
 package p3j.gui.panels.dboverview;
 
-import james.SimSystem;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -24,13 +22,16 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.tree.TreePath;
 
 import p3j.database.DatabaseFactory;
 import p3j.gui.P3J;
+import p3j.gui.dialogs.execstatus.SimpleProgressDialog;
 import p3j.gui.panels.PropertiesShowPanelFactory;
 import p3j.gui.panels.projections.IProjectionTree;
 import p3j.gui.panels.projections.ProjectionTreeNode;
+import p3j.misc.IProgressObserver;
 import p3j.misc.Misc;
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
@@ -75,17 +76,27 @@ public class OverviewProjectionNode extends ProjectionTreeNode<ProjectionModel> 
     removeProjection.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        try {
-          if (GUI.printQuestion(P3J.getInstance(), "Are you sure?",
-              "Do you really want to delete the projection'"
-                  + getEntity().getName() + "'? This cannot be undone!")) {
-            DatabaseFactory.getDatabaseSingleton()
-                .deleteProjection(getEntity());
-            P3J.getInstance().projectionDeleted(getEntity());
+        (new SwingWorker<Void, Void>() {
+          @Override
+          protected Void doInBackground() {
+            try {
+              if (GUI.printQuestion(P3J.getInstance(), "Are you sure?",
+                  "Do you really want to delete the projection'"
+                      + getEntity().getName() + "'? This cannot be undone!")) {
+                IProgressObserver progress = SimpleProgressDialog.showDialog(
+                    P3J.getInstance(), "Deleting projection and its results", "", 2);                
+                DatabaseFactory.getDatabaseSingleton().deleteProjection(
+                    getEntity(), progress);
+                progress.incrementProgress("Updating user interface...");
+                P3J.getInstance().projectionDeleted(getEntity());
+                progress.taskFinished();
+              }
+            } catch (Exception ex) {
+              GUI.printErrorMessage("Projection Deletion Failed", ex);
+            }
+            return null;
           }
-        } catch (Exception ex) {
-          SimSystem.report(ex);
-        }
+        }).execute();
       }
     });
 
