@@ -43,7 +43,7 @@ import java.util.zip.GZIPOutputStream;
 import p3j.database.IP3MDatabase;
 import p3j.gui.P3J;
 import p3j.gui.dialogs.ShowWarningAfterProjectionLoadingDialog;
-import p3j.gui.dialogs.SimpleProgressDialog;
+import p3j.gui.dialogs.execstatus.SimpleProgressDialog;
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.parameters.Parameter;

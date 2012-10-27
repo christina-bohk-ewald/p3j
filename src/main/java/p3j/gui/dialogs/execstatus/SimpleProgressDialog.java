@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License. 
  */
-package p3j.gui.dialogs;
+package p3j.gui.dialogs.execstatus;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -28,7 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 
-import p3j.gui.dialogs.execstatus.ExecutionProgressDialog;
 import p3j.misc.gui.GUI;
 
 /**
