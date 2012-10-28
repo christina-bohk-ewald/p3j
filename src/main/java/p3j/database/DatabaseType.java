@@ -113,6 +113,7 @@ public enum DatabaseType {
   public IPreferencesUIProvider getPreferencesUIProvider() {
     switch (this) {
     case HSQLDB:
+      return new HSQLDBPreferencesUIProvider();
     case MYSQL:
       return new MySQLPreferencesUIProvider();
     case GENERIC:

@@ -125,6 +125,9 @@ public final class Misc {
   /** The URL prefix for MySQL URLs. */
   public static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 
+  /** The URL prefix for HSQLDB URLs. */
+  public static final String HSQLDB_URL_PREFIX = "jdbc:hsqldb:file:";
+
   /** The hibernate property to read out the dialect that is used. */
   public static final String PREF_HIBERNATE_DIALECT_PROPERTY = "hibernate.dialect";
 
@@ -155,7 +158,7 @@ public final class Misc {
   /** The default database URLs. */
   public static final Map<DatabaseType, String> DEFAULT_DB_URLS = new HashMap<>();
   static {
-    DEFAULT_DB_URLS.put(DatabaseType.HSQLDB, "jdbc:hsqldb:file:./pppm_db");
+    DEFAULT_DB_URLS.put(DatabaseType.HSQLDB, HSQLDB_URL_PREFIX + "./pppm_db");
     DEFAULT_DB_URLS.put(DatabaseType.MYSQL, MYSQL_URL_PREFIX
         + "localhost/pppm_db");
     DEFAULT_DB_URLS.put(DatabaseType.GENERIC, MYSQL_URL_PREFIX
@@ -213,6 +216,9 @@ public final class Misc {
 
   /** The label for the Hibernate dialect. */
   public static final String GUI_LABEL_HIBERNATE_DIALECT = "Hibernate dialect class";
+
+  /** The label for entering the location of the database. */
+  public static final String GUI_LABEL_DB_FILE_LOCATION = "Location of database";
 
   /**
    * This class should not be instantiated.
