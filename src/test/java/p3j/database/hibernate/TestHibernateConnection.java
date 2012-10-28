@@ -22,6 +22,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import p3j.database.DatabaseFactory;
+import p3j.database.DatabaseType;
 import p3j.database.IP3MDatabase;
 import p3j.misc.MatrixDimension;
 import p3j.misc.Misc;
@@ -154,7 +155,8 @@ public class TestHibernateConnection extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     DatabaseFactory.setDbConnData(new DBConnectionData(
-        "jdbc:hsqldb:mem:ppm_db", "testuser", "", null));
+        "jdbc:hsqldb:mem:ppm_db", "testuser", "", Misc.HIBERNATE_DIALECTS
+            .get(DatabaseType.HSQLDB)));
     db = DatabaseFactory.createDatabase(Misc.TEST_HIBERNATE_CONFIG_FILE);
   }
 
