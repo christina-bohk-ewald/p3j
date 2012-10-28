@@ -31,21 +31,15 @@ public class P3JConfigFile extends ConfFile {
   @Override
   public void setDefaults() {
 
-    // Database default settings
-    values.put(Misc.PREF_DB_TYPE, Misc.DEFAULT_DB_TYPE);
-    values.put(Misc.PREF_DB_URL, Misc.DEFAULT_DB_CONN.getUrl());
-    values.put(Misc.PREF_DB_USER, Misc.DEFAULT_DB_CONN.getUser());
-    values.put(Misc.PREF_DB_PWD, Misc.DEFAULT_DB_CONN.getPassword());
-    values.put(Misc.PREF_HIBERNATE_DRIVER_PROPERTY,
-        Misc.DEFAULT_DB_CONN.getDriver());
-    values.put(Misc.PREF_HIBERNATE_DIALECT_PROPERTY,
-        Misc.HIBERNATE_DIALECTS.get(Misc.DEFAULT_DB_TYPE));
+    // DAtabase settings
+    put(Misc.PREF_DB_TYPE, Misc.DEFAULT_DB_TYPE);
+    Misc.DEFAULT_DB_TYPE.writePreferences(this,
+        Misc.DEFAULT_DB_TYPE.getDefaults());
 
-    // Other settings
-    values.put(Misc.PREF_NUM_TRIALS, Misc.DEFAULT_NUM_TRIALS);
-    values.put(Misc.PREF_NUM_PARALLEL_THREADS,
-        Misc.DEFAULT_NUM_PARALLEL_THREADS);
-    values.put(Misc.PREF_EXECUTION_MODE, Misc.DEFAULT_EXEC_MODE);
+    // Execution settings
+    put(Misc.PREF_NUM_TRIALS, Misc.DEFAULT_NUM_TRIALS);
+    put(Misc.PREF_NUM_PARALLEL_THREADS, Misc.DEFAULT_NUM_PARALLEL_THREADS);
+    put(Misc.PREF_EXECUTION_MODE, Misc.DEFAULT_EXEC_MODE);
   }
 
   /**

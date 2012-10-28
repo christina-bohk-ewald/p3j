@@ -15,6 +15,11 @@
  */
 package p3j.database;
 
+import james.core.data.DBConnectionData;
+import james.core.util.misc.Pair;
+import p3j.gui.misc.P3JConfigFile;
+import p3j.misc.Misc;
+
 /**
  * Represent the database type to be used.
  * 
@@ -47,4 +52,73 @@ public enum DatabaseType {
       throw new UnsupportedOperationException();
     }
   }
+
+  /**
+   * Prefix to associate certain configuration values with a database type.
+   * Should be unique per type.
+   * 
+   * @return the prefix
+   */
+  public String asPrefix() {
+    switch (this) {
+    case HSQLDB:
+      return "HSQLDB";
+    case MYSQL:
+      return "MySQL";
+    case GENERIC:
+      return "Generic";
+    default:
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public Pair<DBConnectionData, String> readPreferences(P3JConfigFile conf) {
+    if (conf.get(asPrefix() + Misc.PREF_DB_URL) == null)
+      return getDefaults();
+    return readPreferences(asPrefix(), conf);
+  }
+
+  public void writePreferences(P3JConfigFile conf,
+      Pair<DBConnectionData, String> connData) {
+    writePreferences("", conf, connData);
+    writePreferences(asPrefix(), conf, readPreferences("", conf));
+  }
+
+  public Pair<DBConnectionData, String> getDefaults() {
+    return new Pair<>(new DBConnectionData(Misc.DEFAULT_DB_URLS.get(this),
+        Misc.DEFAULT_DB_USERS.get(this), Misc.DEFAULT_DB_PWDS.get(this),
+        Misc.JDBC_DRIVERS.get(this)), Misc.HIBERNATE_DIALECTS.get(this));
+  }
+
+  private Pair<DBConnectionData, String> readPreferences(String prefix,
+      P3JConfigFile conf) {
+    return new Pair<>(new DBConnectionData(conf.get(prefix + Misc.PREF_DB_URL)
+        .toString(), conf.get(prefix + Misc.PREF_DB_USER).toString(), conf.get(
+        prefix + Misc.PREF_DB_PWD).toString(), conf.get(
+        prefix + Misc.PREF_HIBERNATE_DRIVER_PROPERTY).toString()), conf.get(
+        prefix + Misc.PREF_HIBERNATE_DIALECT_PROPERTY).toString());
+  }
+
+  private void writePreferences(String prefix, P3JConfigFile conf,
+      Pair<DBConnectionData, String> connData) {
+    conf.put(prefix + Misc.PREF_DB_URL, connData.getFirstValue().getUrl());
+    conf.put(prefix + Misc.PREF_DB_USER, connData.getFirstValue().getUser());
+    conf.put(prefix + Misc.PREF_DB_PWD, connData.getFirstValue().getPassword());
+    conf.put(prefix + Misc.PREF_HIBERNATE_DRIVER_PROPERTY, connData
+        .getFirstValue().getDriver());
+    conf.put(prefix + Misc.PREF_HIBERNATE_DIALECT_PROPERTY,
+        connData.getSecondValue());
+  }
+
+  public IPreferencesUIProvider getPreferencesUIProvider() {
+    switch (this) {
+    case HSQLDB:
+    case MYSQL:
+    case GENERIC:
+      return new GenericPreferencesUIProvider();
+    default:
+      throw new UnsupportedOperationException();
+    }
+  }
+
 }

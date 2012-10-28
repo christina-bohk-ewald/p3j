@@ -457,10 +457,11 @@ public final class P3J extends JFrame {
    * Edits the preferences.
    */
   protected void editPreferences() {
-
+    
     DatabaseTypeSelectionDialog dbTypeDialog = new DatabaseTypeSelectionDialog(
         this, (DatabaseType) getConfigFile().get(Misc.PREF_DB_TYPE));
     dbTypeDialog.setVisible(true);
+    
     // Check whether user cancelled
     if (dbTypeDialog.getDBType() == null)
       return;

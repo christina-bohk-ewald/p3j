@@ -20,7 +20,6 @@ import james.core.data.DBConnectionData;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,10 +39,10 @@ import org.hibernate.dialect.MySQL5Dialect;
 import org.hsqldb.jdbcDriver;
 import org.w3c.dom.Document;
 
-import com.mysql.jdbc.Driver;
-
 import p3j.database.DatabaseType;
 import p3j.simulation.ExecutionMode;
+
+import com.mysql.jdbc.Driver;
 
 /**
  * Miscellaneous (auxiliary) functions and constants. For simulation-related
@@ -169,10 +168,8 @@ public final class Misc {
   }
 
   /** Default setup for database connection. */
-  public static final DBConnectionData DEFAULT_DB_CONN = new DBConnectionData(
-      DEFAULT_DB_URLS.get(DEFAULT_DB_TYPE),
-      DEFAULT_DB_USERS.get(DEFAULT_DB_TYPE),
-      DEFAULT_DB_PWDS.get(DEFAULT_DB_TYPE), JDBC_DRIVERS.get(DEFAULT_DB_TYPE));
+  public static final DBConnectionData DEFAULT_DB_CONN = DEFAULT_DB_TYPE
+      .getDefaults().getFirstValue();
 
   // Some common GUI Labels
 

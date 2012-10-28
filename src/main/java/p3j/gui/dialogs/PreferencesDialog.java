@@ -15,6 +15,9 @@
  */
 package p3j.gui.dialogs;
 
+import james.core.data.DBConnectionData;
+import james.core.util.misc.Pair;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,14 +27,12 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 
 import p3j.database.DatabaseType;
+import p3j.database.IPreferencesUIProvider;
 import p3j.database.hibernate.P3MDatabase;
 import p3j.gui.misc.P3JConfigFile;
 import p3j.gui.panels.PropertiesShowPanelFactory;
-import p3j.misc.Misc;
 import p3j.misc.gui.GUI;
 
 /**
@@ -49,7 +50,7 @@ public class PreferencesDialog extends JDialog {
   public static final int DIALOG_WIDTH = 850;
 
   /** Height of the dialog. */
-  public static final int DIALOG_HEIGHT = 220;
+  public static final int DIALOG_HEIGHT = 150;
 
   /** The width of the key column in the form. */
   private static final int FORM_KEY_WIDTH = 200;
@@ -59,6 +60,9 @@ public class PreferencesDialog extends JDialog {
 
   /** The chosen database type. */
   private final DatabaseType dbType;
+
+  /** The configuration file. */
+  private final P3JConfigFile configFile;
 
   /**
    * Instantiates a new preferences dialog.
@@ -73,9 +77,8 @@ public class PreferencesDialog extends JDialog {
   public PreferencesDialog(Frame owner, final P3JConfigFile p3jConfiguration,
       DatabaseType databaseType) {
     super(owner, "Edit Preferences", true);
-    setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-    GUI.centerOnScreen(this);
     dbType = databaseType;
+    configFile = p3jConfiguration;
 
     // Create new assignment
     JButton apply = new JButton("Apply");
@@ -95,27 +98,22 @@ public class PreferencesDialog extends JDialog {
         FORM_KEY_WIDTH, buttons, 2);
 
     pspf.sep("Database Connection");
-    final JTextField dbURL = new JTextField(
-        (String) p3jConfiguration.get(Misc.PREF_DB_URL));
-    pspf.app(Misc.PREF_DB_URL + ":", dbURL);
 
-    final JTextField dbUserName = new JTextField(
-        (String) p3jConfiguration.get(Misc.PREF_DB_USER));
-    pspf.app(Misc.PREF_DB_USER + ":", dbUserName);
+    final IPreferencesUIProvider uiProvider = dbType.getPreferencesUIProvider();
+    setSize(DIALOG_WIDTH, DIALOG_HEIGHT + uiProvider.getHeight());
+    GUI.centerOnScreen(this);
 
-    final JTextField dbPassword = new JPasswordField(
-        (String) p3jConfiguration.get(Misc.PREF_DB_PWD));
-    pspf.app(Misc.PREF_DB_PWD + ":", dbPassword);
+    uiProvider.addUIElements(pspf, dbType.readPreferences(p3jConfiguration));
 
     apply.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        Exception ex = P3MDatabase.testConnection(dbURL.getText(),
-            dbUserName.getText(), dbPassword.getText());
+        Pair<DBConnectionData, String> connData = uiProvider.getDBPreferences();
+        Exception ex = P3MDatabase.testConnection(connData.getFirstValue()
+            .getUrl(), connData.getFirstValue().getUser(), connData
+            .getFirstValue().getPassword());
         if (ex == null) {
-          p3jConfiguration.put(Misc.PREF_DB_URL, dbURL.getText());
-          p3jConfiguration.put(Misc.PREF_DB_USER, dbUserName.getText());
-          p3jConfiguration.put(Misc.PREF_DB_PWD, dbPassword.getText());
+          dbType.writePreferences(configFile, connData);
         } else {
           GUI.printErrorMessage(
               thisDialog,
@@ -137,9 +135,10 @@ public class PreferencesDialog extends JDialog {
     testDBConnection.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        Exception ex = P3MDatabase.testConnection(dbURL.getText(),
-            dbUserName.getText(), dbPassword.getText());
-
+        Pair<DBConnectionData, String> connData = uiProvider.getDBPreferences();
+        Exception ex = P3MDatabase.testConnection(connData.getFirstValue()
+            .getUrl(), connData.getFirstValue().getUser(), connData
+            .getFirstValue().getPassword());
         if (ex != null) {
           GUI.printErrorMessage(
               thisDialog,
@@ -156,10 +155,7 @@ public class PreferencesDialog extends JDialog {
     resetToDefaults.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        dbURL.setText(Misc.DEFAULT_DB_URLS.get(dbType)); // TODO: Make this
-                                                         // dbType-specific
-        dbUserName.setText(Misc.DEFAULT_DB_USERS.get(dbType));
-        dbPassword.setText(Misc.DEFAULT_DB_PWDS.get(dbType));
+        uiProvider.setDBPreferences(dbType.getDefaults());
         contentPanel.repaint();
       }
     });

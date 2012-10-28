@@ -26,7 +26,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.hibernate.cfg.Configuration;
-import org.hibernate.dialect.MySQL5Dialect;
 
 import p3j.database.hibernate.P3MDatabase;
 import p3j.gui.P3J;
