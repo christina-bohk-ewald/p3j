@@ -128,6 +128,9 @@ public final class Misc {
   /** The URL prefix for HSQLDB URLs. */
   public static final String HSQLDB_URL_PREFIX = "jdbc:hsqldb:file:";
 
+  /** The file name for HSQLDB. */
+  public static final String HSQLDB_FILE_NAME = "pppm_db";
+
   /** The hibernate property to read out the dialect that is used. */
   public static final String PREF_HIBERNATE_DIALECT_PROPERTY = "hibernate.dialect";
 
@@ -158,7 +161,8 @@ public final class Misc {
   /** The default database URLs. */
   public static final Map<DatabaseType, String> DEFAULT_DB_URLS = new HashMap<>();
   static {
-    DEFAULT_DB_URLS.put(DatabaseType.HSQLDB, HSQLDB_URL_PREFIX + "./pppm_db");
+    DEFAULT_DB_URLS.put(DatabaseType.HSQLDB, HSQLDB_URL_PREFIX + "."
+        + File.separator + HSQLDB_FILE_NAME);
     DEFAULT_DB_URLS.put(DatabaseType.MYSQL, MYSQL_URL_PREFIX
         + "localhost/pppm_db");
     DEFAULT_DB_URLS.put(DatabaseType.GENERIC, MYSQL_URL_PREFIX

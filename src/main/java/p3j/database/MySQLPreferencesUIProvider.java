@@ -27,6 +27,8 @@ import p3j.misc.Misc;
 /**
  * GUI to configure database connection to MySQL server.
  * 
+ * CAn be easily re-used for other (non-file-based) DBMS.
+ * 
  * Created on 28.10.2012
  * 
  * @author Christina Bohk
@@ -34,13 +36,17 @@ import p3j.misc.Misc;
  */
 public class MySQLPreferencesUIProvider implements IPreferencesUIProvider {
 
+  /** The url. */
   final JTextField dbURL = new JTextField();
 
+  /** The user name. */
   final JTextField dbUserName = new JTextField();
 
+  /** The password. */
   final JTextField dbPassword = new JPasswordField();
 
-  final DatabaseType dbType = DatabaseType.MYSQL;
+  /** The database type. */
+  private static final DatabaseType DB_TYPE = DatabaseType.MYSQL;
 
   @Override
   public int getHeight() {
@@ -60,7 +66,7 @@ public class MySQLPreferencesUIProvider implements IPreferencesUIProvider {
   public Pair<DBConnectionData, String> getDBPreferences() {
     return new Pair<>(new DBConnectionData(Misc.MYSQL_URL_PREFIX
         + dbURL.getText(), dbUserName.getText(), dbPassword.getText(),
-        Misc.JDBC_DRIVERS.get(dbType)), Misc.HIBERNATE_DIALECTS.get(dbType));
+        Misc.JDBC_DRIVERS.get(DB_TYPE)), Misc.HIBERNATE_DIALECTS.get(DB_TYPE));
   }
 
   @Override

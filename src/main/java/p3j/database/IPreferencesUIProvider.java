@@ -20,20 +20,48 @@ import james.core.util.misc.Pair;
 import p3j.gui.panels.PropertiesShowPanelFactory;
 
 /**
- * Created on 28.10.2012
+ * Provides the means to configure a database connection via the user interface.
+ * 
+ * @see p3j.gui.dialogs.PreferencesDialog
+ * 
+ *      Created on 28.10.2012
  * 
  * @author Christina Bohk
  * @author Roland Ewald
  */
 public interface IPreferencesUIProvider {
 
+  /**
+   * Gets the required height of the UI elements.
+   * 
+   * @return the height of the UI elements
+   */
   int getHeight();
 
+  /**
+   * Adds the UI elements via a properties panel factory.
+   * 
+   * @param pspf
+   *          the properties panel factory
+   * @param connData
+   *          the current connection data
+   */
   void addUIElements(PropertiesShowPanelFactory pspf,
       Pair<DBConnectionData, String> connData);
 
+  /**
+   * Gets the database connection preferences.
+   * 
+   * @return the connection preferences
+   */
   Pair<DBConnectionData, String> getDBPreferences();
 
-  void setDBPreferences(Pair<DBConnectionData, String> defaults);
+  /**
+   * Sets the database connection preferences.
+   * 
+   * @param prefs
+   *          the preferences
+   */
+  void setDBPreferences(Pair<DBConnectionData, String> prefs);
 
 }
