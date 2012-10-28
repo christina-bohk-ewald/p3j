@@ -33,6 +33,7 @@ import p3j.database.IPreferencesUIProvider;
 import p3j.database.hibernate.P3MDatabase;
 import p3j.gui.misc.P3JConfigFile;
 import p3j.gui.panels.PropertiesShowPanelFactory;
+import p3j.misc.Misc;
 import p3j.misc.gui.GUI;
 
 /**
@@ -114,6 +115,7 @@ public class PreferencesDialog extends JDialog {
             .getFirstValue().getPassword());
         if (ex == null) {
           dbType.writePreferences(configFile, connData);
+          configFile.put(Misc.PREF_DB_TYPE, dbType);
         } else {
           GUI.printErrorMessage(
               thisDialog,

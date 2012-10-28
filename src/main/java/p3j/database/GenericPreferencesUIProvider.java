@@ -38,9 +38,13 @@ public class GenericPreferencesUIProvider implements IPreferencesUIProvider {
 
   final JTextField dbPassword = new JPasswordField();
 
+  final JTextField jdbcDriver = new JTextField();
+
+  final JTextField dialect = new JTextField();
+
   @Override
   public int getHeight() {
-    return 70;
+    return 110;
   }
 
   @Override
@@ -50,11 +54,15 @@ public class GenericPreferencesUIProvider implements IPreferencesUIProvider {
     pspf.app(Misc.PREF_DB_URL + ":", dbURL);
     pspf.app(Misc.PREF_DB_USER + ":", dbUserName);
     pspf.app(Misc.PREF_DB_PWD + ":", dbPassword);
+    pspf.app(Misc.GUI_LABEL_DB_DRIVER_CLASS + ":", jdbcDriver);
+    pspf.app(Misc.GUI_LABEL_HIBERNATE_DIALECT + ":", dialect);
   }
 
   @Override
   public Pair<DBConnectionData, String> getDBPreferences() {
-    return null;
+    return new Pair<>(new DBConnectionData(dbURL.getText(),
+        dbUserName.getText(), dbPassword.getText(), jdbcDriver.getText()),
+        dialect.getText());
   }
 
   @Override
@@ -62,6 +70,8 @@ public class GenericPreferencesUIProvider implements IPreferencesUIProvider {
     dbURL.setText(connData.getFirstValue().getUrl());
     dbUserName.setText(connData.getFirstValue().getUser());
     dbPassword.setText(connData.getFirstValue().getPassword());
+    jdbcDriver.setText(connData.getFirstValue().getDriver());
+    dialect.setText(connData.getSecondValue());
   }
 
 }

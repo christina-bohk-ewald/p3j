@@ -138,12 +138,15 @@ public final class Misc {
         HSQLDialect.class.getCanonicalName());
     HIBERNATE_DIALECTS.put(DatabaseType.MYSQL,
         MySQL5Dialect.class.getCanonicalName());
+    HIBERNATE_DIALECTS.put(DatabaseType.GENERIC,
+        MySQL5Dialect.class.getCanonicalName());
   }
 
   public static final Map<DatabaseType, String> JDBC_DRIVERS = new HashMap<>();
   static {
     JDBC_DRIVERS.put(DatabaseType.HSQLDB, jdbcDriver.class.getCanonicalName());
     JDBC_DRIVERS.put(DatabaseType.MYSQL, Driver.class.getCanonicalName());
+    JDBC_DRIVERS.put(DatabaseType.GENERIC, Driver.class.getCanonicalName());
   }
 
   /** The default database URLs. */
@@ -151,6 +154,7 @@ public final class Misc {
   static {
     DEFAULT_DB_URLS.put(DatabaseType.HSQLDB, "jdbc:hsqldb:file:./pppm_db");
     DEFAULT_DB_URLS.put(DatabaseType.MYSQL, "jdbc:mysql://localhost/pppm_db");
+    DEFAULT_DB_URLS.put(DatabaseType.GENERIC, "jdbc:mysql://localhost/pppm_db");
   }
 
   /** The default database user names. */
@@ -158,6 +162,7 @@ public final class Misc {
   static {
     DEFAULT_DB_USERS.put(DatabaseType.HSQLDB, "sa");
     DEFAULT_DB_USERS.put(DatabaseType.MYSQL, "root");
+    DEFAULT_DB_USERS.put(DatabaseType.GENERIC, "root");
   }
 
   /** The default database passwords. */
@@ -165,6 +170,7 @@ public final class Misc {
   static {
     DEFAULT_DB_PWDS.put(DatabaseType.HSQLDB, "");
     DEFAULT_DB_PWDS.put(DatabaseType.MYSQL, "root");
+    DEFAULT_DB_PWDS.put(DatabaseType.GENERIC, "");
   }
 
   /** Default setup for database connection. */
@@ -196,6 +202,12 @@ public final class Misc {
 
   /** The projection horizon. */
   public static final String GUI_LABEL_PROJECTION_HORIZON = "Projection Horizon:";
+
+  /** The label for the JDBC driver. */
+  public static final String GUI_LABEL_DB_DRIVER_CLASS = "JDBC Driver (needs to be in classpath)";
+
+  /** The label for the Hibernate dialect. */
+  public static final String GUI_LABEL_HIBERNATE_DIALECT = "Hibernate dialect class";
 
   /**
    * This class should not be instantiated.
