@@ -114,6 +114,7 @@ public enum DatabaseType {
     switch (this) {
     case HSQLDB:
     case MYSQL:
+      return new MySQLPreferencesUIProvider();
     case GENERIC:
       return new GenericPreferencesUIProvider();
     default:

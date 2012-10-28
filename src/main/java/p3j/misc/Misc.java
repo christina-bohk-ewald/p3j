@@ -122,6 +122,9 @@ public final class Misc {
 
   // Default database configuration
 
+  /** The URL prefix for MySQL URLs. */
+  public static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
+
   /** The hibernate property to read out the dialect that is used. */
   public static final String PREF_HIBERNATE_DIALECT_PROPERTY = "hibernate.dialect";
 
@@ -153,8 +156,10 @@ public final class Misc {
   public static final Map<DatabaseType, String> DEFAULT_DB_URLS = new HashMap<>();
   static {
     DEFAULT_DB_URLS.put(DatabaseType.HSQLDB, "jdbc:hsqldb:file:./pppm_db");
-    DEFAULT_DB_URLS.put(DatabaseType.MYSQL, "jdbc:mysql://localhost/pppm_db");
-    DEFAULT_DB_URLS.put(DatabaseType.GENERIC, "jdbc:mysql://localhost/pppm_db");
+    DEFAULT_DB_URLS.put(DatabaseType.MYSQL, MYSQL_URL_PREFIX
+        + "localhost/pppm_db");
+    DEFAULT_DB_URLS.put(DatabaseType.GENERIC, MYSQL_URL_PREFIX
+        + "localhost/pppm_db");
   }
 
   /** The default database user names. */
