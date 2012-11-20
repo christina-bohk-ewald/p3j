@@ -34,7 +34,7 @@ import p3j.simulation.calculation.deterministic.Constants;
  * Stores a complete configuration for the PPPM, containing {@link Set} objects
  * associated with different {@link SetType} instances. Such a scenario can be
  * used for forecasting, it comprises all information necessary for basic
- * repeatibility of the Monte-Carlo-simulation. Each scenario holds a list of
+ * reproducibility of the Monte-Carlo-simulation. Each scenario holds a list of
  * all {@link ParameterInstance} objects that need an assignment. Disjunct
  * subsets of this list will be managed by {@link SetType}.
  * 
@@ -79,6 +79,9 @@ public class ProjectionModel extends Model implements IProjectionModel {
   /** Mapping {@link ParameterInstance} to {@link SetType} that manages it. */
   private Map<ParameterInstance, SetType> instanceSetTypes = new HashMap<ParameterInstance, SetType>();
 
+  /** The sub-population model that is assumed. */
+  private SubPopulationModel subPopulationModel = new SubPopulationModel();
+
   /**
    * Number of generations to be taken into account. Is initially set to
    * {@link Constants#DEFAULT_NUM_GENERATIONS}.
@@ -104,7 +107,6 @@ public class ProjectionModel extends Model implements IProjectionModel {
    * Constructor for bean compatibility (do NOT use manually!).
    */
   public ProjectionModel() {
-
   }
 
   /**
@@ -551,6 +553,25 @@ public class ProjectionModel extends Model implements IProjectionModel {
    */
   public void setJumpOffYear(int jumpOffYear) {
     this.jumpOffYear = jumpOffYear;
+  }
+
+  /**
+   * Gets the sub-population model.
+   * 
+   * @return the sub-population model
+   */
+  public SubPopulationModel getSubPopulationModel() {
+    return subPopulationModel;
+  }
+
+  /**
+   * Sets the sub-population model.
+   * 
+   * @param subPopulationModel
+   *          the new sub-population model
+   */
+  public void setSubPopulationModel(SubPopulationModel subPopulationModel) {
+    this.subPopulationModel = subPopulationModel;
   }
 
   /**

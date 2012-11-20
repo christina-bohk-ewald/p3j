@@ -11,6 +11,7 @@
 <property name="years"/>
 <property name="jumpOffYear"/>
 <property name="maximumAge"/>
+<property name="subPopulationModel" length="4096"/>
 
 <many-to-one name="defaultType" class="p3j.pppm.sets.SetType" cascade="save-update,persist,delete"/>
 <many-to-one name="defaultSet" class="p3j.pppm.sets.Set" cascade="save-update,persist,delete"/>
