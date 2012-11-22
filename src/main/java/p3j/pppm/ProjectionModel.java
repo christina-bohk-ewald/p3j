@@ -124,15 +124,18 @@ public class ProjectionModel extends Model implements IProjectionModel {
    *          maximum age to be considered
    * @param jumpOffYear
    *          the jump off year
+   * @param subPopModel
+   *          the model of sub-populations
    */
   public ProjectionModel(String scenName, String desc, int numOfGenerations,
-      int predYears, int maxAge, int jumpOffYear) {
+      int predYears, int maxAge, int jumpOffYear, SubPopulationModel subPopModel) {
     this.name = scenName;
     this.description = desc;
     this.generations = numOfGenerations;
     this.years = predYears;
     this.maximumAge = maxAge;
     this.jumpOffYear = jumpOffYear;
+    this.subPopulationModel = subPopModel;
   }
 
   /**

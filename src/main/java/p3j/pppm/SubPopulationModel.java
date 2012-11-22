@@ -41,9 +41,17 @@ public class SubPopulationModel implements Serializable {
 
   /** Creates default configuration of sub-populations. */
   public SubPopulationModel() {
-    subPopulations.add(new SubPopulation("Natives", true, false));
-    subPopulations.add(new SubPopulation("Immigrants", true, true));
-    subPopulations.add(new SubPopulation("Emigrants", false, true));
+  }
+
+  /**
+   * Instantiates a new sub-population model based on existing sub-populations.
+   * 
+   * @param subPopulations
+   *          the sub-populations that determine the model
+   */
+  public SubPopulationModel(List<SubPopulation> subPopulations) {
+    for (SubPopulation subPop : subPopulations)
+      this.subPopulations.add(subPop.newSubPopulation());
   }
 
   /**

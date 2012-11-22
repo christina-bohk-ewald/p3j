@@ -63,7 +63,16 @@ public class SubPopulation implements Serializable {
       boolean consistOfDescGenerations) {
     this.name = name;
     this.additive = additive;
-    this.setConsistingOfDescendantGenerations(consistOfDescGenerations);
+    this.consistingOfDescendantGenerations = consistOfDescGenerations;
+  }
+
+  /**
+   * Creates new sub-population with same properties.
+   * 
+   * @return the new sub-population
+   */
+  public SubPopulation newSubPopulation() {
+    return new SubPopulation(name, additive, consistingOfDescendantGenerations);
   }
 
   /**

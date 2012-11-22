@@ -333,7 +333,7 @@ public class TestHibernateConnection extends TestCase {
   public void projectionOperations() throws Exception {
     ProjectionModel projection = new ProjectionModel("test scenario",
         "Scenario descrption", TEST_GENERATIONS, TEST_PRED_YEARS, TEST_MAX_AGE,
-        TEST_JUMP_OFF_YEAR);
+        TEST_JUMP_OFF_YEAR, PPPModelFactory.DEFAULT_SUBPOPULATION_MODEL);
     db.newProjection(projection);
     assertNotNull(EXPL_INSTANTIATION, projection);
     SetType sType = projection.createSetType("SetType1",
@@ -347,7 +347,8 @@ public class TestHibernateConnection extends TestCase {
         .get(0).getDefinedParameters().size());
     ProjectionModel projection2 = new ProjectionModel("test scenario2",
         "Scenario descrption 2", TEST_GENERATIONS + 1, TEST_PRED_YEARS,
-        TEST_MAX_AGE, TEST_JUMP_OFF_YEAR);
+        TEST_MAX_AGE, TEST_JUMP_OFF_YEAR,
+        PPPModelFactory.DEFAULT_SUBPOPULATION_MODEL);
     db.newProjection(projection2);
     projections = db.getAllProjections();
     assertEquals(EXPL_TWO_ENTITIES, 2, projections.size());
