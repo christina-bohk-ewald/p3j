@@ -16,9 +16,13 @@
 package p3j.gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import p3j.misc.gui.GUI;
 import p3j.pppm.SubPopulationModel;
@@ -46,10 +50,6 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
    */
   private boolean confirmed = false;
 
-  JButton createAddButton() {
-    return GUI.createIconButton("add_correction.png", "+");
-  }
-
   JButton createDelButton() {
     return GUI.createIconButton("remove_correction.png", "-");
   }
@@ -70,10 +70,16 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
   }
 
   private void initialize() {
-    JPanel content = new JPanel(GUI.getStdBorderLayout());
-    getContentPane().add(content);
+    JPanel overall = new JPanel(GUI.getStdBorderLayout());
+    getContentPane().add(overall);
 
-    content.add(createButtonPanel(), BorderLayout.SOUTH);
+    JPanel content = new JPanel(GUI.getStdBorderLayout());
+    content.add(createAddButtonPanel(), BorderLayout.SOUTH);
+
+    overall.add(new JPanel(), BorderLayout.WEST);
+    overall.add(new JPanel(), BorderLayout.EAST);
+    overall.add(content, BorderLayout.CENTER);
+    overall.add(createButtonPanel(), BorderLayout.SOUTH);
   }
 
   private JPanel createButtonPanel() {
@@ -90,6 +96,35 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     JPanel subPanel = new JPanel();
     subPanel.add(bbBuilder.getPanel());
     return subPanel;
+  }
+
+  private JPanel createAddButtonPanel() {
+
+    JPanel generalPanel = new JPanel(GUI.getStdBorderLayout());
+    JPanel addButtonPanel = new JPanel(GUI.getStdBorderLayout());
+
+    final JTextField subPopName = new JTextField("Subpopulation Name");
+    final JCheckBox hasDescendantGenerations = new JCheckBox(
+        "Distinct Descendant Generations");
+    final JButton addButton = GUI.createIconButton("add_correction.png", "+");
+    addButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        addSubPopulation(subPopName.getText(),
+            hasDescendantGenerations.isSelected());
+      }
+    });
+
+    addButtonPanel.add(subPopName, BorderLayout.CENTER);
+    addButtonPanel.add(hasDescendantGenerations, BorderLayout.EAST);
+
+    generalPanel.add(addButtonPanel, BorderLayout.CENTER);
+    generalPanel.add(addButton, BorderLayout.EAST);
+    return generalPanel;
+  }
+
+  protected void addSubPopulation(String text, boolean selected) {
+    // TODO Auto-generated method stub
   }
 
   @Override
