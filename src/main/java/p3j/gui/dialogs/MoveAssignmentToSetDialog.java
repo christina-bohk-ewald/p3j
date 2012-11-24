@@ -15,8 +15,6 @@
  */
 package p3j.gui.dialogs;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,115 +39,99 @@ import p3j.pppm.sets.SetType;
  */
 public class MoveAssignmentToSetDialog extends ProjectionDialog {
 
-	/**
-	 * The listener interface for clicks on the OK button.
-	 */
-	private final class OKActionListener implements ActionListener {
+  /** Serialization ID. */
+  private static final long serialVersionUID = -1158858943985692727L;
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			Object item = desitnationSetSelector.getSelectedItem();
-			if (!(item instanceof Set)) {
-				return;
-			}
-			Set destSet = (Set) item;
-			oldSet.removeParameterAssignment(assignment);
-			destSet.addParameterAssignment(assignment);
-			DatabaseFactory.getDatabaseSingleton().saveSet(oldSet);
-			DatabaseFactory.getDatabaseSingleton().saveSet(destSet);
-			projectionTree.totalRefresh();
-			ProjectionTreeNode<?> selectNode = ((ProjectionTreeNode<?>) projectionTree
-			    .getTreeModel().getRoot()).getChildWithEntity(assignment
-			    .getParamInstance());
-			if (selectNode.getChildCount() > 0) {
-				selectNode = (ProjectionTreeNode<?>) selectNode.getChildAt(0);
-			}
-			projectionTree.selectNode(selectNode);
-			setVisible(false);
-		}
-	}
+  /** The parameter assignment to be moved. */
+  private final ParameterAssignment assignment;
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = -1158858943985692727L;
+  /** The set the parameter assignment is currently associated with. */
+  private final Set oldSet;
 
-	/** The parameter assignment to be moved. */
-	private final ParameterAssignment assignment;
+  /** The current Settype. */
+  private final SetType setType;
 
-	/** The set the parameter assignment is currently associated with. */
-	private final Set oldSet;
+  /** The projection tree. */
+  private final IProjectionTree projectionTree;
 
-	/** The current Settype. */
-	private final SetType setType;
+  /** The select box to choose the destination set. */
+  private final JComboBox<Set> desitnationSetSelector = new JComboBox<Set>();
 
-	/** The projection tree. */
-	private final IProjectionTree projectionTree;
+  /**
+   * Instantiates a new move assignment to set dialog.
+   * 
+   * @param parameterAssignment
+   *          the parameter assignment
+   * @param projTree
+   *          the projection tree
+   * @param assignmentSet
+   *          the set the assignment is currently stored in
+   * @param currentSetType
+   *          the current Settype
+   * @param node
+   *          the node of the current set
+   */
+  public MoveAssignmentToSetDialog(ParameterAssignment parameterAssignment,
+      IProjectionTree projTree, Set assignmentSet, SetType currentSetType) {
+    assignment = parameterAssignment;
+    oldSet = assignmentSet;
+    projectionTree = projTree;
+    setType = currentSetType;
+    initUI();
+  }
 
-	/** The select box to choose the destination set. */
-	private final JComboBox<Set> desitnationSetSelector = new JComboBox<Set>();
+  @Override
+  protected void okAction() {
+    Object item = desitnationSetSelector.getSelectedItem();
+    if (!(item instanceof Set)) {
+      return;
+    }
+    Set destSet = (Set) item;
+    oldSet.removeParameterAssignment(assignment);
+    destSet.addParameterAssignment(assignment);
+    DatabaseFactory.getDatabaseSingleton().saveSet(oldSet);
+    DatabaseFactory.getDatabaseSingleton().saveSet(destSet);
+    projectionTree.totalRefresh();
+    ProjectionTreeNode<?> selectNode = ((ProjectionTreeNode<?>) projectionTree
+        .getTreeModel().getRoot()).getChildWithEntity(assignment
+        .getParamInstance());
+    if (selectNode.getChildCount() > 0) {
+      selectNode = (ProjectionTreeNode<?>) selectNode.getChildAt(0);
+    }
+    projectionTree.selectNode(selectNode);
+    setVisible(false);
+  }
 
-	/**
-	 * Instantiates a new move assignment to set dialog.
-	 * 
-	 * @param parameterAssignment
-	 *          the parameter assignment
-	 * @param projTree
-	 *          the projection tree
-	 * @param assignmentSet
-	 *          the set the assignment is currently stored in
-	 * @param currentSetType
-	 *          the current Settype
-	 * @param node
-	 *          the node of the current set
-	 */
-	public MoveAssignmentToSetDialog(ParameterAssignment parameterAssignment,
-	    IProjectionTree projTree, Set assignmentSet, SetType currentSetType) {
-		assignment = parameterAssignment;
-		oldSet = assignmentSet;
-		projectionTree = projTree;
-		setType = currentSetType;
-		initUI();
-	}
+  /**
+   * Initialize the user interface.
+   */
+  private void initUI() {
+    setTitle("Moving a parameter assignment");
+    setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+    setModal(true);
+    GUI.centerOnScreen(this);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see p3j.gui.dialogs.ProjectionDialog#addOKButtonAction()
-	 */
-	@Override
-	protected void addOKButtonAction() {
-		getOkButton().addActionListener(new OKActionListener());
-	}
+    List<Set> sets = new ArrayList<Set>(setType.getSets());
+    sets.remove(oldSet);
 
-	/**
-	 * Initialize the user interface.
-	 */
-	private void initUI() {
-		setTitle("Moving a parameter assignment");
-		setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-		setModal(true);
-		GUI.centerOnScreen(this);
+    for (Set s : sets) {
+      desitnationSetSelector.addItem(s);
+    }
 
-		List<Set> sets = new ArrayList<Set>(setType.getSets());
-		sets.remove(oldSet);
+    PropertiesShowPanelFactory pspf = new PropertiesShowPanelFactory(
+        getButtons(), 1);
+    pspf.sep("Assignment '" + assignment.getName() + "'");
+    pspf.app("Move to set:", desitnationSetSelector);
+    getContentPane().add(pspf.constructPanel());
+  }
 
-		for (Set s : sets) {
-			desitnationSetSelector.addItem(s);
-		}
-
-		PropertiesShowPanelFactory pspf = new PropertiesShowPanelFactory(
-		    getButtons(), 1);
-		pspf.sep("Assignment '" + assignment.getName() + "'");
-		pspf.app("Move to set:", desitnationSetSelector);
-		getContentPane().add(pspf.constructPanel());
-	}
-
-	/**
-	 * Checks if showing the dialog is meaningful.
-	 * 
-	 * @return true, if showing is meaningful because there is at least one other
-	 *         set
-	 */
-	public boolean isMeaningful() {
-		return desitnationSetSelector.getItemCount() > 0;
-	}
+  /**
+   * Checks if showing the dialog is meaningful.
+   * 
+   * @return true, if showing is meaningful because there is at least one other
+   *         set
+   */
+  public boolean isMeaningful() {
+    return desitnationSetSelector.getItemCount() > 0;
+  }
 }

@@ -15,10 +15,15 @@
  */
 package p3j.gui.dialogs;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JButton;
+import javax.swing.JPanel;
 
 import p3j.misc.gui.GUI;
 import p3j.pppm.SubPopulationModel;
+
+import com.jgoodies.forms.builder.ButtonBarBuilder2;
 
 /**
  * A dialog to edit the {@link SubPopulationModel} setup for a given
@@ -65,13 +70,32 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
   }
 
   private void initialize() {
-    getContentPane().add(createAddButton());
-    getContentPane().add(createDelButton());
+    JPanel content = new JPanel(GUI.getStdBorderLayout());
+    getContentPane().add(content);
+
+    content.add(createButtonPanel(), BorderLayout.SOUTH);
+  }
+
+  private JPanel createButtonPanel() {
+    JPanel buttonPanel = new JPanel(GUI.getStdBorderLayout());
+    buttonPanel.add(createButtonSubPanel(), BorderLayout.EAST);
+    return buttonPanel;
+  }
+
+  private JPanel createButtonSubPanel() {
+    ButtonBarBuilder2 bbBuilder = new ButtonBarBuilder2();
+    bbBuilder.addButton(getCancelButton());
+    bbBuilder.addUnrelatedGap();
+    bbBuilder.addButton(getOkButton());
+    JPanel subPanel = new JPanel();
+    subPanel.add(bbBuilder.getPanel());
+    return subPanel;
   }
 
   @Override
-  protected void addOKButtonAction() {
+  protected void okAction() {
     this.confirmed = true;
+    setVisible(false);
   }
 
   public SubPopulationModel getSubPopulationModel() {

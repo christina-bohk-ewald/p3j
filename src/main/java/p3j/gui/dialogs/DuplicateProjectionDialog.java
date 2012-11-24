@@ -17,8 +17,6 @@ package p3j.gui.dialogs;
 
 import james.SimSystem;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -257,19 +255,9 @@ public class DuplicateProjectionDialog extends ProcessProjectionDialog {
     return null;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see p3j.gui.dialogs.ProjectionDialog#addOKButtonAction()
-   */
   @Override
-  protected void addOKButtonAction() {
-    getOkButton().addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        duplicateProjection(newProjectionName.getText());
-      }
-    });
+  protected void okAction() {
+    duplicateProjection(newProjectionName.getText());
   }
 
 }

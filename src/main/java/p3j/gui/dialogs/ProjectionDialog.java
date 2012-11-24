@@ -31,52 +31,57 @@ import javax.swing.JDialog;
  */
 public abstract class ProjectionDialog extends JDialog {
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = -4217198597804149925L;
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = -4217198597804149925L;
 
-	/** The height of the dialog. */
-	protected static final int DIALOG_HEIGHT = 150;
+  /** The height of the dialog. */
+  protected static final int DIALOG_HEIGHT = 150;
 
-	/** The width of the dialog. */
-	protected static final int DIALOG_WIDTH = 600;
+  /** The width of the dialog. */
+  protected static final int DIALOG_WIDTH = 600;
 
-	/** The OK button. */
-	private final JButton okButton = new JButton("OK");
+  /** The OK button. */
+  private final JButton okButton = new JButton("OK");
+  {
+    okButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        okAction();
+      }
+    });
+  }
 
-	/** The cancel button. */
-	private final JButton cancelButton = new JButton("Cancel");
-	{
-		cancelButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setVisible(false);
-			}
-		});
-	}
-	/** The buttons. */
-	private final List<JButton> buttons = new ArrayList<JButton>();
-	{
-		getButtons().add(getOkButton());
-		getButtons().add(cancelButton);
-	}
+  /** The cancel button. */
+  private final JButton cancelButton = new JButton("Cancel");
+  {
+    getCancelButton().addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        setVisible(false);
+      }
+    });
+  }
+  /** The buttons. */
+  private final List<JButton> buttons = new ArrayList<JButton>();
+  {
+    getButtons().add(getOkButton());
+    getButtons().add(getCancelButton());
+  }
 
-	/**
-	 * Instantiates a new projection dialog.
-	 */
-	public ProjectionDialog() {
-		addOKButtonAction();
-	}
+  /**
+   * Override to add behavior for the OK button.
+   */
+  protected abstract void okAction();
 
-	/**
-	 * Adds the OK button action.
-	 */
-	protected abstract void addOKButtonAction();
+  public List<JButton> getButtons() {
+    return buttons;
+  }
 
-	public List<JButton> getButtons() {
-		return buttons;
-	}
+  public JButton getOkButton() {
+    return okButton;
+  }
 
-	public JButton getOkButton() {
-		return okButton;
-	}
+  public JButton getCancelButton() {
+    return cancelButton;
+  }
 }
