@@ -45,8 +45,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
@@ -128,12 +126,8 @@ public final class P3J extends JFrame {
 
   // GUI elements
 
-  /** Icon for the run button. */
-  private final Icon runIcon = new ImageIcon(this.getClass().getResource(
-      "/p3j/icons/run.gif"));
-
   /** The button to run a calculation. */
-  private final JButton runButton = new JButton(runIcon);
+  private final JButton runButton = GUI.createIconButton("run.gif", "Run");
   {
     runButton.addActionListener(new ActionListener() {
       @Override
@@ -457,11 +451,11 @@ public final class P3J extends JFrame {
    * Edits the preferences.
    */
   protected void editPreferences() {
-    
+
     DatabaseTypeSelectionDialog dbTypeDialog = new DatabaseTypeSelectionDialog(
         this, (DatabaseType) getConfigFile().get(Misc.PREF_DB_TYPE));
     dbTypeDialog.setVisible(true);
-    
+
     // Check whether user cancelled
     if (dbTypeDialog.getDBType() == null)
       return;

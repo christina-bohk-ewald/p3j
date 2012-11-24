@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -35,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import p3j.gui.P3J;
+import p3j.gui.dialogs.NewSetTypeDialog;
 
 import com.jgoodies.forms.layout.CellConstraints;
 
@@ -176,6 +179,27 @@ public final class GUI {
     SimSystem.report(Level.SEVERE, title, throwable);
     printErrorMessage(P3J.getInstance(), title, throwable.getMessage(),
         throwable);
+  }
+
+  /**
+   * Creates a button with an icon.
+   * 
+   * @param iconFileName
+   *          the icon file name
+   * @param defaultText
+   *          the default text to be displayed when the icon cannot be loaded
+   * @return the button
+   */
+  public static JButton createIconButton(String iconFileName, String defaultText) {
+    JButton button = new JButton();
+    ImageIcon icon = new ImageIcon(
+        NewSetTypeDialog.class.getResource("/p3j/icons/" + iconFileName));
+    if (icon.getImage() != null) {
+      button.setIcon(icon);
+    } else {
+      button.setText("=>");
+    }
+    return button;
   }
 
   /**

@@ -15,6 +15,8 @@
  */
 package p3j.gui.dialogs;
 
+import javax.swing.JButton;
+
 import p3j.misc.gui.GUI;
 import p3j.pppm.SubPopulationModel;
 
@@ -39,6 +41,14 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
    */
   private boolean confirmed = false;
 
+  JButton createAddButton() {
+    return GUI.createIconButton("add_correction.png", "+");
+  }
+
+  JButton createDelButton() {
+    return GUI.createIconButton("remove_correction.png", "-");
+  }
+
   /**
    * Default constructor.
    * 
@@ -55,7 +65,8 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
   }
 
   private void initialize() {
-    // TODO Auto-generated method stub
+    getContentPane().add(createAddButton());
+    getContentPane().add(createDelButton());
   }
 
   @Override

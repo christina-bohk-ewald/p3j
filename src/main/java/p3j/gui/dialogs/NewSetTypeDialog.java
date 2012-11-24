@@ -21,7 +21,6 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -125,16 +124,9 @@ public class NewSetTypeDialog extends
   private JTextField stName = new JTextField("New Settype");
 
   /** Button to add an instance to the new type. */
-  private JButton addParamToNewType = new JButton();
+  private JButton addParamToNewType = GUI.createIconButton("arrow_r2l.gif",
+      "<=");
   {
-    ImageIcon icon = new ImageIcon(
-        NewSetTypeDialog.class.getResource("/p3j/icons/arrow_r2l.gif"));
-    if (icon.getImage() != null) {
-      addParamToNewType.setIcon(icon);
-    } else {
-      addParamToNewType.setText("<=");
-    }
-
     addParamToNewType.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -145,16 +137,9 @@ public class NewSetTypeDialog extends
   }
 
   /** Button to remove a instance from the new type. */
-  private JButton remParamFromNewType = new JButton();
+  private JButton remParamFromNewType = GUI.createIconButton("arrow_l2r.gif",
+      "=>");
   {
-    ImageIcon icon = new ImageIcon(
-        NewSetTypeDialog.class.getResource("/p3j/icons/arrow_l2r.gif"));
-    if (icon.getImage() != null) {
-      remParamFromNewType.setIcon(icon);
-    } else {
-      remParamFromNewType.setText("=>");
-    }
-
     remParamFromNewType.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
