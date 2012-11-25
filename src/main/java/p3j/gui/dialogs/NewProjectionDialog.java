@@ -116,7 +116,7 @@ public class NewProjectionDialog extends JDialog {
       @Override
       public void actionPerformed(ActionEvent e) {
         SubPopulationModelEditDialog dialog = new SubPopulationModelEditDialog(
-            subPopulationModel);
+            subPopulationModel, true);
         dialog.setVisible(true);
         if (dialog.isConfirmed())
           subPopulationModel = dialog.getSubPopulationModel();

@@ -31,6 +31,7 @@ import p3j.gui.dialogs.AdjustMaxAgeDialog;
 import p3j.gui.dialogs.DuplicateProjectionDialog;
 import p3j.gui.dialogs.NewSetTypeDialog;
 import p3j.gui.dialogs.ProjectionDialog;
+import p3j.gui.dialogs.SubPopulationModelEditDialog;
 import p3j.gui.misc.SubNodeSummary;
 import p3j.gui.panels.PropertiesShowPanelFactory;
 import p3j.misc.Misc;
@@ -48,105 +49,117 @@ import p3j.pppm.sets.SetType;
  */
 public class ProjectionNode extends ProjectionTreeNode<ProjectionModel> {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 8332182127722759791L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 8332182127722759791L;
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param projection
-	 *          the projection to be represented
-	 */
-	public ProjectionNode(ProjectionModel projection) {
-		super(projection, projection.getName());
-	}
+  /**
+   * Default constructor.
+   * 
+   * @param projection
+   *          the projection to be represented
+   */
+  public ProjectionNode(ProjectionModel projection) {
+    super(projection, projection.getName());
+  }
 
-	@Override
-	public void deselected() {
+  @Override
+  public void deselected() {
 
-	}
+  }
 
-	@Override
-	public JPanel selected(TreePath selectionPath, final IProjectionTree projTree) {
+  @Override
+  public JPanel selected(TreePath selectionPath, final IProjectionTree projTree) {
 
-		// Layout for info sheet on projection.
-		final ProjectionNode node = this;
-		final JTextField name = new JTextField(getEntity().getName());
-		final JTextArea description = new JTextArea(getEntity().getDescription());
-		final JTextField jumpOffYear = new JTextField(Integer.toString(getEntity()
-		    .getJumpOffYear()));
+    // Layout for info sheet on projection.
+    final ProjectionNode node = this;
+    final JTextField name = new JTextField(getEntity().getName());
+    final JTextArea description = new JTextArea(getEntity().getDescription());
+    final JTextField jumpOffYear = new JTextField(Integer.toString(getEntity()
+        .getJumpOffYear()));
 
-		JButton duplicateButton = new JButton("Duplicate");
-		duplicateButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				DuplicateProjectionDialog dp = new DuplicateProjectionDialog(
-				    getEntity());
-				dp.setVisible(true);
-			}
-		});
+    JButton showSubPopsButton = new JButton("Show Sub-Population Structure");
+    showSubPopsButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        new SubPopulationModelEditDialog(getEntity().getSubPopulationModel(),
+            false).setVisible(true);
+      }
+    });
 
-		JButton createSetTypeButton = new JButton("New Settype");
-		createSetTypeButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				NewSetTypeDialog nstd = new NewSetTypeDialog(node, projTree);
-				nstd.setVisible(true);
-				SetType newSetType = nstd.getNewSetType();
-				DatabaseFactory.getDatabaseSingleton().saveSetType(newSetType);
-				projTree.totalRefresh();
-				projTree.selectNode(node.getChildWithEntity(newSetType));
-			}
-		});
+    JButton duplicateButton = new JButton("Duplicate");
+    duplicateButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        DuplicateProjectionDialog dp = new DuplicateProjectionDialog(
+            getEntity());
+        dp.setVisible(true);
+      }
+    });
 
-		JButton applyButton = new JButton("Apply");
-		applyButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ProjectionModel projection = getEntity();
-				projection.setName(name.getText());
-				projection.setDescription(description.getText());
-				projection.setJumpOffYear(Integer.parseInt(jumpOffYear.getText()));
-				setUserObject(projection.getName());
-				DatabaseFactory.getDatabaseSingleton().saveProjection(projection);
-				projTree.refreshNode(node);
-			}
-		});
+    JButton createSetTypeButton = new JButton("New Settype");
+    createSetTypeButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        NewSetTypeDialog nstd = new NewSetTypeDialog(node, projTree);
+        nstd.setVisible(true);
+        SetType newSetType = nstd.getNewSetType();
+        DatabaseFactory.getDatabaseSingleton().saveSetType(newSetType);
+        projTree.totalRefresh();
+        projTree.selectNode(node.getChildWithEntity(newSetType));
+      }
+    });
 
-		JButton adjustMaxAgeButton = new JButton("Adjust Age Classes");
-		adjustMaxAgeButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				adjustMaxAge(getEntity());
-			}
-		});
+    JButton applyButton = new JButton("Apply");
+    applyButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        ProjectionModel projection = getEntity();
+        projection.setName(name.getText());
+        projection.setDescription(description.getText());
+        projection.setJumpOffYear(Integer.parseInt(jumpOffYear.getText()));
+        setUserObject(projection.getName());
+        DatabaseFactory.getDatabaseSingleton().saveProjection(projection);
+        projTree.refreshNode(node);
+      }
+    });
 
-		List<JButton> buttons = new ArrayList<JButton>();
-		buttons.add(duplicateButton);
-		buttons.add(adjustMaxAgeButton);
-		buttons.add(createSetTypeButton);
-		buttons.add(applyButton);
-		PropertiesShowPanelFactory pspf = new PropertiesShowPanelFactory(buttons, 1);
-		pspf.sep("General Information");
-		pspf.app(Misc.GUI_LABEL_NAME, name);
-		pspf.app(Misc.GUI_LABEL_DESCRIPTION, description, 2);
-		pspf.app(Misc.GUI_LABEL_JUMP_OFF_YEAR, jumpOffYear);
-		pspf.app("Settypes:", getEntity().getAllSetTypes().size());
-		pspf.app("Descendant Generations:", getEntity().getGenerations() - 1);
-		pspf.app("Years to be predicted:", getEntity().getYears());
-		pspf.app("Number of age classes", getEntity().getNumberOfAgeClasses());
-		pspf.appPreview(new SubNodeSummary<SetType>(node, projTree, SetType.class));
-		return pspf.constructPanel();
-	}
+    JButton adjustMaxAgeButton = new JButton("Adjust Age Classes");
+    adjustMaxAgeButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        adjustMaxAge(getEntity());
+      }
+    });
 
-	/**
-	 * Adjusts maximum age.
-	 * 
-	 * @param projectionModel
-	 *          the projection model for which the maximum age shall be adjusted
-	 */
-	protected void adjustMaxAge(ProjectionModel projectionModel) {
-		ProjectionDialog maDialog = new AdjustMaxAgeDialog(projectionModel);
-		maDialog.setVisible(true);
-	}
+    List<JButton> buttons = new ArrayList<JButton>();
+    buttons.add(showSubPopsButton);
+    buttons.add(duplicateButton);
+    buttons.add(adjustMaxAgeButton);
+    buttons.add(createSetTypeButton);
+    buttons.add(applyButton);
+    PropertiesShowPanelFactory pspf = new PropertiesShowPanelFactory(buttons, 1);
+    pspf.sep("General Information");
+    pspf.app(Misc.GUI_LABEL_NAME, name);
+    pspf.app(Misc.GUI_LABEL_DESCRIPTION, description, 2);
+    pspf.app(Misc.GUI_LABEL_JUMP_OFF_YEAR, jumpOffYear);
+    pspf.app("Settypes:", getEntity().getAllSetTypes().size());
+    pspf.app("Descendant Generations:", getEntity().getGenerations() - 1);
+    pspf.app("Years to be predicted:", getEntity().getYears());
+    pspf.app("Number of age classes:", getEntity().getNumberOfAgeClasses());
+    pspf.app("Number of sub-populations:", getEntity().getSubPopulationModel()
+        .getSubPopulations().size());
+    pspf.appPreview(new SubNodeSummary<SetType>(node, projTree, SetType.class));
+    return pspf.constructPanel();
+  }
+
+  /**
+   * Adjusts maximum age.
+   * 
+   * @param projectionModel
+   *          the projection model for which the maximum age shall be adjusted
+   */
+  protected void adjustMaxAge(ProjectionModel projectionModel) {
+    ProjectionDialog maDialog = new AdjustMaxAgeDialog(projectionModel);
+    maDialog.setVisible(true);
+  }
 }
