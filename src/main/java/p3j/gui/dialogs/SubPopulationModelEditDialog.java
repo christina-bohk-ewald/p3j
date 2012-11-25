@@ -20,20 +20,18 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 
 import p3j.misc.gui.GUI;
 import p3j.pppm.SubPopulation;
@@ -54,7 +52,19 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
   private static final long serialVersionUID = -3979733245241552349L;
 
   /** The sub-population model to be edited. */
-  private final SubPopListModel subPopulationModel;
+  private final SubPopulationModel subPopulationModel;
+
+  /** The panel containing the panel describing the existing sub-populations. */
+  private final JPanel subPopListPanel = new JPanel();
+  {
+    subPopListPanel.setLayout(new BoxLayout(subPopListPanel, BoxLayout.Y_AXIS));
+  }
+
+  /** The scroll pane for the list of sub-populations. */
+  private final JScrollPane listScroll = new JScrollPane(subPopListPanel);
+
+  /** The factory to create panels for editing individual sub-populations. */
+  private final SubPopPanelFactory panelFactory;
 
   /**
    * The flag that shows whether the edited sub-population model was confirmed
@@ -72,10 +82,26 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     setModal(true);
     setTitle("Edit Sub-Populations");
     setSize(DIALOG_WIDTH, 2 * DIALOG_HEIGHT);
-    subPopulationModel = new SubPopListModel(new SubPopulationModel(
-        subPopModel.getSubPopulations()));
+    subPopulationModel = new SubPopulationModel(subPopModel.getSubPopulations());
+    panelFactory = new SubPopPanelFactory(this);
+    updateSubPopListPanel();
     GUI.centerOnScreen(this);
     initialize();
+  }
+
+  void updateSubPopListPanel() {
+    subPopListPanel.removeAll();
+    List<SubPopulation> subPops = subPopulationModel.getSubPopulations();
+    for (int i = 0; i < subPops.size(); i++)
+      subPopListPanel.add(panelFactory.getPanel(subPops.get(i), i));
+    listScroll.validate();
+  }
+
+  void updateSubPopListPanel(int index) {
+    subPopListPanel.remove(index);
+    subPopListPanel.add(panelFactory.getPanel(subPopulationModel
+        .getSubPopulations().get(index), index), index);
+    listScroll.validate();
   }
 
   private void initialize() {
@@ -83,7 +109,7 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     getContentPane().add(overall);
 
     JPanel content = new JPanel(GUI.getStdBorderLayout());
-    content.add(createAddSubPopListPanel(), BorderLayout.CENTER);
+    content.add(createSubPopListPanel(), BorderLayout.CENTER);
     content.add(createAddSubPopPanel(), BorderLayout.SOUTH);
 
     overall.add(new JPanel(), BorderLayout.NORTH);
@@ -93,12 +119,10 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     overall.add(createButtonPanel(), BorderLayout.SOUTH);
   }
 
-  private Component createAddSubPopListPanel() {
-    JList<SubPopulation> subPopList = new JList<>(subPopulationModel);
-    subPopList.setCellRenderer(new SubPopCellRenderer());
-    JPanel subPopListPanel = new JPanel(GUI.getStdBorderLayout());
-    subPopListPanel.add(new JScrollPane(subPopList), BorderLayout.CENTER);
-    return subPopListPanel;
+  private Component createSubPopListPanel() {
+    JPanel surroundingPanel = new JPanel(GUI.getStdBorderLayout());
+    surroundingPanel.add(listScroll, BorderLayout.CENTER);
+    return surroundingPanel;
   }
 
   private JPanel createButtonPanel() {
@@ -164,8 +188,10 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
 
   protected void addSubPopulation(String subPopName, boolean additive,
       boolean hasDescendantGenerations) {
-    subPopulationModel.addElement(new SubPopulation(subPopName, additive,
-        hasDescendantGenerations));
+    SubPopulation newSubPop = new SubPopulation(subPopName, additive,
+        hasDescendantGenerations);
+    subPopulationModel.getSubPopulations().add(newSubPop);
+    updateSubPopListPanel();
   }
 
   @Override
@@ -175,8 +201,7 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
   }
 
   public SubPopulationModel getSubPopulationModel() {
-    SubPopulation[] subPops = (SubPopulation[]) subPopulationModel.toArray();
-    return new SubPopulationModel(Arrays.asList(subPops));
+    return subPopulationModel;
   }
 
   public boolean isConfirmed() {
@@ -186,39 +211,44 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
 }
 
 /**
- * Manages the list of sub-populations to be edited.
+ * Provides data editing capabilities for the table.
  */
-class SubPopListModel extends DefaultListModel<SubPopulation> {
+class SubPopPanelFactory {
 
-  final SubPopulationModel subPopModel;
+  final SubPopulationModelEditDialog editDialog;
 
-  SubPopListModel(SubPopulationModel subPopulationModel) {
-    subPopModel = subPopulationModel;
-    for (SubPopulation subPop : subPopulationModel.getSubPopulations())
-      addElement(subPop);
+  SubPopPanelFactory(SubPopulationModelEditDialog editDialog) {
+    this.editDialog = editDialog;
   }
 
-  private static final long serialVersionUID = -4527611539757241306L;
-
-}
-
-/**
- * Renders the relevant data fields of a sub-population to a panel and provides
- * buttons to move it up/down.
- */
-class SubPopCellRenderer implements ListCellRenderer<SubPopulation> {
-
-  @Override
-  public Component getListCellRendererComponent(
-      JList<? extends SubPopulation> list, SubPopulation subPop, int index,
-      boolean isSelected, boolean cellHasFocus) {
+  JPanel getPanel(SubPopulation subPop, int index) {
     JPanel subPopDisplayPanel = new JPanel(GUI.getStdBorderLayout());
-
     subPopDisplayPanel.add(new JPanel(), BorderLayout.NORTH);
+    subPopDisplayPanel
+        .add(makeAdditiveButton(subPop, index), BorderLayout.WEST);
     subPopDisplayPanel.add(new JLabel(subPop.getName()), BorderLayout.CENTER);
     subPopDisplayPanel.add(new JPanel(), BorderLayout.SOUTH);
 
-    subPopDisplayPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+    subPopDisplayPanel
+        .setBorder(BorderFactory.createLineBorder(Color.black, 1));
     return subPopDisplayPanel;
+  }
+
+  JButton makeAdditiveButton(final SubPopulation subPopulation,
+      final int subPopIndex) {
+    JButton resultingButton = null;
+    if (subPopulation.isAdditive())
+      resultingButton = GUI.createIconButton("add_correction.png", "+");
+    else
+      resultingButton = GUI.createIconButton("remove_correction.png", "-");
+    final JButton myButton = resultingButton;
+    myButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        subPopulation.setAdditive(!subPopulation.isAdditive());
+        myButton.setText("!");
+      }
+    });
+    return resultingButton;
   }
 }
