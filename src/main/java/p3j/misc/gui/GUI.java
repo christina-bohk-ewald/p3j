@@ -26,6 +26,7 @@ import java.awt.Window;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.AbstractButton;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -35,9 +36,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import p3j.gui.P3J;
-import p3j.gui.dialogs.NewSetTypeDialog;
 
 import com.jgoodies.forms.layout.CellConstraints;
 
@@ -55,6 +56,9 @@ public final class GUI {
 
   /** The font-size of the wait-message. */
   private static final int FONT_SIZE_WAIT_MSG = 25;
+
+  /** The normal font-size. */
+  private static final int FONT_SIZE_MEDIUM = 15;
 
   /**
    * The number of rows used for a single 'content' row in the layout (for
@@ -191,15 +195,57 @@ public final class GUI {
    * @return the button
    */
   public static JButton createIconButton(String iconFileName, String defaultText) {
-    JButton button = new JButton();
-    ImageIcon icon = new ImageIcon(
-        NewSetTypeDialog.class.getResource("/p3j/icons/" + iconFileName));
+    return decorateButtonWithIconOrText(new JButton(),
+        retrieveIcon(iconFileName), defaultText);
+  }
+
+  /**
+   * Creates a radio button with an icon.
+   * 
+   * @param iconFileName
+   *          the icon file name
+   * @param defaultText
+   *          the default text to be displayed when the icon cannot be loaded
+   * @return the button
+   */
+  public static JRadioButton createIconRadioButton(String iconFileName,
+      String defaultText) {
+    return decorateButtonWithIconOrText(new JRadioButton(),
+        retrieveIcon(iconFileName), defaultText);
+  }
+
+  /**
+   * Decorate button with icon or text.
+   * 
+   * @param <B>
+   *          the generic type of the button
+   * @param button
+   *          the button
+   * @param icon
+   *          the icon
+   * @param defaultText
+   *          the default text
+   * @return the decorated button
+   */
+  public static <B extends AbstractButton> B decorateButtonWithIconOrText(
+      B button, ImageIcon icon, String defaultText) {
     if (icon.getImage() != null) {
       button.setIcon(icon);
     } else {
-      button.setText("=>");
+      button.setText(defaultText);
     }
     return button;
+  }
+
+  /**
+   * Retrieves icon.
+   * 
+   * @param iconFileName
+   *          the icon file name
+   * @return the image icon
+   */
+  public static ImageIcon retrieveIcon(String iconFileName) {
+    return new ImageIcon(GUI.class.getResource("/p3j/icons/" + iconFileName));
   }
 
   /**
@@ -309,8 +355,26 @@ public final class GUI {
    */
   public static JLabel getLabelToWait() {
     JLabel msg = new JLabel("This may take a while. Please be patient...");
-    msg.setFont(new Font("Sans", Font.BOLD, FONT_SIZE_WAIT_MSG));
+    msg.setFont(getDefaultFontLarge());
     return msg;
+  }
+
+  /**
+   * Gets the large default font.
+   * 
+   * @return the large default font
+   */
+  public static Font getDefaultFontLarge() {
+    return new Font("Sans", Font.BOLD, FONT_SIZE_WAIT_MSG);
+  }
+
+  /**
+   * Gets the default bold font.
+   * 
+   * @return the default bold font
+   */
+  public static Font getDefaultFontBold() {
+    return new Font("Sans", Font.BOLD, FONT_SIZE_MEDIUM);
   }
 
   /**
