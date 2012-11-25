@@ -224,7 +224,7 @@ public class NewProjectionDialog extends JDialog {
     }
 
     try {
-      newProjection = new PPPModelFactory().createModel(name.getText(),
+      newProjection = PPPModelFactory.createModel(name.getText(),
           description.getText(), gens, years, maxAge, jOffYear,
           subPopulationModel);
       database.newProjection(newProjection);

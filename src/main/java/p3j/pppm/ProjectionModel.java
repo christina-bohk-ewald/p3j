@@ -80,7 +80,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
   private Map<ParameterInstance, SetType> instanceSetTypes = new HashMap<ParameterInstance, SetType>();
 
   /** The sub-population model that is assumed. */
-  private SubPopulationModel subPopulationModel = new SubPopulationModel();
+  private SubPopulationModel subPopulationModel = PPPModelFactory.DEFAULT_SUBPOPULATION_MODEL;
 
   /**
    * Number of generations to be taken into account. Is initially set to

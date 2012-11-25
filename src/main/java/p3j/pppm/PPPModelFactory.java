@@ -50,15 +50,7 @@ public class PPPModelFactory extends ModelFactory {
       Calendar.YEAR);
 
   /** The default model of sub-populations. */
-  public static final SubPopulationModel DEFAULT_SUBPOPULATION_MODEL = new SubPopulationModel();
-  {
-    DEFAULT_SUBPOPULATION_MODEL.getSubPopulations().add(
-        new SubPopulation("Natives", true, false));
-    DEFAULT_SUBPOPULATION_MODEL.getSubPopulations().add(
-        new SubPopulation("Immigrants", true, true));
-    DEFAULT_SUBPOPULATION_MODEL.getSubPopulations().add(
-        new SubPopulation("Emigrants", false, true));
-  }
+  public static final SubPopulationModel DEFAULT_SUBPOPULATION_MODEL = createDefaultSubPopulationModel();
 
   @Override
   public ISymbolicModel<?> create() {
@@ -82,10 +74,27 @@ public class PPPModelFactory extends ModelFactory {
    * 
    * @return the projection model
    */
-  public ProjectionModel createDefaultModel() {
+  public static ProjectionModel createDefaultModel() {
     return createModel("New Projection", "No description entered.",
         DEFAULT_GENERATIONS, DEFAULT_YEARS, DEFAULT_MAX_AGE,
         DEFAULT_JUMP_OFF_YEAR, DEFAULT_SUBPOPULATION_MODEL);
+  }
+
+  /**
+   * Creates the default sub-population model (natives, immigrants, and
+   * emigrants).
+   * 
+   * @return the sub-population model
+   */
+  public static SubPopulationModel createDefaultSubPopulationModel() {
+    SubPopulationModel defaultModel = new SubPopulationModel();
+    defaultModel.getSubPopulations().add(
+        new SubPopulation("Natives", true, false));
+    defaultModel.getSubPopulations().add(
+        new SubPopulation("Immigrants", true, true));
+    defaultModel.getSubPopulations().add(
+        new SubPopulation("Emigrants", false, true));
+    return defaultModel;
   }
 
   /**
@@ -107,7 +116,7 @@ public class PPPModelFactory extends ModelFactory {
    *          the model of sub-populations
    * @return the projection model
    */
-  public ProjectionModel createModel(String name, String description,
+  public static ProjectionModel createModel(String name, String description,
       int generations, int years, int maxAge, int jumpOffYear,
       SubPopulationModel subPopModel) {
     return new ProjectionModel(name, description, generations, years, maxAge,

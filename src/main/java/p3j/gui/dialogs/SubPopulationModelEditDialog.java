@@ -107,7 +107,7 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     subPopulationModel = new SubPopulationModel(subPopModel.getSubPopulations());
 
     setModal(true);
-    setTitle("Edit Sub-Populations");
+    setTitle((editingAllowed ? "Edit" : "Show") + " Sub-Populations");
     setSize(DIALOG_WIDTH, 2 * DIALOG_HEIGHT);
     GUI.centerOnScreen(this);
     initialize();
@@ -266,7 +266,7 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     radioGroupPanel.add(additiveButton, BorderLayout.CENTER);
     radioGroupPanel.add(subtractiveButton, BorderLayout.EAST);
 
-    final JTextField subPopName = new JTextField("Subpopulation Name");
+    final JTextField subPopName = new JTextField("Sub-Population Name");
     final JCheckBox hasDescendantGenerations = new JCheckBox(
         "Distinct Descendant Generations");
     final JButton addButton = new JButton("Add");

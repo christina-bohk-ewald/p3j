@@ -127,7 +127,7 @@ public class DuplicateProjectionDialog extends ProcessProjectionDialog {
       ProjectionModel originalProjection, String newProjectionName,
       JLabel status) {
 
-    ProjectionModel duplicateProjection = (new PPPModelFactory()).createModel(
+    ProjectionModel duplicateProjection = PPPModelFactory.createModel(
         newProjectionName, originalProjection.getDescription(),
         originalProjection.getGenerations(), originalProjection.getYears(),
         originalProjection.getMaximumAge(),
