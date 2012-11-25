@@ -15,14 +15,15 @@
  */
 package p3j.gui.dialogs;
 
+import james.gui.utils.BasicUtilities;
+
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -84,24 +85,16 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     setSize(DIALOG_WIDTH, 2 * DIALOG_HEIGHT);
     subPopulationModel = new SubPopulationModel(subPopModel.getSubPopulations());
     panelFactory = new SubPopPanelFactory(this);
-    updateSubPopListPanel();
     GUI.centerOnScreen(this);
+    initializeSubPopListPanel();
     initialize();
   }
 
-  void updateSubPopListPanel() {
+  void initializeSubPopListPanel() {
     subPopListPanel.removeAll();
     List<SubPopulation> subPops = subPopulationModel.getSubPopulations();
     for (int i = 0; i < subPops.size(); i++)
       subPopListPanel.add(panelFactory.getPanel(subPops.get(i), i));
-    listScroll.validate();
-  }
-
-  void updateSubPopListPanel(int index) {
-    subPopListPanel.remove(index);
-    subPopListPanel.add(panelFactory.getPanel(subPopulationModel
-        .getSubPopulations().get(index), index), index);
-    listScroll.validate();
   }
 
   private void initialize() {
@@ -162,8 +155,8 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     addButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        addSubPopulation(subPopName.getText(), additiveButton.isSelected(),
-            hasDescendantGenerations.isSelected());
+        addSubPopulation(new SubPopulation(subPopName.getText(), additiveButton
+            .isSelected(), hasDescendantGenerations.isSelected()));
       }
     });
 
@@ -186,12 +179,36 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     return generalPanel;
   }
 
-  protected void addSubPopulation(String subPopName, boolean additive,
-      boolean hasDescendantGenerations) {
-    SubPopulation newSubPop = new SubPopulation(subPopName, additive,
-        hasDescendantGenerations);
-    subPopulationModel.getSubPopulations().add(newSubPop);
-    updateSubPopListPanel();
+  synchronized void addSubPopulation(SubPopulation subPopulation) {
+    for (SubPopulation subPop : subPopulationModel.getSubPopulations())
+      if (subPop.getName().equals(subPopulation.getName())) {
+        GUI.printMessage(
+            this,
+            "Adding sub-population failed",
+            "Sub-population names must be unique, and there already is a sub-population called '"
+                + subPopulation.getName() + "'.");
+        return;
+      }
+    int index = subPopulationModel.getSubPopulations().size();
+    subPopulationModel.getSubPopulations().add(subPopulation);
+    subPopListPanel.add(panelFactory.getPanel(subPopulation, index), index);
+    listScroll.validate();
+  }
+
+  synchronized void removeSubPopulation(SubPopulation subPopulation) {
+    if (subPopulationModel.getSubPopulations().size() == 1) {
+      GUI.printMessage(this, "Deletion failed",
+          "At least one sub-population has to be defined.");
+      return;
+    }
+    int indexToDelete = subPopulationModel.getSubPopulations().indexOf(
+        subPopulation);
+    if (indexToDelete >= 0) {
+      subPopListPanel.remove(indexToDelete);
+      subPopulationModel.getSubPopulations().remove(indexToDelete);
+      BasicUtilities.invalidateOnEDT(subPopListPanel);
+    }
+    listScroll.validate();
   }
 
   @Override
@@ -223,32 +240,60 @@ class SubPopPanelFactory {
 
   JPanel getPanel(SubPopulation subPop, int index) {
     JPanel subPopDisplayPanel = new JPanel(GUI.getStdBorderLayout());
-    subPopDisplayPanel.add(new JPanel(), BorderLayout.NORTH);
-    subPopDisplayPanel
-        .add(makeAdditiveButton(subPop, index), BorderLayout.WEST);
-    subPopDisplayPanel.add(new JLabel(subPop.getName()), BorderLayout.CENTER);
-    subPopDisplayPanel.add(new JPanel(), BorderLayout.SOUTH);
+    JLabel subPopDesc = new JLabel(
+        subPop.getName()
+            + (subPop.isConsistingOfDescendantGenerations() ? "(and descendant generations)"
+                : ""));
 
-    subPopDisplayPanel
-        .setBorder(BorderFactory.createLineBorder(Color.black, 1));
+    subPopDesc.setFont(GUI.getDefaultFontBold());
+
+    subPopDisplayPanel.add(new JPanel(), BorderLayout.NORTH);
+    subPopDisplayPanel.add(createAdditiveButton(subPop, index),
+        BorderLayout.WEST);
+    subPopDisplayPanel.add(subPopDesc, BorderLayout.CENTER);
+    subPopDisplayPanel.add(createControlButtonPanel(subPop, index),
+        BorderLayout.EAST);
+    subPopDisplayPanel.add(new JPanel(), BorderLayout.SOUTH);
+    subPopDisplayPanel.setMaximumSize(new Dimension(
+        (int) (0.8 * SubPopulationModelEditDialog.DIALOG_WIDTH), 60));
+
     return subPopDisplayPanel;
   }
 
-  JButton makeAdditiveButton(final SubPopulation subPopulation,
+  private JPanel createControlButtonPanel(final SubPopulation subPop,
+      final int index) {
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+    JButton deleteButton = GUI.createIconButton("delete_obj.gif", "Delete");
+    buttonPanel.add(deleteButton);
+    deleteButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editDialog.removeSubPopulation(subPop);
+      }
+    });
+    return buttonPanel;
+  }
+
+  JButton createAdditiveButton(final SubPopulation subPopulation,
       final int subPopIndex) {
-    JButton resultingButton = null;
-    if (subPopulation.isAdditive())
-      resultingButton = GUI.createIconButton("add_correction.png", "+");
-    else
-      resultingButton = GUI.createIconButton("remove_correction.png", "-");
-    final JButton myButton = resultingButton;
-    myButton.addActionListener(new ActionListener() {
+    final JButton additivityButton = new JButton();
+    setButtonIcon(additivityButton, subPopulation.isAdditive());
+    additivityButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         subPopulation.setAdditive(!subPopulation.isAdditive());
-        myButton.setText("!");
+        setButtonIcon(additivityButton, subPopulation.isAdditive());
       }
     });
-    return resultingButton;
+    return additivityButton;
+  }
+
+  static void setButtonIcon(JButton additivityButton, boolean isAdditive) {
+    GUI.decorateButtonWithIconOrText(additivityButton, GUI
+        .retrieveIcon(isAdditive ? "add_correction.png"
+            : "remove_correction.png"), isAdditive ? "+" : "-");
+    additivityButton.setToolTipText(isAdditive ? "Adds to overall population"
+        : "Subtracts from overall population");
   }
 }
