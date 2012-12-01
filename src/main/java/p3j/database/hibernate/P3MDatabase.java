@@ -187,11 +187,11 @@ public class P3MDatabase implements IP3MDatabase {
   // Parameter
 
   @Override
-  public Parameter newParameter(String name, boolean genDep,
+  public Parameter newParameter(String name, int sortIndex, boolean genDep,
       MatrixDimension height, MatrixDimension width, Population population) {
     Parameter param = getParameter(name);
     if (param == null) {
-      param = new Parameter(-1, genDep, name, height, width, population);
+      param = new Parameter(sortIndex, genDep, name, height, width, population);
       save(param);
     }
     return param;
@@ -398,7 +398,8 @@ public class P3MDatabase implements IP3MDatabase {
   @Override
   public void newProjection(ProjectionModel projection) {
     // Initializing all parameter instances
-    List<Parameter> parameters = Parameters.getInstance().getParams();
+    Parameters params = new Parameters(projection.getSubPopulationModel());
+    List<Parameter> parameters = params.getParams();
     List<ParameterInstance> allInstances = projection
         .getAllParameterInstances();
     int comparisonIndex = 0;

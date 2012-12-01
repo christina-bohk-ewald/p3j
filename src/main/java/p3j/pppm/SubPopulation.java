@@ -43,6 +43,12 @@ public class SubPopulation implements Serializable {
    */
   private boolean consistingOfDescendantGenerations = false;
 
+  /**
+   * Flag to determine whether this sub-population is part of the jump-off
+   * population.
+   */
+  private boolean jumpOffPopulation = false;
+
   /** Default constructor. */
   public SubPopulation() {
   }
@@ -52,6 +58,9 @@ public class SubPopulation implements Serializable {
    * 
    * @param name
    *          the name of the sub-population
+   * @param jumpOffPop
+   *          flag to indicate that this population is part of the jump-off
+   *          population
    * @param additive
    *          the flag to determine whether this sub-population adds to the
    *          overall population
@@ -59,9 +68,10 @@ public class SubPopulation implements Serializable {
    *          the flag to determine whether this sub-population consists of
    *          descendant generations
    */
-  public SubPopulation(String name, boolean additive,
+  public SubPopulation(String name, boolean jumpOffPop, boolean additive,
       boolean consistOfDescGenerations) {
     this.name = name;
+    this.jumpOffPopulation = jumpOffPop;
     this.additive = additive;
     this.consistingOfDescendantGenerations = consistOfDescGenerations;
   }
@@ -72,7 +82,8 @@ public class SubPopulation implements Serializable {
    * @return the new sub-population
    */
   public SubPopulation newSubPopulation() {
-    return new SubPopulation(name, additive, consistingOfDescendantGenerations);
+    return new SubPopulation(name, jumpOffPopulation, additive,
+        consistingOfDescendantGenerations);
   }
 
   /**
@@ -131,6 +142,14 @@ public class SubPopulation implements Serializable {
   public void setConsistingOfDescendantGenerations(
       boolean consistingOfDescendantGenerations) {
     this.consistingOfDescendantGenerations = consistingOfDescendantGenerations;
+  }
+
+  public boolean isJumpOffPopulation() {
+    return jumpOffPopulation;
+  }
+
+  public void setJumpOffPopulation(boolean jumpOffPopulation) {
+    this.jumpOffPopulation = jumpOffPopulation;
   }
 
 }

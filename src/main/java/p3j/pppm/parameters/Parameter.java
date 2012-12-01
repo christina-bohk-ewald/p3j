@@ -41,111 +41,127 @@ import p3j.misc.MatrixDimension;
  */
 public class Parameter implements Serializable {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 7301913452917113893L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 7301913452917113893L;
 
-	/** ID of the parameter. */
-	private int id;
+  /** ID of the parameter. */
+  private int id;
 
-	/** Flag to mark generation-dependent parameters. */
-	private boolean generationDependent;
+  /** Flag to mark generation-dependent parameters. */
+  private boolean generationDependent;
 
-	/** Name of the parameter. */
-	private String name;
+  /** Name of the parameter. */
+  private String name;
 
-	/** Width of a valid value matrix. */
-	private MatrixDimension valueWidth = MatrixDimension.YEARS;
+  /**
+   * The sorting index of this parameter. This is required to allow a custom
+   * ordering (e.g. by specific sub-populations). As the order is only defined
+   * when considering the sorting index of the other parameters involved, this
+   * needs to be stored per parameter.
+   */
+  private int sortingIndex;
 
-	/** Height of a valid value matrix. */
-	private MatrixDimension valueHeight = MatrixDimension.AGES;
+  /** Width of a valid value matrix. */
+  private MatrixDimension valueWidth = MatrixDimension.YEARS;
 
-	/** The population this parameter refers to. */
-	private Population population;
+  /** Height of a valid value matrix. */
+  private MatrixDimension valueHeight = MatrixDimension.AGES;
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param paramID
-	 *          the unique identifier of the parameter
-	 * @param genDependent
-	 *          if true, this parameter is generation-dependent
-	 * @param paramName
-	 *          name of the parameter
-	 * @param height
-	 *          height of the parameter matrix
-	 * @param width
-	 *          width of the parameter matrix
-	 * @param pop
-	 *          the population this parameter belongs to
-	 */
-	public Parameter(int paramID, boolean genDependent, String paramName,
-	    MatrixDimension height, MatrixDimension width, Population pop) {
-		id = paramID;
-		generationDependent = genDependent;
-		name = paramName;
-		valueHeight = height;
-		valueWidth = width;
-		population = pop;
-	}
+  /** The population this parameter refers to. */
+  private Population population;
 
-	/**
-	 * Constructor for bean compatibility.
-	 */
-	public Parameter() {
-		this(-1, false, "", MatrixDimension.AGES, MatrixDimension.YEARS,
-		    Population.NATIVES);
-	}
+  /**
+   * Default constructor.
+   * 
+   * @param sortIndex
+   *          the sorting index of the parameter
+   * @param genDependent
+   *          if true, this parameter is generation-dependent
+   * @param paramName
+   *          name of the parameter
+   * @param height
+   *          height of the parameter matrix
+   * @param width
+   *          width of the parameter matrix
+   * @param pop
+   *          the population this parameter belongs to
+   */
+  public Parameter(int sortIndex, boolean genDependent, String paramName,
+      MatrixDimension height, MatrixDimension width, Population pop) {
+    sortingIndex = sortIndex;
+    generationDependent = genDependent;
+    name = paramName;
+    valueHeight = height;
+    valueWidth = width;
+    population = pop;
+  }
 
-	public MatrixDimension getValueWidth() {
-		return valueWidth;
-	}
+  /**
+   * Constructor for bean compatibility.
+   */
+  public Parameter() {
+    this(-1, false, "", MatrixDimension.AGES, MatrixDimension.YEARS,
+        Population.NATIVES);
+  }
 
-	public void setValueWidth(MatrixDimension valWidth) {
-		this.valueWidth = valWidth;
-	}
+  public MatrixDimension getValueWidth() {
+    return valueWidth;
+  }
 
-	public MatrixDimension getValueHeight() {
-		return valueHeight;
-	}
+  public void setValueWidth(MatrixDimension valWidth) {
+    this.valueWidth = valWidth;
+  }
 
-	public void setValueHeight(MatrixDimension valHeight) {
-		this.valueHeight = valHeight;
-	}
+  public MatrixDimension getValueHeight() {
+    return valueHeight;
+  }
 
-	public boolean isGenerationDependent() {
-		return generationDependent;
-	}
+  public void setValueHeight(MatrixDimension valHeight) {
+    this.valueHeight = valHeight;
+  }
 
-	public void setGenerationDependent(boolean generationDependent) {
-		this.generationDependent = generationDependent;
-	}
+  public boolean isGenerationDependent() {
+    return generationDependent;
+  }
 
-	public int getID() {
-		return id;
-	}
+  public void setGenerationDependent(boolean generationDependent) {
+    this.generationDependent = generationDependent;
+  }
 
-	public final void setID(int paramID) {
-		id = paramID;
-	}
+  public int getID() {
+    return id;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public final void setID(int paramID) {
+    id = paramID;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public Population getPopulation() {
-		return population;
-	}
+  public int getSortingIndex() {
+    return sortingIndex;
+  }
 
-	public void setPopulation(Population population) {
-		this.population = population;
-	}
+  public void setSortingIndex(int sortingIndex) {
+    this.sortingIndex = sortingIndex;
+  }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Population getPopulation() {
+    return population;
+  }
+
+  public void setPopulation(Population population) {
+    this.population = population;
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
 }

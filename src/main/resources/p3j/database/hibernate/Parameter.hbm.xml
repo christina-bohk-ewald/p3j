@@ -6,6 +6,7 @@
 	<generator class="native"/>
 </id>
 <property name="name" length="256"/>
+<property name="sortingIndex"/>
 <property name="generationDependent" column="generation_dependent"/>
 <property name="valueWidth"/>
 <property name="valueHeight"/>

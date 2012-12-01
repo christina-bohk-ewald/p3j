@@ -17,6 +17,8 @@ package p3j.pppm.parameters;
 
 import java.util.Comparator;
 
+import p3j.pppm.SubPopulationModel;
+
 /**
  * 
  * Enumeration of the populations that are distinguished. Each {@link Parameter}
@@ -29,46 +31,55 @@ import java.util.Comparator;
  * @author Roland Ewald
  * 
  */
+@Deprecated
 public enum Population implements Comparator<Population> {
 
-	/**
-	 * The native population.
-	 */
-	NATIVES,
+  /**
+   * The native population.
+   */
+  NATIVES,
 
-	/**
-	 * The emigrant population.
-	 */
-	EMIGRANTS,
+  /**
+   * The emigrant population.
+   */
+  EMIGRANTS,
 
-	/**
-	 * The immigrant population.
-	 */
-	IMMIGRANTS;
+  /**
+   * The immigrant population.
+   */
+  IMMIGRANTS,
 
-	@Override
-	public int compare(Population p1, Population p2) {
-		if (p1.equals(p2)) {
-			return 0;
-		}
-		if (p1 == NATIVES || (p1 == EMIGRANTS && p2 == IMMIGRANTS)) {
-			return -1;
-		}
-		return 1;
-	}
+  /**
+   * The custom population, introduced to comply with {@link SubPopulationModel}
+   * , thus making this enumeration obsolete.
+   */
+  CUSTOM;
 
-	@Override
-	public String toString() {
-		switch (this) {
-		case NATIVES:
-			return "Natives";
-		case EMIGRANTS:
-			return "Emigrants";
-		case IMMIGRANTS:
-			return "Immigrants";
-		default:
-			return "Unknown";
-		}
-	}
+  @Override
+  public int compare(Population p1, Population p2) {
+    if (p1.equals(p2)) {
+      return 0;
+    }
+    if (p1 == NATIVES || (p1 == EMIGRANTS && p2 == IMMIGRANTS)) {
+      return -1;
+    }
+    return 1;
+  }
+
+  @Override
+  public String toString() {
+    switch (this) {
+    case NATIVES:
+      return "Natives";
+    case EMIGRANTS:
+      return "Emigrants";
+    case IMMIGRANTS:
+      return "Immigrants";
+    case CUSTOM:
+      return "Custom";
+    default:
+      return "Unknown";
+    }
+  }
 
 }

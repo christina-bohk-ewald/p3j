@@ -79,6 +79,8 @@ public interface IP3MDatabase {
    * 
    * @param name
    *          name of the parameter
+   * @param sortIndex
+   *          the sorting index
    * @param genDep
    *          flag to determine generation dependency
    * @param height
@@ -89,8 +91,8 @@ public interface IP3MDatabase {
    *          the population to which this parameter refers
    * @return newly created parameter (or retrieved from DB)
    */
-  Parameter newParameter(String name, boolean genDep, MatrixDimension height,
-      MatrixDimension width, Population population);
+  Parameter newParameter(String name, int sortIndex, boolean genDep,
+      MatrixDimension height, MatrixDimension width, Population population);
 
   /**
    * Retrieves a parameter with the given name from the database.

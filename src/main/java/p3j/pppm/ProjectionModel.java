@@ -140,7 +140,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
 
   /**
    * Initializes projection. Needs to be called after
-   * {@link ProjectionModel#allParameterInstances} has been initialized.
+   * {@link #allParameterInstances} has been initialized.
    */
   @Override
   public void init() {

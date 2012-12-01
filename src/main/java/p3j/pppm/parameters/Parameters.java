@@ -18,17 +18,18 @@ package p3j.pppm.parameters;
 import james.SimSystem;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;
 import p3j.misc.MatrixDimension;
+import p3j.pppm.ProjectionModel;
+import p3j.pppm.SubPopulation;
+import p3j.pppm.SubPopulationModel;
 
 /**
- * Central parameters directory. Contains all {@link Parameter} definitions
- * necessary for the PPPM.
+ * Specifies the {@link Parameter} definitions necessary for a
+ * {@link ProjectionModel} with a certain {@link SubPopulationModel}.
  * 
  * Created on August 7, 2006
  * 
@@ -37,330 +38,139 @@ import p3j.misc.MatrixDimension;
  */
 public final class Parameters {
 
-	/** Counter for the IDs. */
-	private static int idCounter = 1;
+  private static final String LABEL_FERTILITY = ": Fertility";
 
-	/**
-	 * The survivors at age x. Since this string is later used to check whether a
-	 * given parameter refers to mortality, it should be constant over all
-	 * {@link Parameter} instances.
-	 * 
-	 * TODO: Add an enumeration to define the type of a {@link Parameter}.
-	 */
-	public static final String SURVIVORS_AGE_X = "Survivors at age x";
+  private static final String LABEL_PROPORTION_MALE_LIVE_BIRTHS = ": Proportion of male live births";
 
-	/** List with all parameters. */
-	private List<Parameter> params = new ArrayList<Parameter>();
+  private static final String LABEL_PROPORTION_OF_INFANT_DEATHS_FIRST_6_MONTHS = ": Proportion of infant deaths dying in the first 6 months";
 
-	/** Mapping from id => parameter. */
-	private final Map<Integer, Parameter> idToParameter = new HashMap<Integer, Parameter>();
+  private static final String LABEL_SURVIVAL_PROBABILITY_OF_OPEN_END_AGE_CLASS = "Survival probability of open-end age class";
 
-	/** Natives: Survival probability of open-end age class (male). */
-	public static final Parameter NAT_SURV_PROB_O100_M = new Parameter(nextID(),
-	    false, "Natives: Survival probability of open-end age class (male)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.NATIVES);
+  private static final String LABEL_JUMP_OFF_POPULATION = ": Jump-off population";
 
-	/** Natives: Survival probability of open-end age class (female). */
-	public static final Parameter NAT_SURV_PROB_O100_F = new Parameter(nextID(),
-	    false, "Natives: Survival probability of open-end age class (female)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.NATIVES);
+  private static final String LABEL_MALES = " (male)";
 
-	/** Natives: Proportion of infant deaths dying in the first 6 months (male). */
-	public static final Parameter NAT_DEATHPROB_INFANT_1STHALF_M = new Parameter(
-	    nextID(),
-	    false,
-	    "Natives: Proportion of infant deaths dying in the first 6 months (male)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.NATIVES);
+  private static final String LABEL_FEMALES = " (female)";
 
-	/** Natives: Proportion of infant deaths dying in the first 6 months (female). */
-	public static final Parameter NAT_DEATHPROB_INFANT_1STHALF_F = new Parameter(
-	    nextID(),
-	    false,
-	    "Natives: Proportion of infant deaths dying in the first 6 months (female)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.NATIVES);
+  /**
+   * The survivors at age x. Since this string is later used to check whether a
+   * given parameter refers to mortality, it should be constant over all
+   * {@link Parameter} instances.
+   * 
+   * TODO: Add an enumeration to define the type of a {@link Parameter}.
+   */
+  public static final String SURVIVORS_AGE_X = "Survivors at age x";
 
-	/** Natives: Proportion of male live births. */
-	public static final Parameter NAT_PROP_LIVEBIRTH_M = new Parameter(nextID(),
-	    false, "Natives: Proportion of male live births", MatrixDimension.SINGLE,
-	    MatrixDimension.YEARS, Population.NATIVES);
+  public static final String LABEL_SURVIVORS_AGE_X = ": " + SURVIVORS_AGE_X;
 
-	/** Natives: Mortality (male). */
-	public static final Parameter NAT_MORT_X_M = new Parameter(nextID(), false,
-	    "Natives: " + SURVIVORS_AGE_X + " (male)", MatrixDimension.AGES,
-	    MatrixDimension.YEARS, Population.NATIVES);
+  /** List with all parameters. */
+  private final List<Parameter> params = new ArrayList<>();
 
-	/** Natives: Mortality (female). */
-	public static final Parameter NAT_MORT_X_F = new Parameter(nextID(), false,
-	    "Natives: " + SURVIVORS_AGE_X + " (female)", MatrixDimension.AGES,
-	    MatrixDimension.YEARS, Population.NATIVES);
+  /**
+   * The counter for the sorting indices. See
+   * {@link Parameter#getSortingIndex()} etc.
+   */
+  private int sortIndexCounter = 0;
 
-	/** Natives: Fertility. */
-	public static final Parameter NAT_FERT = new Parameter(nextID(), false,
-	    "Natives: Fertility", MatrixDimension.AGES, MatrixDimension.YEARS,
-	    Population.NATIVES);
+  /**
+   * Creates parameters for a given sub-population model.
+   * 
+   * @param subPopModel
+   *          the underlying sub-population model
+   */
+  public Parameters(SubPopulationModel subPopModel) {
 
-	/** Natives: Jump-off population (male). */
-	public static final Parameter NAT_P_END_SY_M = new Parameter(nextID(), false,
-	    "Natives: Jump-off population (male)", MatrixDimension.AGES,
-	    MatrixDimension.SINGLE, Population.NATIVES);
+    IP3MDatabase db = DatabaseFactory.getDatabaseSingleton();
 
-	/** Natives: Jump-off population (female). */
-	public static final Parameter NAT_P_END_SY_F = new Parameter(nextID(), false,
-	    "Natives: Jump-off population (female)", MatrixDimension.AGES,
-	    MatrixDimension.SINGLE, Population.NATIVES);
+    List<Parameter> paramsToRegister = createParamsForModel(subPopModel);
 
-	// EMIGRANTS
+    // Set IDs
+    for (Parameter p : paramsToRegister) {
+      Parameter registeredParameter = null;
+      try {
+        registeredParameter = db.newParameter(p.getName(), p.getSortingIndex(),
+            p.isGenerationDependent(), p.getValueHeight(), p.getValueWidth(),
+            p.getPopulation());
+      } catch (Exception ex) {
+        SimSystem.report(ex);
+      }
+      if (registeredParameter == null)
+        throw new IllegalStateException("Could not register parameter: " + p);
+      params.add(registeredParameter);
+    }
+  }
 
-	/** Emigrants (male). */
-	public static final Parameter EMIGRANTS_M = new Parameter(nextID(), false,
-	    "Emigrants (male)", MatrixDimension.AGES, MatrixDimension.YEARS,
-	    Population.EMIGRANTS);
+  private List<Parameter> createParamsForModel(SubPopulationModel subPopModel) {
+    List<Parameter> parameters = new ArrayList<>();
+    for (SubPopulation subPop : subPopModel.getSubPopulations()) {
+      parameters.addAll(createParamsForSubPop(subPop));
+    }
+    return parameters;
+  }
 
-	/** Emigrants (female). */
-	public static final Parameter EMIGRANTS_F = new Parameter(nextID(), false,
-	    "Emigrants (female)", MatrixDimension.AGES, MatrixDimension.YEARS,
-	    Population.EMIGRANTS);
+  private List<Parameter> createParamsForSubPop(SubPopulation subPop) {
+    List<Parameter> parameters = new ArrayList<>();
 
-	/** Emigrants: Survival probability of open-end age class (male). */
-	public static final Parameter EMIG_SURV_PROB_O100_M = new Parameter(nextID(),
-	    true, "Emigrants: Survival probability of open-end age class (male)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.EMIGRANTS);
+    if (subPop.isJumpOffPopulation()) {
+      addMaleFemaleParameters(parameters, subPop.getName()
+          + LABEL_JUMP_OFF_POPULATION, false, MatrixDimension.AGES,
+          MatrixDimension.SINGLE);
+    } else {
+      addMaleFemaleParameters(parameters, subPop.getName(), false,
+          MatrixDimension.AGES, MatrixDimension.YEARS);
+    }
 
-	/** Emigrants: Survival probability of open-end age class (female). */
-	public static final Parameter EMIG_SURV_PROB_O100_F = new Parameter(nextID(),
-	    true, "Emigrants: Survival probability of open-end age class (female)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.EMIGRANTS);
+    addMaleFemaleParameters(parameters, subPop.getName()
+        + LABEL_SURVIVAL_PROBABILITY_OF_OPEN_END_AGE_CLASS,
+        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
+        MatrixDimension.YEARS);
 
-	/** Emigrants: Proportion of infant deaths dying in the first 6 months (male). */
-	public static final Parameter EMIG_DEATHPROB_INFANT_1STHALF_M = new Parameter(
-	    nextID(),
-	    true,
-	    "Emigrants: Proportion of infant deaths dying in the first 6 months (male)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.EMIGRANTS);
+    addMaleFemaleParameters(parameters, subPop.getName()
+        + LABEL_PROPORTION_OF_INFANT_DEATHS_FIRST_6_MONTHS,
+        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
+        MatrixDimension.YEARS);
 
-	/**
-	 * Emigrants: Proportion of infant deaths dying in the first 6 months
-	 * (female).
-	 */
-	public static final Parameter EMIG_DEATHPROB_INFANT_1STHALF_F = new Parameter(
-	    nextID(),
-	    true,
-	    "Emigrants: Proportion of infant deaths dying in the first 6 months (female)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.EMIGRANTS);
+    addParameter(parameters, subPop.getName()
+        + LABEL_PROPORTION_MALE_LIVE_BIRTHS,
+        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
+        MatrixDimension.YEARS, "");
 
-	/** Emigrants: Proportion of male live births. */
-	public static final Parameter EMIG_PROP_LIVEBIRTH_M = new Parameter(nextID(),
-	    true, "Emigrants: Proportion of male live births",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.EMIGRANTS);
+    addMaleFemaleParameters(parameters, subPop.getName()
+        + LABEL_SURVIVORS_AGE_X, subPop.isConsistingOfDescendantGenerations(),
+        MatrixDimension.AGES, MatrixDimension.YEARS);
 
-	/** Emigrants: Mortality (male). */
-	public static final Parameter EMIG_MORT_X_M = new Parameter(nextID(), true,
-	    "Emigrants: " + SURVIVORS_AGE_X + " (male)", MatrixDimension.AGES,
-	    MatrixDimension.YEARS, Population.EMIGRANTS);
+    addParameter(parameters, subPop.getName() + LABEL_FERTILITY,
+        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.AGES,
+        MatrixDimension.YEARS, "");
 
-	/** Emigrants: Mortality (female). */
-	public static final Parameter EMIG_MORT_X_F = new Parameter(nextID(), true,
-	    "Emigrants: " + SURVIVORS_AGE_X + " (female)", MatrixDimension.AGES,
-	    MatrixDimension.YEARS, Population.EMIGRANTS);
+    return parameters;
+  }
 
-	/** Emigrants: Fertility. */
-	public static final Parameter EMIG_FERT = new Parameter(nextID(), true,
-	    "Emigrants: Fertility", MatrixDimension.AGES, MatrixDimension.YEARS,
-	    Population.EMIGRANTS);
+  private void addMaleFemaleParameters(List<Parameter> parameters,
+      String paramName, boolean genDependent, MatrixDimension first,
+      MatrixDimension second) {
+    for (String suffix : new String[] { LABEL_MALES, LABEL_FEMALES })
+      addParameter(parameters, paramName, genDependent, first, second, suffix);
+  }
 
-	// IMMIGRANTS
+  private void addParameter(List<Parameter> parameters, String paramName,
+      boolean genDependent, MatrixDimension first, MatrixDimension second,
+      String suffix) {
+    parameters.add(new Parameter(nextSortingIndex(), genDependent, paramName
+        + suffix, first, second, Population.CUSTOM));
+  }
 
-	/** Immigrants (male). */
-	public static final Parameter IMMIG_M = new Parameter(nextID(), false,
-	    "Immigrants (male)", MatrixDimension.AGES, MatrixDimension.YEARS,
-	    Population.IMMIGRANTS);
+  /**
+   * Creates next sorting index.
+   * 
+   * @return the next sorting index to be used
+   */
+  private int nextSortingIndex() {
+    return ++sortIndexCounter;
+  }
 
-	/** Immigrants (female). */
-	public static final Parameter IMMIG_F = new Parameter(nextID(), false,
-	    "Immigrants (female)", MatrixDimension.AGES, MatrixDimension.YEARS,
-	    Population.IMMIGRANTS);
-
-	/** Immigrants: Survival probability of open-end age class (male). */
-	public static final Parameter IMMIG_SURV_PROB_O100_M = new Parameter(
-	    nextID(), true,
-	    "Immigrants: Survival probability of open-end age class (male)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.IMMIGRANTS);
-
-	/** Immigrants: Survival probability of open-end age class (female). */
-	public static final Parameter IMMIG_SURV_PROB_O100_F = new Parameter(
-	    nextID(), true,
-	    "Immigrants: Survival probability of open-end age class (female)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.IMMIGRANTS);
-
-	/**
-	 * Immigrants: Proportion of infant deaths dying in the first 6 months (male).
-	 */
-	public static final Parameter IMMIG_DEATHPROB_INFANT_1STHALF_M = new Parameter(
-	    nextID(),
-	    true,
-	    "Immigrants: Proportion of infant deaths dying in the first 6 months (male)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.IMMIGRANTS);
-
-	/**
-	 * Immigrants: Proportion of infant deaths dying in the first 6 months
-	 * (female).
-	 */
-	public static final Parameter IMMIG_DEATHPROB_INFANT_1STHALF_F = new Parameter(
-	    nextID(),
-	    true,
-	    "Immigrants: Proportion of infant deaths dying in the first 6 months (female)",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.IMMIGRANTS);
-
-	/** Immigrants: Proportion of male live births. */
-	public static final Parameter IMMIG_PROP_LIVEBIRTH_M = new Parameter(
-	    nextID(), true, "Immigrants: Proportion of male live births",
-	    MatrixDimension.SINGLE, MatrixDimension.YEARS, Population.IMMIGRANTS);
-
-	/** Immigrants: Mortality (male). */
-	public static final Parameter IMMIG_MORT_X_M = new Parameter(nextID(), true,
-	    "Immigrants: " + SURVIVORS_AGE_X + " (male)", MatrixDimension.AGES,
-	    MatrixDimension.YEARS, Population.IMMIGRANTS);
-
-	/** Immigrants: Mortality (female). */
-	public static final Parameter IMMIG_MORT_X_F = new Parameter(nextID(), true,
-	    "Immigrants: " + SURVIVORS_AGE_X + " (female)", MatrixDimension.AGES,
-	    MatrixDimension.YEARS, Population.IMMIGRANTS);
-
-	/** Immigrants: Fertility. */
-	public static final Parameter IMMIG_FERT = new Parameter(nextID(), true,
-	    "Immigrants: Fertility", MatrixDimension.AGES, MatrixDimension.YEARS,
-	    Population.IMMIGRANTS);
-
-	/** The singleton. */
-	private static Parameters singleton;
-
-	/**
-	 * Returns singleton.
-	 * 
-	 * @return the parameters singleton
-	 */
-	public static Parameters getInstance() {
-		if (singleton == null) {
-			singleton = new Parameters();
-		}
-		return singleton;
-	}
-
-	/**
-	 * Generates a unique id.
-	 * 
-	 * @return a unique id
-	 */
-	protected static int nextID() {
-		return ++idCounter;
-	}
-
-	/**
-	 * This class shall not be instantiated.
-	 */
-	private Parameters() {
-
-		addNatives();
-		addEmigrants();
-		addImmigrants();
-
-		// Is there a database
-		IP3MDatabase db = DatabaseFactory.getDatabaseSingleton();
-
-		List<Parameter> registeredParams = new ArrayList<Parameter>();
-
-		// Set IDs
-		for (Parameter p : params) {
-			if (db != null) {
-				Parameter registeredParameter = null;
-				try {
-					registeredParameter = db.newParameter(p.getName(),
-					    p.isGenerationDependent(), p.getValueHeight(), p.getValueWidth(),
-					    p.getPopulation());
-				} catch (Exception ex) {
-					SimSystem.report(ex);
-				}
-				if (registeredParameter != null) {
-					registeredParams.add(registeredParameter);
-				}
-			} else {
-				registeredParams.add(p);
-			}
-		}
-
-		params = registeredParams;
-
-		for (Parameter p : params) {
-			idToParameter.put(p.getID(), p);
-		}
-
-	}
-
-	/**
-	 * Adds emigrant fields to the parameter mapping.
-	 */
-	private void addImmigrants() {
-		params.add(IMMIG_SURV_PROB_O100_M);
-		params.add(IMMIG_SURV_PROB_O100_F);
-		params.add(IMMIG_DEATHPROB_INFANT_1STHALF_M);
-		params.add(IMMIG_DEATHPROB_INFANT_1STHALF_F);
-		params.add(IMMIG_PROP_LIVEBIRTH_M);
-		params.add(IMMIG_MORT_X_M);
-		params.add(IMMIG_MORT_X_F);
-		params.add(IMMIG_FERT);
-		params.add(IMMIG_M);
-		params.add(IMMIG_F);
-	}
-
-	/**
-	 * Adds the emigrant fields to parameter mapping.
-	 */
-	private void addEmigrants() {
-		params.add(EMIG_SURV_PROB_O100_M);
-		params.add(EMIG_SURV_PROB_O100_F);
-		params.add(EMIG_DEATHPROB_INFANT_1STHALF_M);
-		params.add(EMIG_DEATHPROB_INFANT_1STHALF_F);
-		params.add(EMIG_PROP_LIVEBIRTH_M);
-		params.add(EMIG_MORT_X_M);
-		params.add(EMIG_MORT_X_F);
-		params.add(EMIG_FERT);
-		params.add(EMIGRANTS_M);
-		params.add(EMIGRANTS_F);
-	}
-
-	/**
-	 * Adds the native fields to parameter mapping.
-	 */
-	private void addNatives() {
-		params.add(NAT_SURV_PROB_O100_M);
-		params.add(NAT_SURV_PROB_O100_F);
-		params.add(NAT_DEATHPROB_INFANT_1STHALF_M);
-		params.add(NAT_DEATHPROB_INFANT_1STHALF_F);
-		params.add(NAT_PROP_LIVEBIRTH_M);
-		params.add(NAT_MORT_X_M);
-		params.add(NAT_MORT_X_F);
-		params.add(NAT_FERT);
-		params.add(NAT_P_END_SY_M);
-		params.add(NAT_P_END_SY_F);
-	}
-
-	/**
-	 * Gets the params.
-	 * 
-	 * @return the params
-	 */
-	public List<Parameter> getParams() {
-		return params;
-	}
-
-	/**
-	 * Sets the params.
-	 * 
-	 * @param params
-	 *          the new params
-	 */
-	public void setParams(List<Parameter> params) {
-		this.params = params;
-	}
+  public List<Parameter> getParams() {
+    return params;
+  }
 
 }

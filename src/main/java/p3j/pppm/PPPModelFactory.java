@@ -89,11 +89,11 @@ public class PPPModelFactory extends ModelFactory {
   public static SubPopulationModel createDefaultSubPopulationModel() {
     SubPopulationModel defaultModel = new SubPopulationModel();
     defaultModel.getSubPopulations().add(
-        new SubPopulation("Natives", true, false));
+        new SubPopulation("Natives", true, true, false));
     defaultModel.getSubPopulations().add(
-        new SubPopulation("Immigrants", true, true));
+        new SubPopulation("Immigrants", false, true, true));
     defaultModel.getSubPopulations().add(
-        new SubPopulation("Emigrants", false, true));
+        new SubPopulation("Emigrants", false, false, true));
     return defaultModel;
   }
 
