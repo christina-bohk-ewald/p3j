@@ -38,15 +38,21 @@ import p3j.pppm.SubPopulationModel;
  */
 public final class Parameters {
 
-  private static final String LABEL_FERTILITY = ": Fertility";
+  private static final String LABEL_DELIM = ": ";
 
-  private static final String LABEL_PROPORTION_MALE_LIVE_BIRTHS = ": Proportion of male live births";
+  private static final String LABEL_FERTILITY = LABEL_DELIM + "Fertility";
 
-  private static final String LABEL_PROPORTION_OF_INFANT_DEATHS_FIRST_6_MONTHS = ": Proportion of infant deaths dying in the first 6 months";
+  private static final String LABEL_PROPORTION_MALE_LIVE_BIRTHS = LABEL_DELIM
+      + "Proportion of male live births";
 
-  private static final String LABEL_SURVIVAL_PROBABILITY_OF_OPEN_END_AGE_CLASS = "Survival probability of open-end age class";
+  private static final String LABEL_PROPORTION_OF_INFANT_DEATHS_FIRST_6_MONTHS = LABEL_DELIM
+      + "Proportion of infant deaths dying in the first 6 months";
 
-  private static final String LABEL_JUMP_OFF_POPULATION = ": Jump-off population";
+  private static final String LABEL_SURVIVAL_PROBABILITY_OF_OPEN_END_AGE_CLASS = LABEL_DELIM
+      + "Survival probability of open-end age class";
+
+  private static final String LABEL_JUMP_OFF_POPULATION = LABEL_DELIM
+      + "Jump-off population";
 
   private static final String LABEL_MALES = " (male)";
 

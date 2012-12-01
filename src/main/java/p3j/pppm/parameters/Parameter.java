@@ -59,7 +59,7 @@ public class Parameter implements Serializable {
    * when considering the sorting index of the other parameters involved, this
    * needs to be stored per parameter.
    */
-  private int sortingIndex;
+  private Integer sortingIndex = -1;
 
   /** Width of a valid value matrix. */
   private MatrixDimension valueWidth = MatrixDimension.YEARS;
@@ -140,11 +140,11 @@ public class Parameter implements Serializable {
     return name;
   }
 
-  public int getSortingIndex() {
+  public Integer getSortingIndex() {
     return sortingIndex;
   }
 
-  public void setSortingIndex(int sortingIndex) {
+  public void setSortingIndex(Integer sortingIndex) {
     this.sortingIndex = sortingIndex;
   }
 
