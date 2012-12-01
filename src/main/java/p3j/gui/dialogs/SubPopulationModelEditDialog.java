@@ -269,28 +269,34 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
     final JTextField subPopName = new JTextField("Sub-Population Name");
     final JCheckBox hasDescendantGenerations = new JCheckBox(
         "Distinct Descendant Generations");
+    final JCheckBox jumpOffPop = new JCheckBox("Jump-Off Population");
     final JButton addButton = new JButton("Add");
     addButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        addSubPopulation(new SubPopulation(subPopName.getText(), additiveButton
-            .isSelected(), hasDescendantGenerations.isSelected()));
+        addSubPopulation(new SubPopulation(subPopName.getText(), jumpOffPop
+            .isSelected(), additiveButton.isSelected(),
+            hasDescendantGenerations.isSelected()));
       }
     });
 
     return createAddSubPopPanelLayout(radioGroupPanel, subPopName,
-        hasDescendantGenerations, addButton);
+        hasDescendantGenerations, jumpOffPop, addButton);
   }
 
   private JPanel createAddSubPopPanelLayout(JPanel radioGroupPanel,
       final JTextField subPopName, final JCheckBox hasDescendantGenerations,
-      final JButton addButton) {
+      JCheckBox jumpOffPop, final JButton addButton) {
     JPanel generalPanel = new JPanel(GUI.getStdBorderLayout());
     JPanel addButtonPanel = new JPanel(GUI.getStdBorderLayout());
 
+    JPanel optionPanel = new JPanel();
+    optionPanel.add(hasDescendantGenerations);
+    optionPanel.add(jumpOffPop);
+
     addButtonPanel.add(radioGroupPanel, BorderLayout.WEST);
     addButtonPanel.add(subPopName, BorderLayout.CENTER);
-    addButtonPanel.add(hasDescendantGenerations, BorderLayout.EAST);
+    addButtonPanel.add(optionPanel, BorderLayout.EAST);
 
     generalPanel.add(addButtonPanel, BorderLayout.CENTER);
     generalPanel.add(addButton, BorderLayout.EAST);
@@ -316,6 +322,7 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
 
   private JLabel createSubPopulationDescription(SubPopulation subPop) {
     JLabel subPopDesc = new JLabel(subPop.getName()
+        + (subPop.isJumpOffPopulation() ? " [Jump-Off]" : "")
         + (subPop.isConsistingOfDescendantGenerations() ? " (& descendants)"
             : ""));
     subPopDesc.setFont(GUI.getDefaultFontBold());
