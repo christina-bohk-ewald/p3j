@@ -15,15 +15,14 @@
  */
 package p3j.gui.panels.projections;
 
-
 import javax.swing.JPanel;
 import javax.swing.tree.TreePath;
 
 import p3j.gui.misc.SubNodeSummary;
 import p3j.gui.panels.PropertiesShowPanelFactory;
+import p3j.pppm.SubPopulation;
 import p3j.pppm.parameters.ParameterInstance;
 import p3j.pppm.parameters.Population;
-
 
 /**
  * Node that represents a {@link Population}.
@@ -34,28 +33,26 @@ import p3j.pppm.parameters.Population;
  * @author Roland Ewald
  * 
  */
-public class PopulationNode extends ProjectionTreeNode<Population> {
+public class SubPopulationNode extends ProjectionTreeNode<SubPopulation> {
 
-  /**
-   * Serialization ID.
-   */
+  /** Serialization ID. */
   private static final long serialVersionUID = 6366143563278777563L;
 
   /**
    * Default constructor.
    * 
-   * @param population
-   *          the population to be represented
+   * @param subPopulation
+   *          the sub-population to be represented
    */
-  public PopulationNode(Population population) {
-    super(population, population.toString());
+  public SubPopulationNode(SubPopulation subPopulation) {
+    super(subPopulation, subPopulation.getName());
   }
 
   @Override
   public JPanel selected(TreePath selectionPath, final IProjectionTree projTree) {
     PropertiesShowPanelFactory pspf = new PropertiesShowPanelFactory();
     pspf.sep("General Information");
-    pspf.app("Population:", getEntity());
+    pspf.app("Subpopulation:", getEntity());
     pspf.app("Parameters:", this.getChildCount());
     pspf.appPreview(new SubNodeSummary<ParameterInstance>(this, projTree,
         ParameterInstance.class));
