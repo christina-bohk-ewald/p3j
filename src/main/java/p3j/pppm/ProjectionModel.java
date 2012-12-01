@@ -19,10 +19,13 @@ import james.core.model.Model;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterAssignmentSet;
 import p3j.pppm.parameters.ParameterInstance;
@@ -589,5 +592,32 @@ public class ProjectionModel extends Model implements IProjectionModel {
         for (ParameterAssignmentSet assignSet : set.getSetData().values())
           numOfAssignments += assignSet.size();
     return numOfAssignments;
+  }
+
+  /**
+   * Filters all parameter instances from a given list by a given
+   * sub-population. The parameter instances in the new list are sorted by
+   * {@link Parameter#getSortingIndex()}.
+   * 
+   * @param originalInstances
+   *          the original list of parameter instances
+   * @param subPopulation
+   *          the sub population
+   * @return the parameter instances
+   */
+  public static List<ParameterInstance> filterParamInstancesBySubPopulation(
+      List<ParameterInstance> originalInstances, SubPopulation subPopulation) {
+    List<ParameterInstance> instances = new ArrayList<>();
+    for (ParameterInstance instance : originalInstances)
+      if (instance.getParameter().getName().startsWith(subPopulation.getName()))
+        instances.add(instance);
+    Collections.sort(instances, new Comparator<ParameterInstance>() {
+      @Override
+      public int compare(ParameterInstance p1, ParameterInstance p2) {
+        return Integer.compare(p1.getParameter().getSortingIndex(), p2
+            .getParameter().getSortingIndex());
+      }
+    });
+    return instances;
   }
 }

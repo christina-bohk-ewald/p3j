@@ -144,6 +144,16 @@ public class SubPopulation implements Serializable {
     this.consistingOfDescendantGenerations = consistingOfDescendantGenerations;
   }
 
+  @Override
+  public String toString() {
+    return getName()
+        + " ("
+        + (additive ? "+" : "-")
+        + (jumpOffPopulation ? ", jump-off" : "")
+        + (consistingOfDescendantGenerations ? ", has descendant generations"
+            : "") + ")";
+  }
+
   public boolean isJumpOffPopulation() {
     return jumpOffPopulation;
   }

@@ -15,6 +15,15 @@
  */
 package p3j.pppm.parameters;
 
+import static p3j.pppm.parameters.ParameterType.FERTILITY;
+import static p3j.pppm.parameters.ParameterType.JUMP_OFF;
+import static p3j.pppm.parameters.ParameterType.LABEL_FEMALES;
+import static p3j.pppm.parameters.ParameterType.LABEL_MALES;
+import static p3j.pppm.parameters.ParameterType.MIGRATION;
+import static p3j.pppm.parameters.ParameterType.MORTALITY;
+import static p3j.pppm.parameters.ParameterType.PROP_INF_DEATHS_FIRST_6M;
+import static p3j.pppm.parameters.ParameterType.PROP_MALE_LIVE_BIRTHS;
+import static p3j.pppm.parameters.ParameterType.SURV_PROB_OPEN_END;
 import james.SimSystem;
 
 import java.util.ArrayList;
@@ -36,38 +45,7 @@ import p3j.pppm.SubPopulationModel;
  * @author Christina Bohk
  * @author Roland Ewald
  */
-public final class Parameters {
-
-  private static final String LABEL_DELIM = ": ";
-
-  private static final String LABEL_FERTILITY = LABEL_DELIM + "Fertility";
-
-  private static final String LABEL_PROPORTION_MALE_LIVE_BIRTHS = LABEL_DELIM
-      + "Proportion of male live births";
-
-  private static final String LABEL_PROPORTION_OF_INFANT_DEATHS_FIRST_6_MONTHS = LABEL_DELIM
-      + "Proportion of infant deaths dying in the first 6 months";
-
-  private static final String LABEL_SURVIVAL_PROBABILITY_OF_OPEN_END_AGE_CLASS = LABEL_DELIM
-      + "Survival probability of open-end age class";
-
-  private static final String LABEL_JUMP_OFF_POPULATION = LABEL_DELIM
-      + "Jump-off population";
-
-  private static final String LABEL_MALES = " (male)";
-
-  private static final String LABEL_FEMALES = " (female)";
-
-  /**
-   * The survivors at age x. Since this string is later used to check whether a
-   * given parameter refers to mortality, it should be constant over all
-   * {@link Parameter} instances.
-   * 
-   * TODO: Add an enumeration to define the type of a {@link Parameter}.
-   */
-  public static final String SURVIVORS_AGE_X = "Survivors at age x";
-
-  public static final String LABEL_SURVIVORS_AGE_X = ": " + SURVIVORS_AGE_X;
+public class Parameters {
 
   /** List with all parameters. */
   private final List<Parameter> params = new ArrayList<>();
@@ -118,34 +96,31 @@ public final class Parameters {
     List<Parameter> parameters = new ArrayList<>();
 
     if (subPop.isJumpOffPopulation()) {
-      addMaleFemaleParameters(parameters, subPop.getName()
-          + LABEL_JUMP_OFF_POPULATION, false, MatrixDimension.AGES,
-          MatrixDimension.SINGLE);
+      addMaleFemaleParameters(parameters, JUMP_OFF.getLabelFor(subPop), false,
+          MatrixDimension.AGES, MatrixDimension.SINGLE);
     } else {
-      addMaleFemaleParameters(parameters, subPop.getName(), false,
+      addMaleFemaleParameters(parameters, MIGRATION.getLabelFor(subPop), false,
           MatrixDimension.AGES, MatrixDimension.YEARS);
     }
 
-    addMaleFemaleParameters(parameters, subPop.getName()
-        + LABEL_SURVIVAL_PROBABILITY_OF_OPEN_END_AGE_CLASS,
+    addMaleFemaleParameters(parameters, SURV_PROB_OPEN_END.getLabelFor(subPop),
         subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
         MatrixDimension.YEARS);
 
-    addMaleFemaleParameters(parameters, subPop.getName()
-        + LABEL_PROPORTION_OF_INFANT_DEATHS_FIRST_6_MONTHS,
+    addMaleFemaleParameters(parameters,
+        PROP_INF_DEATHS_FIRST_6M.getLabelFor(subPop),
         subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
         MatrixDimension.YEARS);
 
-    addParameter(parameters, subPop.getName()
-        + LABEL_PROPORTION_MALE_LIVE_BIRTHS,
+    addParameter(parameters, PROP_MALE_LIVE_BIRTHS.getLabelFor(subPop),
         subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
         MatrixDimension.YEARS, "");
 
-    addMaleFemaleParameters(parameters, subPop.getName()
-        + LABEL_SURVIVORS_AGE_X, subPop.isConsistingOfDescendantGenerations(),
-        MatrixDimension.AGES, MatrixDimension.YEARS);
+    addMaleFemaleParameters(parameters, MORTALITY.getLabelFor(subPop),
+        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.AGES,
+        MatrixDimension.YEARS);
 
-    addParameter(parameters, subPop.getName() + LABEL_FERTILITY,
+    addParameter(parameters, FERTILITY.getLabelFor(subPop),
         subPop.isConsistingOfDescendantGenerations(), MatrixDimension.AGES,
         MatrixDimension.YEARS, "");
 
