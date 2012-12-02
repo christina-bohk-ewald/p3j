@@ -17,8 +17,6 @@ package p3j.pppm.parameters;
 
 import static p3j.pppm.parameters.ParameterType.FERTILITY;
 import static p3j.pppm.parameters.ParameterType.JUMP_OFF;
-import static p3j.pppm.parameters.ParameterType.LABEL_FEMALES;
-import static p3j.pppm.parameters.ParameterType.LABEL_MALES;
 import static p3j.pppm.parameters.ParameterType.MIGRATION;
 import static p3j.pppm.parameters.ParameterType.MORTALITY;
 import static p3j.pppm.parameters.ParameterType.PROP_INF_DEATHS_FIRST_6M;
@@ -96,49 +94,53 @@ public class Parameters {
     List<Parameter> parameters = new ArrayList<>();
 
     if (subPop.isJumpOffPopulation()) {
-      addMaleFemaleParameters(parameters, JUMP_OFF.getLabelFor(subPop), false,
+      addMaleFemaleParameters(parameters, JUMP_OFF, subPop, false,
           MatrixDimension.AGES, MatrixDimension.SINGLE);
     } else {
-      addMaleFemaleParameters(parameters, MIGRATION.getLabelFor(subPop), false,
+      addMaleFemaleParameters(parameters, MIGRATION, subPop, false,
           MatrixDimension.AGES, MatrixDimension.YEARS);
     }
 
-    addMaleFemaleParameters(parameters, SURV_PROB_OPEN_END.getLabelFor(subPop),
-        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
-        MatrixDimension.YEARS);
+    addMaleFemaleParameters(parameters, SURV_PROB_OPEN_END, subPop,
+        MatrixDimension.SINGLE, MatrixDimension.YEARS);
 
-    addMaleFemaleParameters(parameters,
-        PROP_INF_DEATHS_FIRST_6M.getLabelFor(subPop),
-        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
-        MatrixDimension.YEARS);
+    addMaleFemaleParameters(parameters, PROP_INF_DEATHS_FIRST_6M, subPop,
+        MatrixDimension.SINGLE, MatrixDimension.YEARS);
 
     addParameter(parameters, PROP_MALE_LIVE_BIRTHS.getLabelFor(subPop),
         subPop.isConsistingOfDescendantGenerations(), MatrixDimension.SINGLE,
-        MatrixDimension.YEARS, "");
-
-    addMaleFemaleParameters(parameters, MORTALITY.getLabelFor(subPop),
-        subPop.isConsistingOfDescendantGenerations(), MatrixDimension.AGES,
         MatrixDimension.YEARS);
+
+    addMaleFemaleParameters(parameters, MORTALITY, subPop,
+        MatrixDimension.AGES, MatrixDimension.YEARS);
 
     addParameter(parameters, FERTILITY.getLabelFor(subPop),
         subPop.isConsistingOfDescendantGenerations(), MatrixDimension.AGES,
-        MatrixDimension.YEARS, "");
+        MatrixDimension.YEARS);
 
     return parameters;
   }
 
   private void addMaleFemaleParameters(List<Parameter> parameters,
-      String paramName, boolean genDependent, MatrixDimension first,
-      MatrixDimension second) {
-    for (String suffix : new String[] { LABEL_MALES, LABEL_FEMALES })
-      addParameter(parameters, paramName, genDependent, first, second, suffix);
+      ParameterType paramType, SubPopulation subPopulation,
+      MatrixDimension first, MatrixDimension second) {
+    addMaleFemaleParameters(parameters, paramType, subPopulation,
+        subPopulation.isConsistingOfDescendantGenerations(), first, second);
+  }
+
+  private void addMaleFemaleParameters(List<Parameter> parameters,
+      ParameterType paramType, SubPopulation subPopulation,
+      boolean genDependent, MatrixDimension first, MatrixDimension second) {
+    addParameter(parameters, paramType.getMaleLabelFor(subPopulation),
+        genDependent, first, second);
+    addParameter(parameters, paramType.getFemaleLabelFor(subPopulation),
+        genDependent, first, second);
   }
 
   private void addParameter(List<Parameter> parameters, String paramName,
-      boolean genDependent, MatrixDimension first, MatrixDimension second,
-      String suffix) {
-    parameters.add(new Parameter(nextSortingIndex(), genDependent, paramName
-        + suffix, first, second, Population.CUSTOM));
+      boolean genDependent, MatrixDimension first, MatrixDimension second) {
+    parameters.add(new Parameter(nextSortingIndex(), genDependent, paramName,
+        first, second, Population.CUSTOM));
   }
 
   /**

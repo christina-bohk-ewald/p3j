@@ -33,41 +33,48 @@ import p3j.pppm.sets.SetType;
  */
 public interface IProjectionModel extends IModel {
 
-	/**
-	 * Gets the number of projected years.
-	 * 
-	 * @return the number of years
-	 */
-	int getYears();
+  /**
+   * Gets the number of projected years.
+   * 
+   * @return the number of years
+   */
+  int getYears();
 
-	/**
-	 * Gets the number of projected generations.
-	 * 
-	 * @return the number of generations
-	 */
-	int getGenerations();
+  /**
+   * Gets the number of projected generations.
+   * 
+   * @return the number of generations
+   */
+  int getGenerations();
 
-	/**
-	 * Gets the map parameter instance => Settype.
-	 * 
-	 * @return the map from parameter instance to Settypes
-	 */
-	Map<ParameterInstance, SetType> getInstanceSetTypes();
+  /**
+   * Gets the map parameter instance => Settype.
+   * 
+   * @return the map from parameter instance to Settypes
+   */
+  Map<ParameterInstance, SetType> getInstanceSetTypes();
 
-	/**
-	 * Gets the maximum age.
-	 * 
-	 * @return the maximum age
-	 */
-	int getMaximumAge();
+  /**
+   * Gets the maximum age.
+   * 
+   * @return the maximum age
+   */
+  int getMaximumAge();
 
-	/**
-	 * Returns list of all {@link SetType} objects, the custom ones and the
-	 * default one.
-	 * 
-	 * @return list of all {@link SetType} objects defined in this scenario (at
-	 *         least the default {@link SetType} is defined)
-	 */
-	List<SetType> getAllSetTypes();
+  /**
+   * Returns list of all {@link SetType} objects, the custom ones and the
+   * default one.
+   * 
+   * @return list of all {@link SetType} objects defined in this scenario (at
+   *         least the default {@link SetType} is defined)
+   */
+  List<SetType> getAllSetTypes();
+
+  /**
+   * Returns the {@link SubPopulationModel} this projection assumes.
+   * 
+   * @return the {@link SubPopulationModel} of the projection
+   */
+  SubPopulationModel getSubPopulationModel();
 
 }

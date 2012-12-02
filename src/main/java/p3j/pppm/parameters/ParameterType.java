@@ -72,4 +72,12 @@ public enum ParameterType {
     }
   }
 
+  public String getMaleLabelFor(SubPopulation subPopulation) {
+    return getLabelFor(subPopulation) + LABEL_MALES;
+  }
+
+  public String getFemaleLabelFor(SubPopulation subPopulation) {
+    return getLabelFor(subPopulation) + LABEL_FEMALES;
+  }
+
 }

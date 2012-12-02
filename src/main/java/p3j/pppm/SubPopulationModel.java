@@ -73,4 +73,17 @@ public class SubPopulationModel implements Serializable {
     this.subPopulations = subPopulations;
   }
 
+  /**
+   * Gets the jump off populations.
+   * 
+   * @return the jump off populations
+   */
+  public List<SubPopulation> getJumpOffPopulations() {
+    List<SubPopulation> jumpOffPopulations = new ArrayList<>();
+    for (SubPopulation subPopulation : subPopulations)
+      if (subPopulation.isJumpOffPopulation())
+        jumpOffPopulations.add(subPopulation);
+    return jumpOffPopulations;
+  }
+
 }
