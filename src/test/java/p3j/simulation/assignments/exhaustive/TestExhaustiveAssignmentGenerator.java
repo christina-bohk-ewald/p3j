@@ -22,11 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import p3j.misc.MatrixDimension;
 import p3j.pppm.PPPModelFactory;
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.SubPopulation;
+import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterInstance;
-import p3j.pppm.parameters.Parameters;
+import p3j.pppm.parameters.ParameterType;
+import p3j.pppm.parameters.Population;
 import p3j.pppm.sets.Set;
 import p3j.pppm.sets.SetType;
 
@@ -55,10 +59,14 @@ public class TestExhaustiveAssignmentGenerator extends TestCase {
 
   /** The parameter instances. */
   final ParameterInstance[] instances = new ParameterInstance[] {
-      new ParameterInstance(0, Parameters.EMIG_MORT_X_F),
-      new ParameterInstance(1, Parameters.EMIG_MORT_X_M),
-      new ParameterInstance(2, Parameters.NAT_MORT_X_M),
-      new ParameterInstance(3, Parameters.NAT_MORT_X_F) };
+      new ParameterInstance(0, TestSetManager.instance1MigF.getParameter()),
+      new ParameterInstance(1, TestSetManager.instance2MigM.getParameter()),
+      new ParameterInstance(2, new Parameter(2, false,
+          ParameterType.MORTALITY.getMaleLabelFor(new SubPopulation()),
+          MatrixDimension.AGES, MatrixDimension.YEARS, Population.CUSTOM)),
+      new ParameterInstance(3, new Parameter(3, false,
+          ParameterType.MORTALITY.getFemaleLabelFor(new SubPopulation()),
+          MatrixDimension.AGES, MatrixDimension.YEARS, Population.CUSTOM)) };
 
   /** The projection model. */
   final ProjectionModel projectionModel = new ProjectionModel(

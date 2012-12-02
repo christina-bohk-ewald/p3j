@@ -106,6 +106,8 @@ public class TestHibernateConnection extends TestCase {
    */
   public static final int TEST_PRED_YEARS = 100;
 
+  private static final int TEST_SORTING_INDEX = 12;
+
   /**
    * The hibernate configuration.
    */
@@ -173,17 +175,17 @@ public class TestHibernateConnection extends TestCase {
    *           when something fails
    */
   public void testParameterOperations() throws Exception {
-    param = db.newParameter("test1", true, MatrixDimension.SINGLE,
-        MatrixDimension.AGES, Population.NATIVES);
+    param = db.newParameter("test1", TEST_SORTING_INDEX, true,
+        MatrixDimension.SINGLE, MatrixDimension.AGES, Population.NATIVES);
     assertNotNull(EXPL_INSTANTIATION, param);
     assertEquals(EXPL_ID_SAVE, 1, param.getID());
-    Parameter param2 = db.newParameter("test1", true, MatrixDimension.SINGLE,
-        MatrixDimension.AGES, Population.NATIVES);
+    Parameter param2 = db.newParameter("test1", TEST_SORTING_INDEX, true,
+        MatrixDimension.SINGLE, MatrixDimension.AGES, Population.NATIVES);
     assertEquals(EXPL_UNIQUE, 1, param2.getID());
     Parameter param3 = db.getParameter("test1");
     assertEquals(EXPL_ONE_ENTITY, param2, param3);
-    param2 = db.newParameter("test2", true, MatrixDimension.SINGLE,
-        MatrixDimension.AGES, Population.NATIVES);
+    param2 = db.newParameter("test2", TEST_SORTING_INDEX, true,
+        MatrixDimension.SINGLE, MatrixDimension.AGES, Population.NATIVES);
     List<Parameter> parameters = db.getAllParameters();
     assertEquals(EXPL_TWO_ENTITIES, 2, parameters.size());
     assertTrue(EXPL_DELETION, db.deleteParameter(param2));
