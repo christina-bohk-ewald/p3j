@@ -31,151 +31,166 @@ import p3j.misc.math.Matrix2D;
  */
 public class BasicResults {
 
-	/** The id. */
-	private int id;
+  /** The id. */
+  private int id;
 
-	/**
-	 * Year-by-year age-specific male population at the end of the year (101 x n
-	 * matrix).
-	 */
-	private Matrix2D endXm;
+  /** The name of the sub-population this result belongs to. */
+  private String subPopName;
 
-	/**
-	 * Year-by-year age-specific female population at the end of the year (101 x n
-	 * matrix).
-	 */
-	private Matrix2D endXf;
+  /**
+   * Year-by-year age-specific male population at the end of the year (101 x n
+   * matrix).
+   */
+  private Matrix2D endXm;
 
-	/** Year-by-year age-specific mean male population (101 x n matrix). */
-	private Matrix2D meanXm;
+  /**
+   * Year-by-year age-specific female population at the end of the year (101 x n
+   * matrix).
+   */
+  private Matrix2D endXf;
 
-	/**
-	 * Year-by-year age-specific mean female population (101 x n matrix).
-	 */
-	private Matrix2D meanXf;
+  /** Year-by-year age-specific mean male population (101 x n matrix). */
+  private Matrix2D meanXm;
 
-	/**
-	 * Year-by-year age-specific male survival probability in the first half of
-	 * the year.
-	 */
-	private Matrix2D p1m;
+  /**
+   * Year-by-year age-specific mean female population (101 x n matrix).
+   */
+  private Matrix2D meanXf;
 
-	/**
-	 * Year-by-year age-specific female survival probability in the first half of
-	 * the year.
-	 */
-	private Matrix2D p1f;
+  /**
+   * Year-by-year age-specific male survival probability in the first half of
+   * the year.
+   */
+  private Matrix2D p1m;
 
-	/**
-	 * Year-by-year age-specific male survival probability in the second half of
-	 * the year.
-	 */
-	private Matrix2D p2m;
+  /**
+   * Year-by-year age-specific female survival probability in the first half of
+   * the year.
+   */
+  private Matrix2D p1f;
 
-	/**
-	 * Year-by-year age-specific female survival probability in the second half of
-	 * the year.
-	 */
-	private Matrix2D p2f;
+  /**
+   * Year-by-year age-specific male survival probability in the second half of
+   * the year.
+   */
+  private Matrix2D p2m;
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param numOfYears
-	 *          number of years to be predicted
-	 * @param maxAge
-	 *          the maximum age
-	 */
-	public BasicResults(int numOfYears, int maxAge) {
+  /**
+   * Year-by-year age-specific female survival probability in the second half of
+   * the year.
+   */
+  private Matrix2D p2f;
 
-		this.endXm = new Matrix2D(maxAge + 1, numOfYears);
-		this.endXf = new Matrix2D(maxAge + 1, numOfYears);
-		this.meanXm = new Matrix2D(maxAge + 1, numOfYears);
-		this.meanXf = new Matrix2D(maxAge + 1, numOfYears);
+  /**
+   * Default constructor.
+   * 
+   * @param subPopulationName
+   *          the sub-population name
+   * @param numOfYears
+   *          number of years to be predicted
+   * @param maxAge
+   *          the maximum age
+   */
+  public BasicResults(String subPopulationName, int numOfYears, int maxAge) {
 
-		this.p1m = new Matrix2D(maxAge, numOfYears);
-		this.p1f = new Matrix2D(maxAge, numOfYears);
-		this.p2m = new Matrix2D(maxAge, numOfYears);
-		this.p2f = new Matrix2D(maxAge, numOfYears);
+    this.subPopName = subPopulationName;
 
-	}
+    this.endXm = new Matrix2D(maxAge + 1, numOfYears);
+    this.endXf = new Matrix2D(maxAge + 1, numOfYears);
+    this.meanXm = new Matrix2D(maxAge + 1, numOfYears);
+    this.meanXf = new Matrix2D(maxAge + 1, numOfYears);
 
-	/**
-	 * Constructor for bean compliance. Do NOT use manually.
-	 */
-	public BasicResults() {
-	}
+    this.p1m = new Matrix2D(maxAge, numOfYears);
+    this.p1f = new Matrix2D(maxAge, numOfYears);
+    this.p2m = new Matrix2D(maxAge, numOfYears);
+    this.p2f = new Matrix2D(maxAge, numOfYears);
 
-	public Matrix2D getEndXm() {
-		return endXm;
-	}
+  }
 
-	public void setEndXm(Matrix2D endXm) {
-		this.endXm = endXm;
-	}
+  /**
+   * Constructor for bean compliance. Do NOT use manually.
+   */
+  public BasicResults() {
+  }
 
-	public Matrix2D getEndXf() {
-		return endXf;
-	}
+  public Matrix2D getEndXm() {
+    return endXm;
+  }
 
-	public void setEndXf(Matrix2D endXf) {
-		this.endXf = endXf;
-	}
+  public void setEndXm(Matrix2D endXm) {
+    this.endXm = endXm;
+  }
 
-	public Matrix2D getMeanXm() {
-		return meanXm;
-	}
+  public Matrix2D getEndXf() {
+    return endXf;
+  }
 
-	public void setMeanXm(Matrix2D meanXm) {
-		this.meanXm = meanXm;
-	}
+  public void setEndXf(Matrix2D endXf) {
+    this.endXf = endXf;
+  }
 
-	public Matrix2D getMeanXf() {
-		return meanXf;
-	}
+  public Matrix2D getMeanXm() {
+    return meanXm;
+  }
 
-	public void setMeanXf(Matrix2D meanXf) {
-		this.meanXf = meanXf;
-	}
+  public void setMeanXm(Matrix2D meanXm) {
+    this.meanXm = meanXm;
+  }
 
-	public Matrix2D getP1m() {
-		return p1m;
-	}
+  public Matrix2D getMeanXf() {
+    return meanXf;
+  }
 
-	public void setP1m(Matrix2D p1m) {
-		this.p1m = p1m;
-	}
+  public void setMeanXf(Matrix2D meanXf) {
+    this.meanXf = meanXf;
+  }
 
-	public Matrix2D getP1f() {
-		return p1f;
-	}
+  public Matrix2D getP1m() {
+    return p1m;
+  }
 
-	public void setP1f(Matrix2D p1f) {
-		this.p1f = p1f;
-	}
+  public void setP1m(Matrix2D p1m) {
+    this.p1m = p1m;
+  }
 
-	public Matrix2D getP2m() {
-		return p2m;
-	}
+  public Matrix2D getP1f() {
+    return p1f;
+  }
 
-	public void setP2m(Matrix2D p2m) {
-		this.p2m = p2m;
-	}
+  public void setP1f(Matrix2D p1f) {
+    this.p1f = p1f;
+  }
 
-	public Matrix2D getP2f() {
-		return p2f;
-	}
+  public Matrix2D getP2m() {
+    return p2m;
+  }
 
-	public void setP2f(Matrix2D p2f) {
-		this.p2f = p2f;
-	}
+  public void setP2m(Matrix2D p2m) {
+    this.p2m = p2m;
+  }
 
-	public int getID() {
-		return id;
-	}
+  public Matrix2D getP2f() {
+    return p2f;
+  }
 
-	public void setID(int id) {
-		this.id = id;
-	}
+  public void setP2f(Matrix2D p2f) {
+    this.p2f = p2f;
+  }
+
+  public int getID() {
+    return id;
+  }
+
+  public void setID(int id) {
+    this.id = id;
+  }
+
+  public String getSubPopName() {
+    return subPopName;
+  }
+
+  public void setSubPopName(String subPopName) {
+    this.subPopName = subPopName;
+  }
 
 }

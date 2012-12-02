@@ -48,11 +48,13 @@ public abstract class AbstractPopulation<P extends BasicParameters, R extends Ba
   /**
    * Calculate population.
    * 
+   * @param subPopName
+   *          the sub-population name
    * @param parameters
    *          the parameters requires to population calculation
    * @return results the results of the calculation
    */
-  public abstract R calculatePopulation(P parameters);
+  public abstract R calculatePopulation(String subPopName, P parameters);
 
   /**
    * Calculates survival probabilities for the first half of a year.
@@ -158,20 +160,20 @@ public abstract class AbstractPopulation<P extends BasicParameters, R extends Ba
       BasicParameters parameters, BasicResults results) {
 
     // First half of the year
-    getFirstHalfyearSurvProb(results.getP1f(), parameters
-        .getDeathProbInfant1halfFemale(), parameters.getMortXf(), parameters
-        .getNumOfYears(), parameters.getMaxAge());
-    getFirstHalfyearSurvProb(results.getP1m(), parameters
-        .getDeathProbInfant1halfMale(), parameters.getMortXm(), parameters
-        .getNumOfYears(), parameters.getMaxAge());
+    getFirstHalfyearSurvProb(results.getP1f(),
+        parameters.getDeathProbInfant1halfFemale(), parameters.getMortXf(),
+        parameters.getNumOfYears(), parameters.getMaxAge());
+    getFirstHalfyearSurvProb(results.getP1m(),
+        parameters.getDeathProbInfant1halfMale(), parameters.getMortXm(),
+        parameters.getNumOfYears(), parameters.getMaxAge());
 
     // Second half of the year
-    getSecondHalfyearSurvProb(results.getP2f(), parameters
-        .getDeathProbInfant1halfFemale(), parameters.getMortXf(), parameters
-        .getNumOfYears(), parameters.getMaxAge());
-    getSecondHalfyearSurvProb(results.getP2m(), parameters
-        .getDeathProbInfant1halfMale(), parameters.getMortXm(), parameters
-        .getNumOfYears(), parameters.getMaxAge());
+    getSecondHalfyearSurvProb(results.getP2f(),
+        parameters.getDeathProbInfant1halfFemale(), parameters.getMortXf(),
+        parameters.getNumOfYears(), parameters.getMaxAge());
+    getSecondHalfyearSurvProb(results.getP2m(),
+        parameters.getDeathProbInfant1halfMale(), parameters.getMortXm(),
+        parameters.getNumOfYears(), parameters.getMaxAge());
   }
 
   /**
@@ -195,8 +197,12 @@ public abstract class AbstractPopulation<P extends BasicParameters, R extends Ba
   protected static void calculateByMultMin1(int startAge, int endAge, int year,
       Matrix2D target, Matrix2D source, Matrix2D mult) {
     for (int age = startAge; age < endAge; age++) {
-      target.setQuick(age, year, source.getQuick(age - 1, year - 1)
-          * mult.getQuick(age - 1, year - 1));
+      target
+          .setQuick(
+              age,
+              year,
+              source.getQuick(age - 1, year - 1)
+                  * mult.getQuick(age - 1, year - 1));
     }
   }
 
@@ -220,8 +226,8 @@ public abstract class AbstractPopulation<P extends BasicParameters, R extends Ba
   protected static void calculateByMult(int startAge, int endAge, int year,
       Matrix2D target, Matrix2D source, Matrix2D mult) {
     for (int age = startAge; age < endAge; age++) {
-      target.setQuick(age, year, source.getQuick(age, year)
-          * mult.getQuick(age, year));
+      target.setQuick(age, year,
+          source.getQuick(age, year) * mult.getQuick(age, year));
     }
   }
 
@@ -276,8 +282,10 @@ public abstract class AbstractPopulation<P extends BasicParameters, R extends Ba
 
     target.setQuick(0, year, numberOfChilds * liveBirthProp.getQuick(year, 0));
 
-    target
-        .setQuick(maxAge, year, endPopulation.getQuick(maxAge - 1, year - 1)
+    target.setQuick(
+        maxAge,
+        year,
+        endPopulation.getQuick(maxAge - 1, year - 1)
             * p2.getQuick(maxAge - 1, year)
             + endPopulation.getQuick(maxAge, year - 1)
             * survO100.getQuick(year, 0));

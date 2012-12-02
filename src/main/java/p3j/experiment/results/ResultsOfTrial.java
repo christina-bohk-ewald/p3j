@@ -52,13 +52,12 @@ public class ResultsOfTrial implements Serializable {
 	 * The assignment used to generate the trial: one parameter assignment per
 	 * instance.
 	 */
-	private Map<ParameterInstance, ParameterAssignment> assignment = new HashMap<ParameterInstance, ParameterAssignment>();
+  private Map<ParameterInstance, ParameterAssignment> assignment = new HashMap<>();
 
-	/**
-	 * Results of native population calculation. This list has only a single
-	 * element, but this improves database performance significantly.
-	 */
-	private List<BasicResults> nativeResults;
+	  /**
+   * Results of native population calculation.
+   */
+  private List<BasicResults> nativeResults;
 
 	/** The results for the immigrant generations. */
 	private List<BasicResults> immigrantResults = new ArrayList<BasicResults>();
