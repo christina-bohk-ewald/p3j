@@ -38,6 +38,12 @@ public class BasicResults {
   private String subPopName;
 
   /**
+   * The generation of the sub-population (0 if no generations are
+   * distinguished).
+   */
+  private int generation;
+
+  /**
    * Year-by-year age-specific male population at the end of the year (101 x n
    * matrix).
    */
@@ -91,9 +97,11 @@ public class BasicResults {
    * @param maxAge
    *          the maximum age
    */
-  public BasicResults(String subPopulationName, int numOfYears, int maxAge) {
+  public BasicResults(String subPopulationName, int subPopGeneration,
+      int numOfYears, int maxAge) {
 
     this.subPopName = subPopulationName;
+    this.generation = subPopGeneration;
 
     this.endXm = new Matrix2D(maxAge + 1, numOfYears);
     this.endXf = new Matrix2D(maxAge + 1, numOfYears);
@@ -191,6 +199,14 @@ public class BasicResults {
 
   public void setSubPopName(String subPopName) {
     this.subPopName = subPopName;
+  }
+
+  public int getGeneration() {
+    return generation;
+  }
+
+  public void setGeneration(int generation) {
+    this.generation = generation;
   }
 
 }

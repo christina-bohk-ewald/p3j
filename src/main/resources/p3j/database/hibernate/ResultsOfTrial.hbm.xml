@@ -11,19 +11,9 @@
      <many-to-many column="assignment_id" class="p3j.pppm.parameters.ParameterAssignment"/>
 </map>
 <many-to-one name="projection" column="projection_id"/>
-<list name="nativeResults" cascade="all" table="results_natives"  lazy="true">
+<list name="subPopulationResults" cascade="all" table="results_subpops"  lazy="true">
     <key column="trial_id"/>
     <list-index column="result_order" />
-    <many-to-many class="p3j.experiment.results.BasicResults" column="result_id"/>
-</list>
-<list name="immigrantResults" cascade="all" table="results_immigrants"  lazy="true">
-    <key column="trial_id"/>
-    <list-index column="result_order" />
-    <many-to-many class="p3j.experiment.results.BasicResults" column="result_id"/>
-</list>
-<list name="emigrantResults" cascade="all" table="results_emigrants"  lazy="true">
-    <key column="trial_id"/>
-    <list-index column="result_order"/>
     <many-to-many class="p3j.experiment.results.BasicResults" column="result_id"/>
 </list>
 <property name="assignmentProbability" column="probability"/>

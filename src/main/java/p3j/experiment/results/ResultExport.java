@@ -44,6 +44,7 @@ import p3j.misc.IProgressObserver;
 import p3j.misc.gui.GUI;
 import p3j.misc.math.Matrix2D;
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.SubPopulation;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
@@ -615,11 +616,17 @@ public class ResultExport {
         throw new IllegalStateException("Could not create directory: "
             + trialDirectory.getAbsolutePath());
       }
-      exportBasicResults(trialDirectory, results.getNativesResults(), "natives");
-      writeGenerationResults(trialDirectory, results.getImmigrantResults(),
-          "immigrants");
-      writeGenerationResults(trialDirectory, results.getEmigrantResults(),
-          "emigrants");
+
+      for (SubPopulation subPop : projection.getSubPopulationModel()
+          .getSubPopulations()) {
+        if (subPop.isConsistingOfDescendantGenerations())
+          writeGenerationResults(trialDirectory, results.retrieveFor(subPop),
+              subPop.getSimplifiedName());
+        else
+          exportBasicResults(trialDirectory,
+              results.retrieveFor(subPop).get(0), subPop.getSimplifiedName());
+      }
+
       writeAssumptionsUsed(trialDirectory, results, assumptionEncoder);
       resultCount++;
     }

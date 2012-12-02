@@ -209,4 +209,9 @@ public class ExecutionSummary {
 	public Map<ParameterInstance, ParameterAssignment> getParamAssignments() {
 		return paramAssignments;
 	}
+
+  public List<BasicResults> getSubPopulationResults() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

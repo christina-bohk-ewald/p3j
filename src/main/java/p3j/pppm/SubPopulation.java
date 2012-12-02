@@ -162,4 +162,15 @@ public class SubPopulation implements Serializable {
     this.jumpOffPopulation = jumpOffPopulation;
   }
 
+  /**
+   * Gets the simplified name of the sub-population. This can be used, for
+   * example, in file names.
+   * 
+   * @return the simplified name (lower cases, no spaces, etc.)
+   */
+  public String getSimplifiedName() {
+    return name.toLowerCase().replace(" ", "").replace(":", "")
+        .replace("\\", "_").replace("/", "_");
+  }
+
 }

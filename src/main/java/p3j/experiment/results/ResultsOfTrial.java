@@ -26,6 +26,7 @@ import java.util.Set;
 
 import p3j.pppm.IProjectionModel;
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.SubPopulation;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterInstance;
 import p3j.pppm.sets.SetType;
@@ -39,198 +40,173 @@ import p3j.pppm.sets.SetType;
  */
 public class ResultsOfTrial implements Serializable {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 2484910276641194217L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 2484910276641194217L;
 
-	/** The ID of this trial. */
-	private int id = -1;
+  /** The ID of this trial. */
+  private int id = -1;
 
-	/** The projection to which this trial belongs. */
-	private ProjectionModel projection;
+  /** The projection to which this trial belongs. */
+  private ProjectionModel projection;
 
-	/**
-	 * The assignment used to generate the trial: one parameter assignment per
-	 * instance.
-	 */
+  /**
+   * The assignment used to generate the trial: one parameter assignment per
+   * instance.
+   */
   private Map<ParameterInstance, ParameterAssignment> assignment = new HashMap<>();
 
-	  /**
-   * Results of native population calculation.
+  /** Results of the calculations per sub-population & generation. */
+  private List<BasicResults> subPopulationResults = new ArrayList<>();
+
+  /** The overall assignment probability. */
+  private double assignmentProbability;
+
+  /**
+   * The probability that the given combination of sets was chosen. Dividing
+   * {@link ResultsOfTrial#assignmentProbability} by this value yields the
+   * probability of choosing the given assignments GIVEN the selected set
+   * combination.
    */
-  private List<BasicResults> nativeResults;
+  private double setCombinationProbability;
 
-	/** The results for the immigrant generations. */
-	private List<BasicResults> immigrantResults = new ArrayList<BasicResults>();
+  /**
+   * Empty constructor (for Bean compatibility).
+   */
+  public ResultsOfTrial() {
+  }
 
-	/** The results for the emigrant generations. */
-	private List<BasicResults> emigrantResults = new ArrayList<BasicResults>();
+  /**
+   * Instantiates new results for a trial.
+   * 
+   * @param projectionModel
+   *          the current projection model
+   * @param execSummary
+   *          the execution summary
+   */
+  public ResultsOfTrial(IProjectionModel projectionModel,
+      ExecutionSummary execSummary) {
+    subPopulationResults.addAll(execSummary.getSubPopulationResults());
+    projection = (ProjectionModel) projectionModel;
+    assignment.putAll(execSummary.getParamAssignments());
+    calculateAssignmentProbability();
+  }
 
-	/** The overall assignment probability. */
-	private double assignmentProbability;
+  /**
+   * Calculates the assignment's overall probability.
+   */
+  private void calculateAssignmentProbability() {
 
-	/**
-	 * The probability that the given combination of sets was chosen. Dividing
-	 * {@link ResultsOfTrial#assignmentProbability} by this value yields the
-	 * probability of choosing the given assignments GIVEN the selected set
-	 * combination.
-	 */
-	private double setCombinationProbability;
+    double setCombProb = 1.0;
+    double assignmentCombProb = 1.0;
 
-	/**
-	 * Empty constructor (for Bean compatibility).
-	 */
-	public ResultsOfTrial() {
-	}
+    Set<Integer> checkedSetTypeIDs = new HashSet<Integer>();
+    for (Entry<ParameterInstance, ParameterAssignment> entry : assignment
+        .entrySet()) {
 
-	/**
-	 * Instantiates new results for a trial.
-	 * 
-	 * @param projectionModel
-	 *          the current projection model
-	 * @param execSummary
-	 *          the execution summary
-	 */
-	public ResultsOfTrial(IProjectionModel projectionModel,
-	    ExecutionSummary execSummary) {
-		nativeResults = new ArrayList<BasicResults>();
-		nativeResults.add(execSummary.getNativeResults());
-		projection = (ProjectionModel) projectionModel;
-		assignment.putAll(execSummary.getParamAssignments());
-		immigrantResults.addAll(execSummary.getImmigrantResults());
-		emigrantResults.addAll(execSummary.getEmigrantResults());
-		calculateAssignmentProbability();
-	}
+      ParameterInstance paramInstance = entry.getKey();
+      ParameterAssignment paramAssignment = entry.getValue();
+      assignmentCombProb *= paramAssignment.getProbability();
 
-	/**
-	 * Calculates the assignment's overall probability.
-	 */
-	private void calculateAssignmentProbability() {
+      SetType currentSetType = projection.getInstanceSetTypes().get(
+          paramInstance);
+      if (!checkedSetTypeIDs.contains(currentSetType.getID())) {
+        setCombProb *= getSetProbability(paramInstance, paramAssignment,
+            currentSetType);
+        checkedSetTypeIDs.add(currentSetType.getID());
+      }
+    }
 
-		double setCombProb = 1.0;
-		double assignmentCombProb = 1.0;
+    setCombinationProbability = setCombProb;
+    assignmentProbability = setCombProb * assignmentCombProb;
+  }
 
-		Set<Integer> checkedSetTypeIDs = new HashSet<Integer>();
-		for (Entry<ParameterInstance, ParameterAssignment> entry : assignment
-		    .entrySet()) {
+  /**
+   * Gets the probability of the set.
+   * 
+   * @param paramInstance
+   *          a parameter instance belonging to the current Settype
+   * @param paramAssignment
+   *          a parameter assignment (belonging to the set in question)
+   * @param currentSetType
+   *          the current Settype
+   * @return the occurrence probability of the set
+   */
+  private double getSetProbability(ParameterInstance paramInstance,
+      ParameterAssignment paramAssignment, SetType currentSetType) {
+    List<p3j.pppm.sets.Set> currentSets = currentSetType.getSets();
+    for (p3j.pppm.sets.Set currentSet : currentSets) {
+      for (ParameterAssignment currentAssignment : currentSet
+          .getParameterAssignments(paramInstance).getAssignments()) {
+        if (currentAssignment.getID() == paramAssignment.getID()) {
+          return currentSet.getProbability();
+        }
+      }
+    }
+    return -1.0;
+  }
 
-			ParameterInstance paramInstance = entry.getKey();
-			ParameterAssignment paramAssignment = entry.getValue();
-			assignmentCombProb *= paramAssignment.getProbability();
+  public int getID() {
+    return id;
+  }
 
-			SetType currentSetType = projection.getInstanceSetTypes().get(
-			    paramInstance);
-			if (!checkedSetTypeIDs.contains(currentSetType.getID())) {
-				setCombProb *= getSetProbability(paramInstance, paramAssignment,
-				    currentSetType);
-				checkedSetTypeIDs.add(currentSetType.getID());
-			}
-		}
+  public void setID(int id) {
+    this.id = id;
+  }
 
-		setCombinationProbability = setCombProb;
-		assignmentProbability = setCombProb * assignmentCombProb;
-	}
+  public ProjectionModel getProjection() {
+    return projection;
+  }
 
-	/**
-	 * Gets the probability of the set.
-	 * 
-	 * @param paramInstance
-	 *          a parameter instance belonging to the current Settype
-	 * @param paramAssignment
-	 *          a parameter assignment (belonging to the set in question)
-	 * @param currentSetType
-	 *          the current Settype
-	 * @return the occurrence probability of the set
-	 */
-	private double getSetProbability(ParameterInstance paramInstance,
-	    ParameterAssignment paramAssignment, SetType currentSetType) {
-		List<p3j.pppm.sets.Set> currentSets = currentSetType.getSets();
-		for (p3j.pppm.sets.Set currentSet : currentSets) {
-			for (ParameterAssignment currentAssignment : currentSet
-			    .getParameterAssignments(paramInstance).getAssignments()) {
-				if (currentAssignment.getID() == paramAssignment.getID()) {
-					return currentSet.getProbability();
-				}
-			}
-		}
-		return -1.0;
-	}
+  public void setProjection(ProjectionModel projection) {
+    this.projection = projection;
+  }
 
-	public int getID() {
-		return id;
-	}
+  public Map<ParameterInstance, ParameterAssignment> getAssignment() {
+    return assignment;
+  }
 
-	public void setID(int id) {
-		this.id = id;
-	}
+  public void setAssignment(
+      Map<ParameterInstance, ParameterAssignment> assignment) {
+    this.assignment = assignment;
+  }
 
-	public ProjectionModel getProjection() {
-		return projection;
-	}
+  public double getAssignmentProbability() {
+    return assignmentProbability;
+  }
 
-	public void setProjection(ProjectionModel projection) {
-		this.projection = projection;
-	}
+  public void setAssignmentProbability(double assignmentProbability) {
+    this.assignmentProbability = assignmentProbability;
+  }
 
-	public Map<ParameterInstance, ParameterAssignment> getAssignment() {
-		return assignment;
-	}
+  public double getSetCombinationProbability() {
+    return setCombinationProbability;
+  }
 
-	public void setAssignment(
-	    Map<ParameterInstance, ParameterAssignment> assignment) {
-		this.assignment = assignment;
-	}
+  public void setSetCombinationProbability(double setCombinationProbability) {
+    this.setCombinationProbability = setCombinationProbability;
+  }
 
-	public List<BasicResults> getNativeResults() {
-		return nativeResults;
-	}
+  public List<BasicResults> getSubPopulationResults() {
+    return subPopulationResults;
+  }
 
-	/**
-	 * Gets the results of the natives. Checks that there is exactly one result
-	 * set for the natives.
-	 * 
-	 * @return the results of the natives
-	 */
-	public BasicResults getNativesResults() {
-		if (nativeResults.size() != 1) {
-			throw new IllegalStateException(
-			    "Number of native results does not match!");
-		}
-		return nativeResults.get(0);
-	}
+  public void setSubPopulationResults(List<BasicResults> subPopulationResults) {
+    this.subPopulationResults = subPopulationResults;
+  }
 
-	public void setNativeResults(List<BasicResults> nativeResults) {
-		this.nativeResults = nativeResults;
-	}
+  /**
+   * Retrieves all results for a specific sub-population.
+   * 
+   * @param subPop
+   *          the sub-population
+   * @return the list of results referring to this sub-population
+   */
+  public List<BasicResults> retrieveFor(SubPopulation subPop) {
+    List<BasicResults> subPopResults = new ArrayList<>();
+    for (BasicResults subPopResult : subPopulationResults)
+      if (subPopResult.getSubPopName().equals(subPop.getName()))
+        subPopResults.add(subPopResult);
+    return subPopResults;
+  }
 
-	public double getAssignmentProbability() {
-		return assignmentProbability;
-	}
-
-	public void setAssignmentProbability(double assignmentProbability) {
-		this.assignmentProbability = assignmentProbability;
-	}
-
-	public List<BasicResults> getImmigrantResults() {
-		return immigrantResults;
-	}
-
-	public void setImmigrantResults(List<BasicResults> immigrantResults) {
-		this.immigrantResults = immigrantResults;
-	}
-
-	public List<BasicResults> getEmigrantResults() {
-		return emigrantResults;
-	}
-
-	public void setEmigrantResults(List<BasicResults> emigrantResults) {
-		this.emigrantResults = emigrantResults;
-	}
-
-	public double getSetCombinationProbability() {
-		return setCombinationProbability;
-	}
-
-	public void setSetCombinationProbability(double setCombinationProbability) {
-		this.setCombinationProbability = setCombinationProbability;
-	}
 }

@@ -6,6 +6,7 @@
 			<generator class="native" />
 		</id>
 		<property name="subPopName"/>
+		<property name="generation"/>
 		<property name="endXm" length="65536" lazy="true"/>
 		<property name="endXf" length="65536" lazy="true"/>
 		<property name="meanXm" length="65536" lazy="true"/>
