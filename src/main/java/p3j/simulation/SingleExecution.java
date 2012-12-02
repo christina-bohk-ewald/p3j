@@ -116,7 +116,7 @@ public class SingleExecution {
         assignment.getFirstValue());
 
     for (SubPopulation jumpOffPopulation : jumpOffPopulations) {
-      NativeParameters nativeParameters = setupBasicNativeParameters(years,
+      NativeParameters nativeParameters = setupBasicJumpOffParameters(years,
           jumpOffPopulation);
       NativePopulation nativePopulation = new NativePopulation();
       executionSummary.setNativeParameters(nativeParameters);
@@ -352,7 +352,7 @@ public class SingleExecution {
    * @param jumpOffPopulation
    * @return parameters to calculate native population prediction
    */
-  NativeParameters setupBasicNativeParameters(int years,
+  NativeParameters setupBasicJumpOffParameters(int years,
       SubPopulation jumpOffPopulation) {
 
     NativeParameters nativeParameters = new NativeParameters(years,

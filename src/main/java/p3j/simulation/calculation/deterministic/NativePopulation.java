@@ -31,10 +31,11 @@ public class NativePopulation extends
     AbstractPopulation<NativeParameters, BasicResults> {
 
   @Override
-  public BasicResults calculatePopulation(NativeParameters parameters) {
+  public BasicResults calculatePopulation(String subPopName, int generation,
+      NativeParameters parameters) {
 
-    BasicResults results = new BasicResults(parameters.getNumOfYears(),
-        parameters.getMaxAge());
+    BasicResults results = new BasicResults(subPopName, generation,
+        parameters.getNumOfYears(), parameters.getMaxAge());
 
     // Storing start year populations to results
     results.getEndXm().assignColumn(0, parameters.getPEndSYm().toArray()[0]);
@@ -49,13 +50,13 @@ public class NativePopulation extends
           results.getEndXf(), results.getP2f());
 
       // Get number of children born in current year
-      double numOfChilds = getNumOfChilds(results.getMeanXf(), parameters
-          .getFertX(), year);
+      double numOfChilds = getNumOfChilds(results.getMeanXf(),
+          parameters.getFertX(), year);
 
       calculateRestOfMeanPopulation(results.getMeanXf(), results.getEndXf(),
-          results.getP2f(), parameters.getSurviveProbO100f(), parameters
-              .getFemalePropLiveBirth(), year, numOfChilds, parameters
-              .getMaxAge());
+          results.getP2f(), parameters.getSurviveProbO100f(),
+          parameters.getFemalePropLiveBirth(), year, numOfChilds,
+          parameters.getMaxAge());
 
       // Female end population
       calculateByMult(0, parameters.getMaxAge(), year, results.getEndXf(),
@@ -72,9 +73,9 @@ public class NativePopulation extends
           results.getEndXm(), results.getP2m());
 
       calculateRestOfMeanPopulation(results.getMeanXm(), results.getEndXm(),
-          results.getP2m(), parameters.getSurviveProbO100m(), parameters
-              .getMalePropLiveBirth(), year, numOfChilds, parameters
-              .getMaxAge());
+          results.getP2m(), parameters.getSurviveProbO100m(),
+          parameters.getMalePropLiveBirth(), year, numOfChilds,
+          parameters.getMaxAge());
 
       // Male end population
       calculateByMult(0, parameters.getMaxAge(), year, results.getEndXm(),

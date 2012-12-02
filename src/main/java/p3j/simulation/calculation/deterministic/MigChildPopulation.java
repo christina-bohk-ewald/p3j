@@ -34,27 +34,29 @@ public class MigChildPopulation extends
     AbstractPopulation<MigChildParameters, BasicResults> {
 
   @Override
-  public BasicResults calculatePopulation(MigChildParameters parameters) {
+  public BasicResults calculatePopulation(String subPopName, int generation,
+      MigChildParameters parameters) {
 
-    BasicResults results = new BasicResults(parameters.getNumOfYears(),
-        parameters.getMaxAge());
+    BasicResults results = new BasicResults(subPopName, generation,
+        parameters.getNumOfYears(), parameters.getMaxAge());
 
     calculateSurvivalProbabilities(parameters, results);
 
     // Calculate rest
 
     // ...for females
-    calculateMeanAndEndPopulation(parameters.getOldMeanXf(), parameters
-        .getOldFertX(), parameters.getFemalePropLiveBirth(), results
-        .getMeanXf(), results.getEndXf(), parameters.getSurviveProbO100f(),
-        results.getP1f(), results.getP2f(), parameters.getNumOfYears(),
-        parameters.getMaxAge());
+    calculateMeanAndEndPopulation(parameters.getOldMeanXf(),
+        parameters.getOldFertX(), parameters.getFemalePropLiveBirth(),
+        results.getMeanXf(), results.getEndXf(),
+        parameters.getSurviveProbO100f(), results.getP1f(), results.getP2f(),
+        parameters.getNumOfYears(), parameters.getMaxAge());
 
     // ...for males
-    calculateMeanAndEndPopulation(parameters.getOldMeanXf(), parameters
-        .getOldFertX(), parameters.getMalePropLiveBirth(), results.getMeanXm(),
-        results.getEndXm(), parameters.getSurviveProbO100m(), results.getP1m(),
-        results.getP2m(), parameters.getNumOfYears(), parameters.getMaxAge());
+    calculateMeanAndEndPopulation(parameters.getOldMeanXf(),
+        parameters.getOldFertX(), parameters.getMalePropLiveBirth(),
+        results.getMeanXm(), results.getEndXm(),
+        parameters.getSurviveProbO100m(), results.getP1m(), results.getP2m(),
+        parameters.getNumOfYears(), parameters.getMaxAge());
 
     return results;
   }
@@ -97,31 +99,35 @@ public class MigChildPopulation extends
 
         // Calculate mean population
         if (age == maximumAge) {
-          meanPopulation.setQuick(age, year, endPopulation.getQuick(age - 1,
-              year - 1)
-              * p2.getQuick(age - 1, year - 1)
-              + endPopulation.getQuick(age, year - 1)
-              * surviveProbO100.getQuick(year, 0));
+          meanPopulation.setQuick(
+              age,
+              year,
+              endPopulation.getQuick(age - 1, year - 1)
+                  * p2.getQuick(age - 1, year - 1)
+                  + endPopulation.getQuick(age, year - 1)
+                  * surviveProbO100.getQuick(year, 0));
         } else {
-	        switch (age) {
+          switch (age) {
           case 0:
-            meanPopulation.setQuick(age, year, numOfChilds
-                * propLiveBirth.getQuick(year, 0));
+            meanPopulation.setQuick(age, year,
+                numOfChilds * propLiveBirth.getQuick(year, 0));
             break;
           default:
-            meanPopulation.setQuick(age, year, endPopulation.getQuick(age - 1,
-                year - 1)
-                * p2.getQuick(age - 1, year - 1));
+            meanPopulation.setQuick(
+                age,
+                year,
+                endPopulation.getQuick(age - 1, year - 1)
+                    * p2.getQuick(age - 1, year - 1));
             break;
           }
-				}
+        }
 
         // Calculate end population
         if (age == maximumAge) {
-	        endPopulation.setQuick(age, year, meanPopulation.getQuick(age, year)
+          endPopulation.setQuick(age, year, meanPopulation.getQuick(age, year)
               * surviveProbO100.getQuick(year, 0));
         } else {
-	        endPopulation.setQuick(age, year, meanPopulation.getQuick(age, year)
+          endPopulation.setQuick(age, year, meanPopulation.getQuick(age, year)
               * p1.getQuick(age, year));
         }
 

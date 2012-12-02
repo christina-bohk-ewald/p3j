@@ -50,11 +50,14 @@ public abstract class AbstractPopulation<P extends BasicParameters, R extends Ba
    * 
    * @param subPopName
    *          the sub-population name
+   * @param generation
+   *          the generation
    * @param parameters
    *          the parameters requires to population calculation
    * @return results the results of the calculation
    */
-  public abstract R calculatePopulation(String subPopName, P parameters);
+  public abstract R calculatePopulation(String subPopName, int generation,
+      P parameters);
 
   /**
    * Calculates survival probabilities for the first half of a year.

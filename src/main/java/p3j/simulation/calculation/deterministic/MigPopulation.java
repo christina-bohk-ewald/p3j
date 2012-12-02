@@ -33,10 +33,15 @@ public class MigPopulation extends
     AbstractPopulation<MigParameters, BasicResults> {
 
   @Override
-  public BasicResults calculatePopulation(MigParameters parameters) {
+  public BasicResults calculatePopulation(String subPopName, int generation,
+      MigParameters parameters) {
 
-    BasicResults results = new BasicResults(parameters.getNumOfYears(),
-        parameters.getMaxAge());
+    if (generation != 0)
+      throw new IllegalArgumentException(
+          "Only supports generation-0 populations");
+
+    BasicResults results = new BasicResults(subPopName, generation,
+        parameters.getNumOfYears(), parameters.getMaxAge());
 
     calculateSurvivalProbabilities(parameters, results);
 
@@ -44,15 +49,15 @@ public class MigPopulation extends
 
     // ...for females
     calculateMeanAndEndPopulation(results.getMeanXf(), results.getEndXf(),
-        parameters.getMigrantsXf(), parameters.getSurviveProbO100f(), results
-            .getP1f(), results.getP2f(), parameters.getNumOfYears(), parameters
-            .getMaxAge());
+        parameters.getMigrantsXf(), parameters.getSurviveProbO100f(),
+        results.getP1f(), results.getP2f(), parameters.getNumOfYears(),
+        parameters.getMaxAge());
 
     // ...for males
     calculateMeanAndEndPopulation(results.getMeanXm(), results.getEndXm(),
-        parameters.getMigrantsXm(), parameters.getSurviveProbO100m(), results
-            .getP1m(), results.getP2m(), parameters.getNumOfYears(), parameters
-            .getMaxAge());
+        parameters.getMigrantsXm(), parameters.getSurviveProbO100m(),
+        results.getP1m(), results.getP2m(), parameters.getNumOfYears(),
+        parameters.getMaxAge());
 
     return results;
   }
@@ -88,47 +93,55 @@ public class MigPopulation extends
 
         // Calculate mean population
         if (age == maximumAge) {
-          meanPopulation.setQuick(age, year, endPopulation.getQuick(age - 1,
-              year - 1)
-              * p2.getQuick(age - 1, year - 1)
-              + (migrants.getQuick(year, age) / 2)
-              * surviveProbO100.getQuick(year, 0));
+          meanPopulation.setQuick(
+              age,
+              year,
+              endPopulation.getQuick(age - 1, year - 1)
+                  * p2.getQuick(age - 1, year - 1)
+                  + (migrants.getQuick(year, age) / 2)
+                  * surviveProbO100.getQuick(year, 0));
         } else {
           switch (age) {
           case 0:
             meanPopulation.setQuick(age, year, 0);
             break;
           case 1:
-            meanPopulation.setQuick(age, year, (migrants.getQuick(year - 1,
-                age - 1) + migrants.getQuick(year, age) / 2)
-                * p2.getQuick(age - 1, year - 1));
+            meanPopulation.setQuick(
+                age,
+                year,
+                (migrants.getQuick(year - 1, age - 1) + migrants.getQuick(year,
+                    age) / 2) * p2.getQuick(age - 1, year - 1));
             break;
           default:
-            meanPopulation.setQuick(age, year,
+            meanPopulation.setQuick(
+                age,
+                year,
                 (migrants.getQuick(year, age) / 2 + endPopulation.getQuick(
-                    age - 1, year - 1))
-                    * p2.getQuick(age - 1, year - 1));
+                    age - 1, year - 1)) * p2.getQuick(age - 1, year - 1));
             break;
           }
         }
 
         // Calculate end population
         if (age == maximumAge) {
-          endPopulation.setQuick(age, year, meanPopulation.getQuick(age, year)
-              * surviveProbO100.getQuick(year, 0)
-              + migrants.getQuick(year, age) / 2);
+          endPopulation.setQuick(
+              age,
+              year,
+              meanPopulation.getQuick(age, year)
+                  * surviveProbO100.getQuick(year, 0)
+                  + migrants.getQuick(year, age) / 2);
 
         } else {
           switch (age) {
           case 0:
-            endPopulation.setQuick(age, year, meanPopulation
-                .getQuick(age, year)
-                * p1.getQuick(age, year) + migrants.getQuick(year, age));
+            endPopulation.setQuick(age, year,
+                meanPopulation.getQuick(age, year) * p1.getQuick(age, year)
+                    + migrants.getQuick(year, age));
             break;
           default:
-            endPopulation.setQuick(age, year, meanPopulation
-                .getQuick(age, year)
-                * p1.getQuick(age, year) + migrants.getQuick(year, age) / 2);
+            endPopulation.setQuick(age, year,
+                meanPopulation.getQuick(age, year) * p1.getQuick(age, year)
+                    + migrants.getQuick(year, age) / 2);
             break;
           }
         }
