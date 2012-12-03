@@ -75,6 +75,9 @@ public class SingleExecution {
   /** The list containing the populations that define a jump-off population. */
   private final List<SubPopulation> jumpOffPopulations;
 
+  /** The list containing the populations that define a yearly in-flow. */
+  private final List<SubPopulation> inFlowPopulations;
+
   /** The database to store results in. */
   private final IP3MDatabase database;
 
@@ -93,6 +96,8 @@ public class SingleExecution {
     projection = proj;
     jumpOffPopulations = projection.getSubPopulationModel()
         .getJumpOffPopulations();
+    inFlowPopulations = projection.getSubPopulationModel()
+        .getInFlowPopulations();
     database = dataBase;
     random = SimSystem.getRNGGenerator().getNextRNG();
   }
@@ -116,12 +121,12 @@ public class SingleExecution {
         assignment.getFirstValue());
 
     for (SubPopulation jumpOffPopulation : jumpOffPopulations) {
-      NativeParameters nativeParameters = setupBasicJumpOffParameters(years,
+      NativeParameters jumpOffParameters = setupBasicJumpOffParameters(years,
           jumpOffPopulation);
       NativePopulation nativePopulation = new NativePopulation();
-      executionSummary.setNativeParameters(nativeParameters);
+      executionSummary.setNativeParameters(jumpOffParameters);
       executionSummary.setNativeResults(nativePopulation
-          .calculatePopulation(nativeParameters));
+          .calculatePopulation(jumpOffParameters));
     }
 
     SubPopulation subPop = null; // FIXME

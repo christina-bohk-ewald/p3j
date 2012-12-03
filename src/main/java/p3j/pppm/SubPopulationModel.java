@@ -74,16 +74,59 @@ public class SubPopulationModel implements Serializable {
   }
 
   /**
-   * Gets the jump off populations.
+   * Gets the jump-off populations.
    * 
    * @return the jump off populations
    */
   public List<SubPopulation> getJumpOffPopulations() {
-    List<SubPopulation> jumpOffPopulations = new ArrayList<>();
+    return filterSubPopulationsByProperty(true, null);
+  }
+
+  /**
+   * Gets the in-flow populations.
+   * 
+   * @return the in flow populations
+   */
+  public List<SubPopulation> getInFlowPopulations() {
+    return filterSubPopulationsByProperty(true, null);
+  }
+
+  /**
+   * Gets the jump-off populations.
+   * 
+   * @return the jump off populations
+   */
+  public List<SubPopulation> getPopulationsWithoutDescendants() {
+    return filterSubPopulationsByProperty(null, false);
+  }
+
+  /**
+   * Gets the in-flow populations.
+   * 
+   * @return the in flow populations
+   */
+  public List<SubPopulation> getPopulationsWithDescendants() {
+    return filterSubPopulationsByProperty(null, true);
+  }
+
+  /**
+   * Filters sub-populations by jump-off flag.
+   * 
+   * @param jumpOff
+   *          the desired state of the jump off flag (null if don't-care)
+   * @param descendants
+   *          the desired state of the descendants flag (null if don't-care)
+   * @return the list of corresponding sub-populations
+   */
+  private List<SubPopulation> filterSubPopulationsByProperty(Boolean jumpOff,
+      Boolean descendants) {
+    List<SubPopulation> subPops = new ArrayList<>();
     for (SubPopulation subPopulation : subPopulations)
-      if (subPopulation.isJumpOffPopulation())
-        jumpOffPopulations.add(subPopulation);
-    return jumpOffPopulations;
+      if ((jumpOff == null || (subPopulation.isJumpOffPopulation() == jumpOff))
+          && (descendants == null || (subPopulation
+              .isConsistingOfDescendantGenerations() == descendants)))
+        subPops.add(subPopulation);
+    return subPops;
   }
 
 }
