@@ -124,20 +124,21 @@ public class SingleExecution {
       NativeParameters jumpOffParameters = setupBasicJumpOffParameters(years,
           jumpOffPopulation);
       NativePopulation nativePopulation = new NativePopulation();
-      executionSummary.addNativeParameters(jumpOffParameters);
-      executionSummary.setNativeResults(nativePopulation.calculatePopulation(
-          jumpOffPopulation.getName(), 0, jumpOffParameters));
+      executionSummary.addParameters(jumpOffPopulation, jumpOffParameters);
+      executionSummary.addResults(jumpOffPopulation, 0, nativePopulation
+          .calculatePopulation(jumpOffPopulation.getName(), 0,
+              jumpOffParameters));
 
-      // TODO: multiple generations
+      if (jumpOffPopulation.isConsistingOfDescendantGenerations())
+        throw new UnsupportedOperationException(); // TODO
     }
 
     for (SubPopulation inFlowPopulation : inFlowPopulations) {
-      calculateFirstEmigrantPopulation(executionSummary, inFlowPopulation,
-          years);
+      calculateFirstInFlowPopulation(executionSummary, inFlowPopulation, years);
       if (inFlowPopulation.isConsistingOfDescendantGenerations())
         for (int i = 1; i < projection.getGenerations(); i++) {
-          calculateEmigrantChildPopulation(executionSummary, inFlowPopulation,
-              i, years);
+          calculateInFlowChildPopulation(executionSummary, inFlowPopulation, i,
+              years);
         }
     }
     storeResultsToDB(executionSummary);
@@ -195,7 +196,6 @@ public class SingleExecution {
             .getName(), assignmentEntry.getValue());
       }
     }
-
     return generatorResults;
   }
 
@@ -239,7 +239,7 @@ public class SingleExecution {
    * @param years
    *          the number of years for which shall be predicted
    */
-  void calculateFirstEmigrantPopulation(ExecutionSummary experimentSummary,
+  void calculateFirstInFlowPopulation(ExecutionSummary experimentSummary,
       SubPopulation subPopulation, int years) {
     MigParameters parameters = new MigParameters(years,
         projection.getMaximumAge());
@@ -247,11 +247,11 @@ public class SingleExecution {
         .getMaleLabelFor(subPopulation)));
     parameters.setMigrantsXf(getGenIndepParameter(ParameterType.MIGRATION
         .getFemaleLabelFor(subPopulation)));
-    setupBasicMigrantParameters(parameters, subPopulation, 0);
+    setupBasicInFlowPopulationParameters(parameters, subPopulation, 0);
     MigPopulation migPopulation = new MigPopulation();
-    experimentSummary.setFirstEmigrantParameters(parameters);
-    experimentSummary.addEmigrantResult(migPopulation.calculatePopulation(
-        subPopulation.getName(), 0, parameters));
+    experimentSummary.setParameters(subPopulation, 0, parameters);
+    experimentSummary.addResults(subPopulation, 0, migPopulation
+        .calculatePopulation(subPopulation.getName(), 0, parameters));
   }
 
   /**
@@ -266,20 +266,20 @@ public class SingleExecution {
    * @param years
    *          the number of years for which shall be predicted
    */
-  void calculateEmigrantChildPopulation(ExecutionSummary experimentSummary,
+  void calculateInFlowChildPopulation(ExecutionSummary experimentSummary,
       SubPopulation subPopulation, int generation, int years) {
     MigChildParameters parameters = new MigChildParameters(years,
         projection.getMaximumAge());
-    parameters.setOldFertX((generation == 1) ? experimentSummary
-        .getFirstEmigrantParameters().getFertX() : experimentSummary
-        .getEmigrantParameters().get(generation - 2).getFertX());
-    parameters.setOldMeanXf(experimentSummary.getEmigrantResults()
-        .get(generation - 1).getMeanXf());
-    setupBasicMigrantParameters(parameters, subPopulation, generation);
+    parameters.setOldFertX(experimentSummary.getParameters(subPopulation,
+        generation - 1).getFertX());
+    parameters.setOldMeanXf(experimentSummary.getResults(subPopulation,
+        generation - 1).getMeanXf());
+    setupBasicInFlowPopulationParameters(parameters, subPopulation, generation);
     MigChildPopulation migChildPopulation = new MigChildPopulation();
-    experimentSummary.addEmigrantParameters(parameters);
-    experimentSummary.addEmigrantResult(migChildPopulation.calculatePopulation(
-        subPopulation.getName(), generation, parameters));
+    experimentSummary.setDescendantParameters(subPopulation, generation,
+        parameters);
+    experimentSummary.addResults(subPopulation, generation, migChildPopulation
+        .calculatePopulation(subPopulation.getName(), generation, parameters));
   }
 
   /**
@@ -340,7 +340,7 @@ public class SingleExecution {
    * @param generation
    *          the generation for which the parameters should be set
    */
-  void setupBasicMigrantParameters(BasicParameters parameters,
+  void setupBasicInFlowPopulationParameters(BasicParameters parameters,
       SubPopulation subPopulation, int generation) {
 
     parameters.setDeathProbInfant1halfMale(getGenDepParameter(

@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import p3j.misc.math.Matrix2D;
+import p3j.pppm.SubPopulation;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterInstance;
+import p3j.simulation.calculation.deterministic.parameters.BasicParameters;
 import p3j.simulation.calculation.deterministic.parameters.MigChildParameters;
 import p3j.simulation.calculation.deterministic.parameters.MigParameters;
 import p3j.simulation.calculation.deterministic.parameters.NativeParameters;
@@ -211,6 +213,55 @@ public class ExecutionSummary {
   }
 
   public List<BasicResults> getSubPopulationResults() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public void addNativeParameters(NativeParameters jumpOffParameters) {
+    nativeParameters.add(jumpOffParameters);
+  }
+
+  public void addParameters(SubPopulation jumpOffPopulation,
+      NativeParameters jumpOffParameters) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void addResults(SubPopulation jumpOffPopulation, int i,
+      BasicResults calculatePopulation) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void setFirstParameters(SubPopulation subPopulation,
+      MigParameters parameters) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public BasicParameters getFirstParameters(SubPopulation subPopulation) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public void setParameters(SubPopulation subPopulation, int i,
+      MigParameters parameters) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public BasicParameters getParameters(SubPopulation subPopulation, int i) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public void setDescendantParameters(SubPopulation subPopulation,
+      int generation, MigChildParameters parameters) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public BasicResults getResults(SubPopulation subPopulation, int i) {
     // TODO Auto-generated method stub
     return null;
   }
