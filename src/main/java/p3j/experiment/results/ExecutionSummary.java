@@ -53,11 +53,11 @@ public class ExecutionSummary {
   /** Parameters to calculate (the first generation of) in-flow sub-populations. */
   private Map<SubPopulation, MigParameters> inFlowParameters = new HashMap<>();
 
-  /** Parameters to calculate descendant generations. */
-  private Map<SubPopulation, MigChildParameters> descendantGenParameters = new HashMap<>();
+  /** Parameters to calculate descendant generations of in-flow sub-populations. */
+  private Map<SubPopulation, List<MigChildParameters>> inFlowDescParameters = new HashMap<>();
 
   /** Stores the results per sub-population. */
-  private Map<SubPopulation, Map<Integer, BasicResults>> results = new HashMap<>();
+  private Map<SubPopulation, List<BasicResults>> results = new HashMap<>();
 
   /**
    * Instantiates a new execution summary.
@@ -100,7 +100,7 @@ public class ExecutionSummary {
    */
   private void addTotalEndPopulation(SubPopulation subPop,
       List<Matrix2D> matrixList) {
-    for (BasicResults result : results.get(subPop).values()) {
+    for (BasicResults result : results.get(subPop)) {
       matrixList.add(result.getEndXm());
       matrixList.add(result.getEndXf());
     }
@@ -110,53 +110,67 @@ public class ExecutionSummary {
     return paramAssignments;
   }
 
-  public List<BasicResults> getSubPopulationResults() {
-    // TODO Auto-generated method stub
-    return null;
+  /**
+   * Gets all results.
+   * 
+   * @return the results
+   */
+  public List<BasicResults> getAllResults() {
+    List<BasicResults> allResults = new ArrayList<>();
+    for (SubPopulation subPop : subPopulations)
+      allResults.addAll(results.get(subPop));
+    return allResults;
   }
 
-  public void addParameters(SubPopulation jumpOffPopulation,
-      NativeParameters jumpOffParameters) {
-    // TODO Auto-generated method stub
-
+  public void setJumpOffParameters(SubPopulation jumpOffPopulation,
+      NativeParameters jumpOffParams) {
+    jumpOffParameters.put(jumpOffPopulation, jumpOffParams);
   }
 
-  public void addResults(SubPopulation jumpOffPopulation, int i,
-      BasicResults calculatePopulation) {
-    // TODO Auto-generated method stub
-
+  public void addResults(SubPopulation jumpOffPopulation, int generation,
+      BasicResults popResults) {
+    List<BasicResults> resultList = results.get(jumpOffPopulation);
+    if (resultList == null) {
+      resultList = new ArrayList<>();
+      results.put(jumpOffPopulation, resultList);
+    }
+    resultList.set(generation, popResults);
   }
 
-  public void setFirstParameters(SubPopulation subPopulation,
+  public void setInFlowParameters(SubPopulation subPopulation,
       MigParameters parameters) {
-    // TODO Auto-generated method stub
-
+    inFlowParameters.put(subPopulation, parameters);
   }
 
-  public BasicParameters getFirstParameters(SubPopulation subPopulation) {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  public BasicParameters getParameters(SubPopulation subPopulation,
+      int generation) {
+    if (!subPopulation.isConsistingOfDescendantGenerations())
+      throw new IllegalArgumentException("Sub-population '"
+          + subPopulation.getName()
+          + "' does not have separate descendant generations.");
 
-  public void setParameters(SubPopulation subPopulation, int i,
-      MigParameters parameters) {
-    // TODO Auto-generated method stub
+    if (generation == 0)
+      return inFlowParameters.get(subPopulation);
 
-  }
-
-  public BasicParameters getParameters(SubPopulation subPopulation, int i) {
-    // TODO Auto-generated method stub
-    return null;
+    return inFlowDescParameters.get(subPopulation).get(generation - 1);
   }
 
   public void setDescendantParameters(SubPopulation subPopulation,
       int generation, MigChildParameters parameters) {
-    // TODO Auto-generated method stub
-
+    if (generation <= 0 || !subPopulation.isConsistingOfDescendantGenerations())
+      throw new IllegalArgumentException("There is no generation '"
+          + generation + "' for sub-population '" + subPopulation.getName()
+          + "'.");
+    List<MigChildParameters> paramList = inFlowDescParameters
+        .get(subPopulation);
+    if (paramList == null) {
+      paramList = new ArrayList<>();
+      inFlowDescParameters.put(subPopulation, paramList);
+    }
+    paramList.set(generation - 1, parameters);
   }
 
-  public BasicResults getResults(SubPopulation subPopulation, int i) {
-    // TODO Auto-generated method stub
-    return null;
+  public BasicResults getResults(SubPopulation subPopulation, int generation) {
+    return results.get(subPopulation).get(generation);
   }
 }

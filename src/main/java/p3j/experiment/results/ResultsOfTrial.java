@@ -85,7 +85,7 @@ public class ResultsOfTrial implements Serializable {
    */
   public ResultsOfTrial(IProjectionModel projectionModel,
       ExecutionSummary execSummary) {
-    subPopulationResults.addAll(execSummary.getSubPopulationResults());
+    subPopulationResults.addAll(execSummary.getAllResults());
     projection = (ProjectionModel) projectionModel;
     assignment.putAll(execSummary.getParamAssignments());
     calculateAssignmentProbability();

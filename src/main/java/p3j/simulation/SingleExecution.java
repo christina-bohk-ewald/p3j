@@ -125,7 +125,8 @@ public class SingleExecution {
       NativeParameters jumpOffParameters = setupBasicJumpOffParameters(years,
           jumpOffPopulation);
       NativePopulation nativePopulation = new NativePopulation();
-      executionSummary.addParameters(jumpOffPopulation, jumpOffParameters);
+      executionSummary.setJumpOffParameters(jumpOffPopulation,
+          jumpOffParameters);
       executionSummary.addResults(jumpOffPopulation, 0, nativePopulation
           .calculatePopulation(jumpOffPopulation.getName(), 0,
               jumpOffParameters));
@@ -250,7 +251,7 @@ public class SingleExecution {
         .getFemaleLabelFor(subPopulation)));
     setupBasicInFlowPopulationParameters(parameters, subPopulation, 0);
     MigPopulation migPopulation = new MigPopulation();
-    executionSummary.setParameters(subPopulation, 0, parameters);
+    executionSummary.setInFlowParameters(subPopulation, parameters);
     executionSummary.addResults(subPopulation, 0, migPopulation
         .calculatePopulation(subPopulation.getName(), 0, parameters));
   }
