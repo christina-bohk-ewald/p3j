@@ -17,7 +17,7 @@ package p3j.simulation.calculation.deterministic;
 
 import p3j.experiment.results.BasicResults;
 import p3j.misc.math.Matrix2D;
-import p3j.simulation.calculation.deterministic.parameters.MigChildParameters;
+import p3j.simulation.calculation.deterministic.parameters.InFlowDescendantParameters;
 
 /**
  * Calculation of the population containing children of migrants. One function
@@ -31,11 +31,11 @@ import p3j.simulation.calculation.deterministic.parameters.MigChildParameters;
  * 
  */
 public class MigChildPopulation extends
-    AbstractPopulation<MigChildParameters, BasicResults> {
+    AbstractPopulation<InFlowDescendantParameters, BasicResults> {
 
   @Override
   public BasicResults calculatePopulation(String subPopName, int generation,
-      MigChildParameters parameters) {
+      InFlowDescendantParameters parameters) {
 
     BasicResults results = new BasicResults(subPopName, generation,
         parameters.getNumOfYears(), parameters.getMaxAge());

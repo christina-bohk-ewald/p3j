@@ -17,7 +17,7 @@ package p3j.simulation.calculation.deterministic;
 
 import p3j.experiment.results.BasicResults;
 import p3j.misc.math.Matrix2D;
-import p3j.simulation.calculation.deterministic.parameters.MigParameters;
+import p3j.simulation.calculation.deterministic.parameters.InFlowParameters;
 
 /**
  * Calculation regarding the population of migrants. One method has seven
@@ -30,11 +30,11 @@ import p3j.simulation.calculation.deterministic.parameters.MigParameters;
  * 
  */
 public class MigPopulation extends
-    AbstractPopulation<MigParameters, BasicResults> {
+    AbstractPopulation<InFlowParameters, BasicResults> {
 
   @Override
   public BasicResults calculatePopulation(String subPopName, int generation,
-      MigParameters parameters) {
+      InFlowParameters parameters) {
 
     if (generation != 0)
       throw new IllegalArgumentException(

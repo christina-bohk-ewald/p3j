@@ -16,7 +16,7 @@
 package p3j.simulation.calculation.deterministic;
 
 import p3j.experiment.results.BasicResults;
-import p3j.simulation.calculation.deterministic.parameters.NativeParameters;
+import p3j.simulation.calculation.deterministic.parameters.JumpOffParameters;
 
 /**
  * Handles calculations for the native population.
@@ -28,11 +28,11 @@ import p3j.simulation.calculation.deterministic.parameters.NativeParameters;
  * 
  */
 public class NativePopulation extends
-    AbstractPopulation<NativeParameters, BasicResults> {
+    AbstractPopulation<JumpOffParameters, BasicResults> {
 
   @Override
   public BasicResults calculatePopulation(String subPopName, int generation,
-      NativeParameters parameters) {
+      JumpOffParameters parameters) {
 
     BasicResults results = new BasicResults(subPopName, generation,
         parameters.getNumOfYears(), parameters.getMaxAge());

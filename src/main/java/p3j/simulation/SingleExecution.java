@@ -40,9 +40,9 @@ import p3j.simulation.calculation.deterministic.MigChildPopulation;
 import p3j.simulation.calculation.deterministic.MigPopulation;
 import p3j.simulation.calculation.deterministic.NativePopulation;
 import p3j.simulation.calculation.deterministic.parameters.BasicParameters;
-import p3j.simulation.calculation.deterministic.parameters.MigChildParameters;
-import p3j.simulation.calculation.deterministic.parameters.MigParameters;
-import p3j.simulation.calculation.deterministic.parameters.NativeParameters;
+import p3j.simulation.calculation.deterministic.parameters.InFlowDescendantParameters;
+import p3j.simulation.calculation.deterministic.parameters.InFlowParameters;
+import p3j.simulation.calculation.deterministic.parameters.JumpOffParameters;
 
 /**
  * This class holds all data structures and methods that are required to use an
@@ -122,7 +122,7 @@ public class SingleExecution {
         assignment.getFirstValue());
 
     for (SubPopulation jumpOffPopulation : jumpOffPopulations) {
-      NativeParameters jumpOffParameters = setupBasicJumpOffParameters(years,
+      JumpOffParameters jumpOffParameters = setupBasicJumpOffParameters(years,
           jumpOffPopulation);
       NativePopulation nativePopulation = new NativePopulation();
       executionSummary.setJumpOffParameters(jumpOffPopulation,
@@ -243,7 +243,7 @@ public class SingleExecution {
    */
   void calculateFirstInFlowPopulation(ExecutionSummary executionSummary,
       SubPopulation subPopulation, int years) {
-    MigParameters parameters = new MigParameters(years,
+    InFlowParameters parameters = new InFlowParameters(years,
         projection.getMaximumAge());
     parameters.setMigrantsXm(getGenIndepParameter(ParameterType.MIGRATION
         .getMaleLabelFor(subPopulation)));
@@ -270,7 +270,7 @@ public class SingleExecution {
    */
   void calculateInFlowChildPopulation(ExecutionSummary executionSummary,
       SubPopulation subPopulation, int generation, int years) {
-    MigChildParameters parameters = new MigChildParameters(years,
+    InFlowDescendantParameters parameters = new InFlowDescendantParameters(years,
         projection.getMaximumAge());
     parameters.setOldFertX(executionSummary.getParameters(subPopulation,
         generation - 1).getFertX());
@@ -292,10 +292,10 @@ public class SingleExecution {
    * @param jumpOffPopulation
    * @return parameters to calculate native population prediction
    */
-  NativeParameters setupBasicJumpOffParameters(int years,
+  JumpOffParameters setupBasicJumpOffParameters(int years,
       SubPopulation jumpOffPopulation) {
 
-    NativeParameters nativeParameters = new NativeParameters(years,
+    JumpOffParameters nativeParameters = new JumpOffParameters(years,
         projection.getMaximumAge());
 
     nativeParameters.setPEndSYm(getGenIndepParameter(ParameterType.JUMP_OFF

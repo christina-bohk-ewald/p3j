@@ -26,9 +26,9 @@ import p3j.pppm.SubPopulation;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterInstance;
 import p3j.simulation.calculation.deterministic.parameters.BasicParameters;
-import p3j.simulation.calculation.deterministic.parameters.MigChildParameters;
-import p3j.simulation.calculation.deterministic.parameters.MigParameters;
-import p3j.simulation.calculation.deterministic.parameters.NativeParameters;
+import p3j.simulation.calculation.deterministic.parameters.InFlowDescendantParameters;
+import p3j.simulation.calculation.deterministic.parameters.InFlowParameters;
+import p3j.simulation.calculation.deterministic.parameters.JumpOffParameters;
 
 /**
  * Summary of a single PPPM execution.
@@ -48,13 +48,13 @@ public class ExecutionSummary {
   private final List<SubPopulation> subPopulations;
 
   /** Parameters for calculating the jump-off populations. */
-  private Map<SubPopulation, NativeParameters> jumpOffParameters = new HashMap<>();
+  private Map<SubPopulation, JumpOffParameters> jumpOffParameters = new HashMap<>();
 
   /** Parameters to calculate (the first generation of) in-flow sub-populations. */
-  private Map<SubPopulation, MigParameters> inFlowParameters = new HashMap<>();
+  private Map<SubPopulation, InFlowParameters> inFlowParameters = new HashMap<>();
 
   /** Parameters to calculate descendant generations of in-flow sub-populations. */
-  private Map<SubPopulation, List<MigChildParameters>> inFlowDescParameters = new HashMap<>();
+  private Map<SubPopulation, List<InFlowDescendantParameters>> inFlowDescParameters = new HashMap<>();
 
   /** Stores the results per sub-population. */
   private Map<SubPopulation, List<BasicResults>> results = new HashMap<>();
@@ -123,7 +123,7 @@ public class ExecutionSummary {
   }
 
   public void setJumpOffParameters(SubPopulation jumpOffPopulation,
-      NativeParameters jumpOffParams) {
+      JumpOffParameters jumpOffParams) {
     jumpOffParameters.put(jumpOffPopulation, jumpOffParams);
   }
 
@@ -138,7 +138,7 @@ public class ExecutionSummary {
   }
 
   public void setInFlowParameters(SubPopulation subPopulation,
-      MigParameters parameters) {
+      InFlowParameters parameters) {
     inFlowParameters.put(subPopulation, parameters);
   }
 
@@ -156,12 +156,12 @@ public class ExecutionSummary {
   }
 
   public void setDescendantParameters(SubPopulation subPopulation,
-      int generation, MigChildParameters parameters) {
+      int generation, InFlowDescendantParameters parameters) {
     if (generation <= 0 || !subPopulation.isConsistingOfDescendantGenerations())
       throw new IllegalArgumentException("There is no generation '"
           + generation + "' for sub-population '" + subPopulation.getName()
           + "'.");
-    List<MigChildParameters> paramList = inFlowDescParameters
+    List<InFlowDescendantParameters> paramList = inFlowDescParameters
         .get(subPopulation);
     if (paramList == null) {
       paramList = new ArrayList<>();
