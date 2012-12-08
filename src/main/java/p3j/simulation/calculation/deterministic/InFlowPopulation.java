@@ -20,8 +20,7 @@ import p3j.misc.math.Matrix2D;
 import p3j.simulation.calculation.deterministic.parameters.InFlowParameters;
 
 /**
- * Calculation regarding the population of migrants. One method has seven
- * parameters and therefore does not confirm to ESCA-JAVA0138.
+ * Calculation regarding the sub-populations with an in-flow matrix.
  * 
  * Created on July 22, 2006
  * 
@@ -29,7 +28,7 @@ import p3j.simulation.calculation.deterministic.parameters.InFlowParameters;
  * @author Roland Ewald
  * 
  */
-public class MigPopulation extends
+public class InFlowPopulation extends
     AbstractPopulation<InFlowParameters, BasicResults> {
 
   @Override

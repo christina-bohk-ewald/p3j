@@ -19,7 +19,7 @@ import p3j.experiment.results.BasicResults;
 import p3j.simulation.calculation.deterministic.parameters.JumpOffParameters;
 
 /**
- * Handles calculations for the native population.
+ * Handles calculations for the jump-off sub-populations.
  * 
  * Created on July 16, 2006
  * 
@@ -27,7 +27,7 @@ import p3j.simulation.calculation.deterministic.parameters.JumpOffParameters;
  * @author Roland Ewald
  * 
  */
-public class NativePopulation extends
+public class JumpOffPopulation extends
     AbstractPopulation<JumpOffParameters, BasicResults> {
 
   @Override

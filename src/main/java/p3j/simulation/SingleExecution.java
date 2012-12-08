@@ -36,9 +36,9 @@ import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterInstance;
 import p3j.pppm.parameters.ParameterType;
 import p3j.simulation.assignments.plugintype.IParamAssignmentGenerator;
-import p3j.simulation.calculation.deterministic.MigChildPopulation;
-import p3j.simulation.calculation.deterministic.MigPopulation;
-import p3j.simulation.calculation.deterministic.NativePopulation;
+import p3j.simulation.calculation.deterministic.InFlowDescendantPopulation;
+import p3j.simulation.calculation.deterministic.InFlowPopulation;
+import p3j.simulation.calculation.deterministic.JumpOffPopulation;
 import p3j.simulation.calculation.deterministic.parameters.BasicParameters;
 import p3j.simulation.calculation.deterministic.parameters.InFlowDescendantParameters;
 import p3j.simulation.calculation.deterministic.parameters.InFlowParameters;
@@ -124,7 +124,7 @@ public class SingleExecution {
     for (SubPopulation jumpOffPopulation : jumpOffPopulations) {
       JumpOffParameters jumpOffParameters = setupBasicJumpOffParameters(years,
           jumpOffPopulation);
-      NativePopulation nativePopulation = new NativePopulation();
+      JumpOffPopulation nativePopulation = new JumpOffPopulation();
       executionSummary.setJumpOffParameters(jumpOffPopulation,
           jumpOffParameters);
       executionSummary.addResults(jumpOffPopulation, 0, nativePopulation
@@ -250,7 +250,7 @@ public class SingleExecution {
     parameters.setMigrantsXf(getGenIndepParameter(ParameterType.MIGRATION
         .getFemaleLabelFor(subPopulation)));
     setupBasicInFlowPopulationParameters(parameters, subPopulation, 0);
-    MigPopulation migPopulation = new MigPopulation();
+    InFlowPopulation migPopulation = new InFlowPopulation();
     executionSummary.setInFlowParameters(subPopulation, parameters);
     executionSummary.addResults(subPopulation, 0, migPopulation
         .calculatePopulation(subPopulation.getName(), 0, parameters));
@@ -277,7 +277,7 @@ public class SingleExecution {
     parameters.setOldMeanXf(executionSummary.getResults(subPopulation,
         generation - 1).getMeanXf());
     setupBasicInFlowPopulationParameters(parameters, subPopulation, generation);
-    MigChildPopulation migChildPopulation = new MigChildPopulation();
+    InFlowDescendantPopulation migChildPopulation = new InFlowDescendantPopulation();
     executionSummary.setDescendantParameters(subPopulation, generation,
         parameters);
     executionSummary.addResults(subPopulation, generation, migChildPopulation

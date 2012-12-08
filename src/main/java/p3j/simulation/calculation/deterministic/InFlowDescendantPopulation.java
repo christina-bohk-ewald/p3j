@@ -20,9 +20,8 @@ import p3j.misc.math.Matrix2D;
 import p3j.simulation.calculation.deterministic.parameters.InFlowDescendantParameters;
 
 /**
- * Calculation of the population containing children of migrants. One function
- * does not conform to ESCA-JAVA0138 (9 parameters are required for
- * calculation).
+ * Calculation of the population containing descendants of sub-populations with
+ * in-flow matrix.
  * 
  * Created on July 22, 2006
  * 
@@ -30,7 +29,7 @@ import p3j.simulation.calculation.deterministic.parameters.InFlowDescendantParam
  * @author Roland Ewald
  * 
  */
-public class MigChildPopulation extends
+public class InFlowDescendantPopulation extends
     AbstractPopulation<InFlowDescendantParameters, BasicResults> {
 
   @Override
