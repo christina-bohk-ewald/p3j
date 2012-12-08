@@ -134,7 +134,11 @@ public class ExecutionSummary {
       resultList = new ArrayList<>();
       results.put(jumpOffPopulation, resultList);
     }
-    resultList.set(generation, popResults);
+    if (resultList.size() != generation)
+      throw new IllegalArgumentException("Can't add result for generation "
+          + generation + ", there are " + resultList.size()
+          + " elements in result list.");
+    resultList.add(generation, popResults);
   }
 
   public void setInFlowParameters(SubPopulation subPopulation,
@@ -167,7 +171,11 @@ public class ExecutionSummary {
       paramList = new ArrayList<>();
       inFlowDescParameters.put(subPopulation, paramList);
     }
-    paramList.set(generation - 1, parameters);
+    if (paramList.size() != generation - 1)
+      throw new IllegalArgumentException("Can't add parameters for generation "
+          + generation + ", there are " + paramList.size()
+          + " elements in the parameter list for descendant populations.");
+    paramList.add(parameters);
   }
 
   public BasicResults getResults(SubPopulation subPopulation, int generation) {

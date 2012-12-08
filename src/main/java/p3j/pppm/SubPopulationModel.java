@@ -88,7 +88,7 @@ public class SubPopulationModel implements Serializable {
    * @return the in flow populations
    */
   public List<SubPopulation> getInFlowPopulations() {
-    return filterSubPopulationsByProperty(true, null);
+    return filterSubPopulationsByProperty(false, null);
   }
 
   /**

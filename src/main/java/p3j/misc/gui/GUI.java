@@ -167,6 +167,7 @@ public final class GUI {
   public static void printErrorMessage(Component parent, String title,
       Object message, Throwable throwable) {
     SimSystem.report(Level.SEVERE, title, throwable);
+    throwable.printStackTrace();
     printErrorMessage(parent, title, message);
   }
 

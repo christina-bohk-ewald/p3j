@@ -29,6 +29,7 @@ import p3j.database.IP3MDatabase;
 import p3j.experiment.results.ExecutionSummary;
 import p3j.experiment.results.ResultsOfTrial;
 import p3j.misc.errors.GeneratorError;
+import p3j.misc.gui.GUI;
 import p3j.misc.math.Matrix2D;
 import p3j.pppm.IProjectionModel;
 import p3j.pppm.SubPopulation;
@@ -112,40 +113,48 @@ public class SingleExecution {
   public Pair<ExecutionSummary, List<GeneratorError>> execute(
       IParamAssignmentGenerator generator) {
 
-    Pair<Map<ParameterInstance, ParameterAssignment>, List<GeneratorError>> assignment = chooseAssignment(
-        generator, random);
+    Pair<ExecutionSummary, List<GeneratorError>> result = null;
 
-    // Create parameter classes
-    int years = projection.getYears();
-    ExecutionSummary executionSummary = new ExecutionSummary(projection
-        .getSubPopulationModel().getSubPopulations(),
-        assignment.getFirstValue());
+    try {
+      Pair<Map<ParameterInstance, ParameterAssignment>, List<GeneratorError>> assignment = chooseAssignment(
+          generator, random);
 
-    for (SubPopulation jumpOffPopulation : jumpOffPopulations) {
-      JumpOffParameters jumpOffParameters = setupBasicJumpOffParameters(years,
-          jumpOffPopulation);
-      JumpOffPopulation nativePopulation = new JumpOffPopulation();
-      executionSummary.setJumpOffParameters(jumpOffPopulation,
-          jumpOffParameters);
-      executionSummary.addResults(jumpOffPopulation, 0, nativePopulation
-          .calculatePopulation(jumpOffPopulation.getName(), 0,
-              jumpOffParameters));
+      // Create parameter classes
+      int years = projection.getYears();
+      ExecutionSummary executionSummary = new ExecutionSummary(projection
+          .getSubPopulationModel().getSubPopulations(),
+          assignment.getFirstValue());
 
-      if (jumpOffPopulation.isConsistingOfDescendantGenerations())
-        throw new UnsupportedOperationException(); // TODO
+      for (SubPopulation jumpOffPopulation : jumpOffPopulations) {
+        JumpOffParameters jumpOffParameters = setupBasicJumpOffParameters(
+            years, jumpOffPopulation);
+        JumpOffPopulation nativePopulation = new JumpOffPopulation();
+        executionSummary.setJumpOffParameters(jumpOffPopulation,
+            jumpOffParameters);
+        executionSummary.addResults(jumpOffPopulation, 0, nativePopulation
+            .calculatePopulation(jumpOffPopulation.getName(), 0,
+                jumpOffParameters));
+
+        if (jumpOffPopulation.isConsistingOfDescendantGenerations())
+          throw new UnsupportedOperationException(); // TODO
+      }
+
+      for (SubPopulation inFlowPopulation : inFlowPopulations) {
+        calculateFirstInFlowPopulation(executionSummary, inFlowPopulation,
+            years);
+        if (inFlowPopulation.isConsistingOfDescendantGenerations())
+          for (int i = 1; i < projection.getGenerations(); i++) {
+            calculateInFlowChildPopulation(executionSummary, inFlowPopulation,
+                i, years);
+          }
+      }
+      storeResultsToDB(executionSummary);
+      result = new Pair<ExecutionSummary, List<GeneratorError>>(
+          executionSummary, assignment.getSecondValue());
+    } catch (Throwable t) {
+      GUI.printErrorMessage("Execution failed", t);
     }
-
-    for (SubPopulation inFlowPopulation : inFlowPopulations) {
-      calculateFirstInFlowPopulation(executionSummary, inFlowPopulation, years);
-      if (inFlowPopulation.isConsistingOfDescendantGenerations())
-        for (int i = 1; i < projection.getGenerations(); i++) {
-          calculateInFlowChildPopulation(executionSummary, inFlowPopulation, i,
-              years);
-        }
-    }
-    storeResultsToDB(executionSummary);
-    return new Pair<ExecutionSummary, List<GeneratorError>>(executionSummary,
-        assignment.getSecondValue());
+    return result;
   }
 
   /**
@@ -270,8 +279,8 @@ public class SingleExecution {
    */
   void calculateInFlowChildPopulation(ExecutionSummary executionSummary,
       SubPopulation subPopulation, int generation, int years) {
-    InFlowDescendantParameters parameters = new InFlowDescendantParameters(years,
-        projection.getMaximumAge());
+    InFlowDescendantParameters parameters = new InFlowDescendantParameters(
+        years, projection.getMaximumAge());
     parameters.setOldFertX(executionSummary.getParameters(subPopulation,
         generation - 1).getFertX());
     parameters.setOldMeanXf(executionSummary.getResults(subPopulation,
