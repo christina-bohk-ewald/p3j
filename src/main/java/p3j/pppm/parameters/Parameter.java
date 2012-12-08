@@ -145,7 +145,8 @@ public class Parameter implements Serializable {
   }
 
   public void setSortingIndex(Integer sortingIndex) {
-    this.sortingIndex = sortingIndex;
+    if (sortingIndex != null)
+      this.sortingIndex = sortingIndex;
   }
 
   public void setName(String name) {
