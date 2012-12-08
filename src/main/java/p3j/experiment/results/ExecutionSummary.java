@@ -17,6 +17,7 @@ package p3j.experiment.results;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,143 +44,33 @@ public class ExecutionSummary {
   /** The parameter assignments. */
   private final Map<ParameterInstance, ParameterAssignment> paramAssignments;
 
+  /** The sub-populations. */
+  private final List<SubPopulation> subPopulations;
+
   /** Parameters for calculating the jump-off populations. */
-  private List<NativeParameters> nativeParameters;
+  private Map<SubPopulation, NativeParameters> jumpOffParameters = new HashMap<>();
 
-  /** Results of jump-off population calculations. */
-  private List<BasicResults> nativeResults;
+  /** Parameters to calculate (the first generation of) in-flow sub-populations. */
+  private Map<SubPopulation, MigParameters> inFlowParameters = new HashMap<>();
 
-  /** Results of emigrant population calculation. */
-  private List<BasicResults> emigrantResults = new ArrayList<BasicResults>();
+  /** Parameters to calculate descendant generations. */
+  private Map<SubPopulation, MigChildParameters> descendantGenParameters = new HashMap<>();
 
-  /** Parameters to calculate first emigrant generation. */
-  private MigParameters firstEmigrantParameters;
-
-  /** Parameters to calculate child generations of emigrants. */
-  private List<MigChildParameters> emigrantParameters = new ArrayList<MigChildParameters>();
-
-  /** Results of immigrant population calculation. */
-  private List<BasicResults> immigrantResults = new ArrayList<BasicResults>();
-
-  /** Parameters to calculate first immigrant generation. */
-  private MigParameters firstImmigrantParameters;
-
-  /** Parameters to calculate child generations of immigrants. */
-  private List<MigChildParameters> immigrantParameters = new ArrayList<MigChildParameters>();
+  /** Stores the results per sub-population. */
+  private Map<SubPopulation, Map<Integer, BasicResults>> results = new HashMap<>();
 
   /**
    * Instantiates a new execution summary.
    * 
+   * @param subPopulations
+   *          the existing sub populations
    * @param assignment
    *          the overall assignment used: parameter instance -> assignment
    */
-  public ExecutionSummary(Map<ParameterInstance, ParameterAssignment> assignment) {
+  public ExecutionSummary(List<SubPopulation> subPopulations,
+      Map<ParameterInstance, ParameterAssignment> assignment) {
     paramAssignments = Collections.unmodifiableMap(assignment);
-  }
-
-  public List<MigChildParameters> getEmigrantParameters() {
-    return emigrantParameters;
-  }
-
-  public void setEmigrantParameters(List<MigChildParameters> emigrantParameters) {
-    this.emigrantParameters = emigrantParameters;
-  }
-
-  /**
-   * Adds the emigrant parameters.
-   * 
-   * @param parameters
-   *          the parameters
-   */
-  public void addEmigrantParameters(MigChildParameters parameters) {
-    this.emigrantParameters.add(parameters);
-  }
-
-  public MigParameters getFirstEmigrantParameters() {
-    return firstEmigrantParameters;
-  }
-
-  public void setFirstEmigrantParameters(MigParameters firstEmigrantParameters) {
-    this.firstEmigrantParameters = firstEmigrantParameters;
-  }
-
-  public MigParameters getFirstImmigrantParameters() {
-    return firstImmigrantParameters;
-  }
-
-  public void setFirstImmigrantParameters(MigParameters firstImmigrantParameters) {
-    this.firstImmigrantParameters = firstImmigrantParameters;
-  }
-
-  public List<MigChildParameters> getImmigrantParameters() {
-    return immigrantParameters;
-  }
-
-  public void setImmigrantParameters(
-      List<MigChildParameters> immigrantParameters) {
-    this.immigrantParameters = immigrantParameters;
-  }
-
-  /**
-   * Adds the immigrant parameter.
-   * 
-   * @param parameters
-   *          the parameters
-   */
-  public void addImmigrantParameter(MigChildParameters parameters) {
-    this.immigrantParameters.add(parameters);
-  }
-
-  public NativeParameters getNativeParameters() {
-    return nativeParameters;
-  }
-
-  public void setNativeParameters(NativeParameters nativeParameters) {
-    this.nativeParameters = nativeParameters;
-  }
-
-  public List<BasicResults> getEmigrantResults() {
-    return emigrantResults;
-  }
-
-  public void setEmigrantResults(List<BasicResults> emigrantResults) {
-    this.emigrantResults = emigrantResults;
-  }
-
-  /**
-   * Adds the results for emigrants.
-   * 
-   * @param emigrantResult
-   *          the emigrant results
-   */
-  public void addEmigrantResult(BasicResults emigrantResult) {
-    this.emigrantResults.add(emigrantResult);
-  }
-
-  public List<BasicResults> getImmigrantResults() {
-    return immigrantResults;
-  }
-
-  public void setImmigrantResults(List<BasicResults> immigrantResults) {
-    this.immigrantResults = immigrantResults;
-  }
-
-  /**
-   * Adds the results for immigrants.
-   * 
-   * @param immigrantResult
-   *          the immigrant results
-   */
-  public void addImmigrantResult(BasicResults immigrantResult) {
-    this.immigrantResults.add(immigrantResult);
-  }
-
-  public BasicResults getNativeResults() {
-    return nativeResults;
-  }
-
-  public void setNativeResults(BasicResults nativeResults) {
-    this.nativeResults = nativeResults;
+    this.subPopulations = subPopulations;
   }
 
   /**
@@ -188,24 +79,31 @@ public class ExecutionSummary {
    * @return total end population
    */
   public Matrix2D getTotalEndPopulation() {
-
-    // Natives plus immigrants
     List<Matrix2D> addList = new ArrayList<Matrix2D>();
-    addList.add(nativeResults.getEndXm());
-    addList.add(nativeResults.getEndXf());
-    for (BasicResults immResults : immigrantResults) {
-      addList.add(immResults.getEndXm());
-      addList.add(immResults.getEndXf());
-    }
-
-    // Minus all emigrants
     List<Matrix2D> subList = new ArrayList<Matrix2D>();
-    for (BasicResults emResults : emigrantResults) {
-      subList.add(emResults.getEndXm());
-      subList.add(emResults.getEndXf());
-    }
-
+    for (SubPopulation subPop : subPopulations)
+      if (subPop.isAdditive())
+        addTotalEndPopulation(subPop, addList);
+      else
+        addTotalEndPopulation(subPop, subList);
     return Matrix2D.add(addList).sub(subList);
+  }
+
+  /**
+   * Adds the total end population matrices to the matrix list passed as second
+   * argument.
+   * 
+   * @param subPop
+   *          the sub pop
+   * @param matrixList
+   *          the matrix list
+   */
+  private void addTotalEndPopulation(SubPopulation subPop,
+      List<Matrix2D> matrixList) {
+    for (BasicResults result : results.get(subPop).values()) {
+      matrixList.add(result.getEndXm());
+      matrixList.add(result.getEndXf());
+    }
   }
 
   public Map<ParameterInstance, ParameterAssignment> getParamAssignments() {
@@ -215,10 +113,6 @@ public class ExecutionSummary {
   public List<BasicResults> getSubPopulationResults() {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  public void addNativeParameters(NativeParameters jumpOffParameters) {
-    nativeParameters.add(jumpOffParameters);
   }
 
   public void addParameters(SubPopulation jumpOffPopulation,

@@ -117,7 +117,8 @@ public class SingleExecution {
 
     // Create parameter classes
     int years = projection.getYears();
-    ExecutionSummary executionSummary = new ExecutionSummary(
+    ExecutionSummary executionSummary = new ExecutionSummary(projection
+        .getSubPopulationModel().getSubPopulations(),
         assignment.getFirstValue());
 
     for (SubPopulation jumpOffPopulation : jumpOffPopulations) {
@@ -232,14 +233,14 @@ public class SingleExecution {
   /**
    * Calculates the first generation of emigrants.
    * 
-   * @param experimentSummary
-   *          experiment summary to be filled with the results
+   * @param executionSummary
+   *          execution summary to be filled with the results
    * @param subPopulation
    *          the sub-population
    * @param years
    *          the number of years for which shall be predicted
    */
-  void calculateFirstInFlowPopulation(ExecutionSummary experimentSummary,
+  void calculateFirstInFlowPopulation(ExecutionSummary executionSummary,
       SubPopulation subPopulation, int years) {
     MigParameters parameters = new MigParameters(years,
         projection.getMaximumAge());
@@ -249,16 +250,16 @@ public class SingleExecution {
         .getFemaleLabelFor(subPopulation)));
     setupBasicInFlowPopulationParameters(parameters, subPopulation, 0);
     MigPopulation migPopulation = new MigPopulation();
-    experimentSummary.setParameters(subPopulation, 0, parameters);
-    experimentSummary.addResults(subPopulation, 0, migPopulation
+    executionSummary.setParameters(subPopulation, 0, parameters);
+    executionSummary.addResults(subPopulation, 0, migPopulation
         .calculatePopulation(subPopulation.getName(), 0, parameters));
   }
 
   /**
    * Calculates a child population of the emigrants sub-population.
    * 
-   * @param experimentSummary
-   *          experiment summary to be filled with the results
+   * @param executionSummary
+   *          execution summary to be filled with the results
    * @param subPopulation
    *          the sub-population
    * @param generation
@@ -266,19 +267,19 @@ public class SingleExecution {
    * @param years
    *          the number of years for which shall be predicted
    */
-  void calculateInFlowChildPopulation(ExecutionSummary experimentSummary,
+  void calculateInFlowChildPopulation(ExecutionSummary executionSummary,
       SubPopulation subPopulation, int generation, int years) {
     MigChildParameters parameters = new MigChildParameters(years,
         projection.getMaximumAge());
-    parameters.setOldFertX(experimentSummary.getParameters(subPopulation,
+    parameters.setOldFertX(executionSummary.getParameters(subPopulation,
         generation - 1).getFertX());
-    parameters.setOldMeanXf(experimentSummary.getResults(subPopulation,
+    parameters.setOldMeanXf(executionSummary.getResults(subPopulation,
         generation - 1).getMeanXf());
     setupBasicInFlowPopulationParameters(parameters, subPopulation, generation);
     MigChildPopulation migChildPopulation = new MigChildPopulation();
-    experimentSummary.setDescendantParameters(subPopulation, generation,
+    executionSummary.setDescendantParameters(subPopulation, generation,
         parameters);
-    experimentSummary.addResults(subPopulation, generation, migChildPopulation
+    executionSummary.addResults(subPopulation, generation, migChildPopulation
         .calculatePopulation(subPopulation.getName(), generation, parameters));
   }
 
