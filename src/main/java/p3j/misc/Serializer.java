@@ -563,13 +563,10 @@ public class Serializer {
       List<ParameterInstance> matchCandidates = new ArrayList<>();
 
       for (ParameterInstance oldInstance : oldInstances)
-        if (newInstance.getComparisonIndex() == oldInstance
-            .getComparisonIndex()
+        if (newInstance.toString().equals(oldInstance.toString())
             && newInstance.getGeneration() == oldInstance.getGeneration()
             && newInstance.getValueHeight() == oldInstance.getValueHeight()
             && newInstance.getValueWidth() == oldInstance.getValueWidth()
-            && newInstance.getParameter().getPopulation() == oldInstance
-                .getParameter().getPopulation()
             && newInstance.getParameter().isGenerationDependent() == oldInstance
                 .getParameter().isGenerationDependent()) {
           matchCandidates.add(oldInstance);
