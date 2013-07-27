@@ -172,7 +172,7 @@ public final class Misc {
   /** The default database user names. */
   public static final Map<DatabaseType, String> DEFAULT_DB_USERS = new HashMap<>();
   static {
-    DEFAULT_DB_USERS.put(DatabaseType.HSQLDB, "sa");
+    DEFAULT_DB_USERS.put(DatabaseType.HSQLDB, "user");
     DEFAULT_DB_USERS.put(DatabaseType.MYSQL, "root");
     DEFAULT_DB_USERS.put(DatabaseType.GENERIC, "root");
   }
