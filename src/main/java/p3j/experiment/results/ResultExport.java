@@ -170,7 +170,8 @@ public class ResultExport {
       throws IOException {
     File aggregatedDirectory = initializeSubDirectory("aggregated_data");
     aggregateData(aggregatedDirectory,
-        (new ResultAggregation(projection.getGenerations(), numOfYears))
+        (new ResultAggregation(projection.getGenerations(), numOfYears,
+            projection.getSubPopulationModel()))
             .getSelectorsForAggregatedDataExport(), progress);
     if (progress.isCancelled())
       return;
@@ -195,7 +196,8 @@ public class ResultExport {
     File aggregatedDirectory = initializeSubDirectory("aggregated");
     progress.incrementProgress("Retrieving data selectors...");
     IAggregationSelector[] selectors = (new ResultAggregation(
-        projection.getGenerations(), numOfYears)).getSelectorsForReport();
+        projection.getGenerations(), numOfYears,
+        projection.getSubPopulationModel())).getSelectorsForReport();
     progress.incrementProgress("Data aggregation...");
     Map<String, Object> aggregationInfoMap = aggregateData(aggregatedDirectory,
         selectors, progress);

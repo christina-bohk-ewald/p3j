@@ -23,7 +23,10 @@ import java.util.Map;
 
 import p3j.misc.Misc;
 import p3j.misc.math.Matrix2D;
+import p3j.pppm.SubPopulation;
+import p3j.pppm.SubPopulationModel;
 
+// TODO: Auto-generated Javadoc
 /**
  * Simple helper class to define the result aggregation.
  * 
@@ -40,49 +43,46 @@ public class ResultAggregation {
   /** The number of years. */
   private final int numOfYears;
 
+  /** The sub-population model. */
+  private final SubPopulationModel subPopulationModel;
+
   /**
-   * Map to easily access selectors for different subpopulations. Map format:
-   * SUB-POPULATION (immigrants || emigrants) => ( [END_X_M || END_X_F] =>
-   * List[Generation_0, ..., Generation_n] )
+   * Map to easily access selectors for different sub-populations. Map format:
+   * Sub-Population => ( Output Variable => List[Generation_0, ...,
+   * Generation_n] )
    */
   private final Map<ISubPopulationSelector, Map<IOutputVariableSelector, List<AbstractAggregationSelector>>> subPopSelectorMap;
 
+  /** Stores sub-population selectors (their names are unique). */
+  private final Map<SubPopulation, ISubPopulationSelector> subPopulationSelectors;
+
   // Several default selectors, for further usage:
 
-  /** End population of male natives. */
-  private final AbstractAggregationSelector nativesEndXm;
-
-  /** End population of female natives. */
-  private final AbstractAggregationSelector nativesEndXf;
+  /**
+   * All male sub-populations to be added for total population.
+   */
+  private final List<AbstractAggregationSelector> allMaleAdditions = new ArrayList<>();
 
   /**
-   * All male sub-populations to be added for total population (natives +
-   * immigrants).
+   * All male sub-populations to be added for total population.
    */
-  private final List<AbstractAggregationSelector> allMaleAdditions;
+  private final List<AbstractAggregationSelector> allFemaleAdditions = new ArrayList<>();
 
   /**
-   * All male sub-populations to be added for total population (natives +
-   * immigrants).
+   * All male sub-populations to be subtracted for total population.
    */
-  private final List<AbstractAggregationSelector> allFemaleAdditions;
+  private final List<AbstractAggregationSelector> allMaleSubtractions = new ArrayList<>();
 
   /**
-   * All male sub-populations to be subtracted for total population (emigrants).
+   * All female sub-populations to be subtracted for total population.
    */
-  private final List<AbstractAggregationSelector> allMaleSubtractions;
-
-  /**
-   * All female sub-populations to be subtracted for total population
-   * (emigrants).
-   */
-  private final List<AbstractAggregationSelector> allFemaleSubtractions;
+  private final List<AbstractAggregationSelector> allFemaleSubtractions = new ArrayList<>();
 
   /** All sub-populations to be added for total population. */
-  private final List<AbstractAggregationSelector> allTotalAdditions;
+  private final List<AbstractAggregationSelector> allTotalAdditions = new ArrayList<>();
 
   /** All sub-populations to be subtracted for total population. */
-  private final List<AbstractAggregationSelector> allTotalSubtractions;
+  private final List<AbstractAggregationSelector> allTotalSubtractions = new ArrayList<>();
 
   /**
    * Instantiates a new result aggregation helper.
@@ -91,62 +91,85 @@ public class ResultAggregation {
    *          the number of generations
    * @param numberOfYears
    *          the number of years
+   * @param subPopModel
+   *          the sub pop model
    */
-  public ResultAggregation(int numberOfGenerations, int numberOfYears) {
+  public ResultAggregation(int numberOfGenerations, int numberOfYears,
+      SubPopulationModel subPopModel) {
 
     // Define general structure
     generations = numberOfGenerations;
     numOfYears = numberOfYears;
+    subPopulationModel = subPopModel;
+
+    // Create and manage sub-population selectors
+    subPopulationSelectors = createSubPopSelectors();
     subPopSelectorMap = initSubPopSelectorMap();
 
-    // Define often-used selectors
-    nativesEndXm = new SumOverAgesSelector(END_X_M, NATIVES, -1);
-    nativesEndXf = new SumOverAgesSelector(END_X_F, NATIVES, -1);
+    // Create lists of relevant sub-population selectors
+    for (SubPopulation subPopulation : subPopulationModel.getSubPopulations()) {
+      ISubPopulationSelector subPopSelector = subPopulationSelectors
+          .get(subPopulation);
+      if (subPopulation.isAdditive()) {
+        allMaleAdditions.addAll(subPopSelectorMap.get(subPopSelector).get(
+            END_X_M));
+        allFemaleAdditions.addAll(subPopSelectorMap.get(subPopSelector).get(
+            END_X_F));
+        allTotalAdditions.addAll(getAllForSubPop(subPopSelector));
+      } else {
+        allMaleSubtractions.addAll(subPopSelectorMap.get(subPopSelector).get(
+            END_X_M));
+        allFemaleSubtractions.addAll(subPopSelectorMap.get(subPopSelector).get(
+            END_X_F));
+        allTotalSubtractions.addAll(getAllForSubPop(subPopSelector));
+      }
+    }
+  }
 
-    // Extracting those selector lists from the above that are required to
-    // define further selectors on top
-    allMaleAdditions = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(IMMIGRANTS).get(END_X_M));
-    allMaleAdditions.add(0, nativesEndXm);
-    allFemaleAdditions = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(IMMIGRANTS).get(END_X_F));
-    allFemaleAdditions.add(0, nativesEndXf);
-    allMaleSubtractions = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(EMIGRANTS).get(END_X_M));
-    allFemaleSubtractions = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(EMIGRANTS).get(END_X_F));
-
-    // Note: total population = natives + immigrants - emigrants
-    allTotalAdditions = getAllForSubPop(IMMIGRANTS);
-    allTotalAdditions.add(0, nativesEndXm);
-    allTotalAdditions.add(0, nativesEndXf);
-    allTotalSubtractions = getAllForSubPop(EMIGRANTS);
+  /**
+   * Creates the sub-population selectors.
+   * 
+   * @return the map sub-population => sub-population selector
+   */
+  private Map<SubPopulation, ISubPopulationSelector> createSubPopSelectors() {
+    Map<SubPopulation, ISubPopulationSelector> result = new HashMap<>();
+    for (SubPopulation subPopulation : subPopulationModel.getSubPopulations()) {
+      result.put(subPopulation,
+          new SubPopulationSelector(subPopulation.getName()));
+    }
+    return Collections.unmodifiableMap(result);
   }
 
   /**
    * Initializes the sub-population selector map.
    * 
-   * Map format:
-   * 
-   * [immigrants || emigrants] => ( [END_X_M || END_X_F] => List[Generation_0,
-   * ..., Generation_n] )
-   * 
    * @return map of sub-population selectors
+   * @see ResultAggregation#subPopSelectorMap
    */
   private Map<ISubPopulationSelector, Map<IOutputVariableSelector, List<AbstractAggregationSelector>>> initSubPopSelectorMap() {
-    Map<ISubPopulationSelector, Map<IOutputVariableSelector, List<AbstractAggregationSelector>>> resultMap = new HashMap<ISubPopulationSelector, Map<IOutputVariableSelector, List<AbstractAggregationSelector>>>();
-    for (ISubPopulationSelector trialSelector : GEN_POPULATIONS) {
-      Map<IOutputVariableSelector, List<AbstractAggregationSelector>> outputMap = new HashMap<IOutputVariableSelector, List<AbstractAggregationSelector>>();
+    Map<ISubPopulationSelector, Map<IOutputVariableSelector, List<AbstractAggregationSelector>>> resultMap = new HashMap<>();
+    for (SubPopulation subPopulation : subPopulationModel.getSubPopulations()) {
+
+      ISubPopulationSelector subPopSelector = subPopulationSelectors
+          .get(subPopulation);
+
+      Map<IOutputVariableSelector, List<AbstractAggregationSelector>> outputMap = new HashMap<>();
       outputMap.put(END_X_M, new ArrayList<AbstractAggregationSelector>());
       outputMap.put(END_X_F, new ArrayList<AbstractAggregationSelector>());
-      resultMap.put(trialSelector, outputMap);
-      for (int i = 0; i < generations; i++) {
-        SumOverAgesSelector subPopEndXm = new SumOverAgesSelector(END_X_M,
-            trialSelector, i);
-        SumOverAgesSelector subPopEndXf = new SumOverAgesSelector(END_X_F,
-            trialSelector, i);
-        resultMap.get(trialSelector).get(END_X_M).add(subPopEndXm);
-        resultMap.get(trialSelector).get(END_X_F).add(subPopEndXf);
+      resultMap.put(subPopSelector, outputMap);
+
+      if (subPopulation.isConsistingOfDescendantGenerations())
+        for (int i = 0; i < generations; i++) {
+          resultMap.get(subPopSelector).get(END_X_M)
+              .add(new SumOverAgesSelector(END_X_M, subPopSelector, i));
+          resultMap.get(subPopSelector).get(END_X_F)
+              .add(new SumOverAgesSelector(END_X_F, subPopSelector, i));
+        }
+      else {
+        resultMap.get(subPopSelector).get(END_X_M)
+            .add(new SumOverAgesSelector(END_X_M, subPopSelector, -1));
+        resultMap.get(subPopSelector).get(END_X_F)
+            .add(new SumOverAgesSelector(END_X_F, subPopSelector, -1));
       }
     }
     return Collections.unmodifiableMap(resultMap);
@@ -204,96 +227,103 @@ public class ResultAggregation {
     }
   };
 
-  /** The selector for natives. */
-  private static final ISubPopulationSelector NATIVES = new ISubPopulationSelector() {
+  /**
+   * Generic selector for sub-populations.
+   * 
+   * Created on 29.07.2013
+   * 
+   * @author Christina Bohk
+   * @author Roland Ewald
+   */
+  class SubPopulationSelector implements ISubPopulationSelector {
+
+    /** The sub pop name. */
+    private final String subPopName;
+
+    /**
+     * Instantiates a new sub population selector.
+     * 
+     * @param subPopulationName
+     *          the sub population name
+     */
+    SubPopulationSelector(String subPopulationName) {
+      subPopName = subPopulationName;
+    }
+
+    @Override
+    public BasicResults select(ResultsOfTrial resultsOfTrial, int generation) {
+      // TODO: this is inefficient; improve if necessary
+      for (BasicResults result : resultsOfTrial.getSubPopulationResults())
+        // The (gen == -1 & resu.gen==0) check accounts for an incompatibility
+        // between results and aggregation selectors: 0 is the default
+        // generation index for the former, but the latter use -1 if there is no
+        // generation
+        if (result.getSubPopName().equals(subPopName)
+            && (result.getGeneration() == generation || generation == -1
+                && result.getGeneration() == 0))
+          return result;
+      throw new IllegalArgumentException(
+          "Could not find result for generation '" + generation
+              + "' of sub-population '" + subPopName + "'");
+    }
+
     @Override
     public String getPrefix() {
-      return "natives";
+      return subPopName;
     }
 
-    @Override
-    public BasicResults select(ResultsOfTrial results, int generation) {
-      return null; // FIXME: results.getNativesResults();
-    }
-  };
-
-  /** The selector for immigrants. */
-  private static final ISubPopulationSelector IMMIGRANTS = new ISubPopulationSelector() {
-    @Override
-    public String getPrefix() {
-      return "immigrants";
-    }
-
-    @Override
-    public BasicResults select(ResultsOfTrial results, int generation) {
-      return null; // FIXME: results.getImmigrantResults().get(generation);
-    }
-  };
-
-  /** The selector for emigrants. */
-  private static final ISubPopulationSelector EMIGRANTS = new ISubPopulationSelector() {
-    @Override
-    public String getPrefix() {
-      return "emigrants";
-    }
-
-    @Override
-    public BasicResults select(ResultsOfTrial results, int generation) {
-      return null; // FIXME: results.getEmigrantResults().get(generation);
-    }
-  };
+  }
 
   /** The array of result-type selectors. */
   private static final IOutputVariableSelector[] RESULT_TYPES = { END_X_M,
       END_X_F, MEAN_X_M, MEAN_X_F };
 
-  /** The array of sub-population selectors (without natives). */
-  private static final ISubPopulationSelector[] GEN_POPULATIONS = { IMMIGRANTS,
-      EMIGRANTS };
-
   /**
    * Gets the selectors to be used for report generation.
-   * 
-   * @param generations
-   *          the number of generations
-   * @param numOfYears
-   *          the number of years to be predicted
    * 
    * @return the selectors
    */
   public IAggregationSelector[] getSelectorsForReport() {
-
     List<IAggregationSelector> selectors = defineSubPopMergingSelectors();
 
-    // Add selectors for natives
-    for (IOutputVariableSelector resultType : new IOutputVariableSelector[] {
-        END_X_M, END_X_F }) {
-      selectors.add(new ChooseAgesForSingleYearSelector(resultType, NATIVES,
-          -1, 0));
-      selectors.add(new ChooseAgesForSingleYearSelector(resultType, NATIVES,
-          -1, numOfYears - 1));
-    }
-    for (IOutputVariableSelector resultType : RESULT_TYPES) {
-      selectors.add(new SumOverAgesSelector(resultType, NATIVES, -1));
-    }
-
-    // Add selectors for all sub-populations and their descendants
-    for (ISubPopulationSelector trialSelector : GEN_POPULATIONS) {
-      for (int i = 0; i < generations; i++) {
-        for (IOutputVariableSelector resultType : new IOutputVariableSelector[] {
-            END_X_M, END_X_F }) {
-          selectors.add(new ChooseAgesForSingleYearSelector(resultType,
-              trialSelector, i, 0));
-          selectors.add(new ChooseAgesForSingleYearSelector(resultType,
-              trialSelector, i, numOfYears - 1));
-        }
-        for (IOutputVariableSelector resultType : RESULT_TYPES) {
-          selectors.add(new SumOverAgesSelector(resultType, trialSelector, i));
-        }
-      }
+    for (SubPopulation subPopulation : subPopulationModel.getSubPopulations()) {
+      ISubPopulationSelector subPopSelector = subPopulationSelectors
+          .get(subPopulation);
+      if (subPopulation.isConsistingOfDescendantGenerations())
+        for (int i = 0; i < generations; i++)
+          selectors.addAll(createSelectorsPerGeneration(subPopSelector, i));
+      else
+        selectors.addAll(createSelectorsPerGeneration(subPopSelector, -1));
     }
 
     return selectors.toArray(new IAggregationSelector[0]);
+  }
+
+  /**
+   * Creates the selectors for a sub-population selector and a specific
+   * generation.
+   * 
+   * @param subPopSelector
+   *          the sub pop selector
+   * @param generation
+   *          the generation, use -1 for sub-populations without descendants
+   * @return list of generation-specific selectors
+   */
+  private List<IAggregationSelector> createSelectorsPerGeneration(
+      ISubPopulationSelector subPopSelector, int generation) {
+    List<IAggregationSelector> result = new ArrayList<>();
+    for (IOutputVariableSelector resultType : new IOutputVariableSelector[] {
+        END_X_M, END_X_F }) {
+      result.add(new ChooseAgesForSingleYearSelector(resultType,
+          subPopSelector, generation, 0));
+      result.add(new ChooseAgesForSingleYearSelector(resultType,
+          subPopSelector, generation, numOfYears - 1));
+    }
+    for (IOutputVariableSelector resultType : RESULT_TYPES) {
+      result
+          .add(new SumOverAgesSelector(resultType, subPopSelector, generation));
+    }
+    return result;
   }
 
   /**
@@ -327,17 +357,15 @@ public class ResultAggregation {
 
     // Total population for natives (m+f)
     List<IAggregationSelector> selectors = new ArrayList<IAggregationSelector>();
-    selectors.add(new MergeSubPopSumOverAgesSelector(
-        new AbstractAggregationSelector[] { nativesEndXm, nativesEndXf },
-        "natives_end_x_mf"));
 
-    selectors.addAll(defineMFSelectorsForAllMigrantGenerations());
+    selectors.addAll(defineMFSelectorsForAllGenerations());
 
     // Specifying the total male/female/male+female population
     selectors.addAll(defineTotalMaleFemaleCombinedSelectors());
 
     // Specifying emigrant/immigrant total population
-    selectors.addAll(defineMigrantSelectors(subPopSelectorMap));
+    selectors
+        .addAll(defineSelectorsForSubPopsWithGenerations(subPopSelectorMap));
 
     return selectors;
   }
@@ -345,72 +373,54 @@ public class ResultAggregation {
   /**
    * Specify selectors for total migrant populations.
    * 
-   * @param aggrSelectors
-   *          the aggregation selectors
    * @param subPopSelectorMap
    *          the sub-population selector map
+   * @return the list
    */
   @SuppressWarnings("unchecked")
-  private List<IAggregationSelector> defineMigrantSelectors(
+  private List<IAggregationSelector> defineSelectorsForSubPopsWithGenerations(
       Map<ISubPopulationSelector, Map<IOutputVariableSelector, List<AbstractAggregationSelector>>> subPopSelectorMap) {
 
     List<IAggregationSelector> selectors = new ArrayList<IAggregationSelector>();
 
-    // Add merging selectors for immigrants
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(subPopSelectorMap.get(IMMIGRANTS)
-            .get(END_X_M), "immigrants_end_x_m"), numOfYears));
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(subPopSelectorMap.get(IMMIGRANTS)
-            .get(END_X_F), "immigrants_end_x_f"), numOfYears));
-    selectors.add(new MergeSubPopSumOverAgesSelector(
-        getAllForSubPop(IMMIGRANTS), "immigrants_end_x_mf"));
+    for (SubPopulation subPopulation : subPopulationModel.getSubPopulations()) {
 
-    // Add merging selectors for emigrants
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(subPopSelectorMap.get(EMIGRANTS)
-            .get(END_X_M), null, "emigrants_end_x_m"), numOfYears));
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(subPopSelectorMap.get(EMIGRANTS)
-            .get(END_X_F), null, "emigrants_end_x_f"), numOfYears));
-    selectors.add(new MergeSubPopSumOverAgesSelector(
-        getAllForSubPop(EMIGRANTS), null, "emigrants_end_x_mf"));
+      if (!subPopulation.isConsistingOfDescendantGenerations())
+        continue;
 
-    // Define selectors for descendant immigrant/emigrants
-    List<AbstractAggregationSelector> allMaleDescImmigrants = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(IMMIGRANTS).get(END_X_M));
-    allMaleDescImmigrants.remove(0);
-    List<AbstractAggregationSelector> allFemaleDescImmigrants = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(IMMIGRANTS).get(END_X_F));
-    allFemaleDescImmigrants.remove(0);
-    List<AbstractAggregationSelector> allMaleDescEmigrants = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(EMIGRANTS).get(END_X_M));
-    allMaleDescEmigrants.remove(0);
-    List<AbstractAggregationSelector> allFemaleDescEmigrants = new ArrayList<AbstractAggregationSelector>(
-        subPopSelectorMap.get(EMIGRANTS).get(END_X_F));
-    allFemaleDescEmigrants.remove(0);
+      ISubPopulationSelector subPopSelector = subPopulationSelectors
+          .get(subPopulation);
+      String prefix = subPopSelector.getPrefix();
 
-    // Add merging selectors for descendant immigrants
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(allMaleDescImmigrants, null,
-            "immigrants_desc_end_x_m"), numOfYears));
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(allFemaleDescImmigrants, null,
-            "immigrants_desc_end_x_f"), numOfYears));
-    selectors.add(new MergeSubPopSumOverAgesSelector(Misc
-        .<AbstractAggregationSelector> mergeList(allMaleDescImmigrants,
-            allFemaleDescImmigrants), null, "immigrants_desc_end_x_mf"));
+      // Add merging selectors
+      selectors.addAll(defineSingleYearSelectors(
+          new MergeSubPopSumOverAgesSelector(subPopSelectorMap.get(
+              subPopSelector).get(END_X_M), prefix + "_end_x_m"), numOfYears));
+      selectors.addAll(defineSingleYearSelectors(
+          new MergeSubPopSumOverAgesSelector(subPopSelectorMap.get(
+              subPopSelector).get(END_X_F), prefix + "_end_x_f"), numOfYears));
+      selectors.add(new MergeSubPopSumOverAgesSelector(
+          getAllForSubPop(subPopSelector), prefix + "_end_x_mf"));
 
-    // Add merging selectors for descendant emigrants
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(allMaleDescEmigrants, null,
-            "emigrants_desc_end_x_m"), numOfYears));
-    selectors.addAll(defineSingleYearSelectors(
-        new MergeSubPopSumOverAgesSelector(allFemaleDescEmigrants, null,
-            "emigrants_desc_end_x_f"), numOfYears));
-    selectors.add(new MergeSubPopSumOverAgesSelector(Misc
-        .<AbstractAggregationSelector> mergeList(allMaleDescEmigrants,
-            allFemaleDescEmigrants), null, "emigrants_desc_end_x_mf"));
+      // Define selectors for male and female descendants
+      List<AbstractAggregationSelector> allMaleDescendants = new ArrayList<>(
+          subPopSelectorMap.get(subPopSelector).get(END_X_M));
+      allMaleDescendants.remove(0);
+      List<AbstractAggregationSelector> allFemaleDescendants = new ArrayList<>(
+          subPopSelectorMap.get(subPopSelector).get(END_X_F));
+      allFemaleDescendants.remove(0);
+
+      // Add merging selectors for descendants
+      selectors.addAll(defineSingleYearSelectors(
+          new MergeSubPopSumOverAgesSelector(allMaleDescendants, null, prefix
+              + "_desc_end_x_m"), numOfYears));
+      selectors.addAll(defineSingleYearSelectors(
+          new MergeSubPopSumOverAgesSelector(allFemaleDescendants, null, prefix
+              + "_desc_end_x_f"), numOfYears));
+      selectors.add(new MergeSubPopSumOverAgesSelector(Misc
+          .<AbstractAggregationSelector> mergeList(allMaleDescendants,
+              allFemaleDescendants), null, prefix + "_desc_end_x_mf"));
+    }
 
     return selectors;
   }
@@ -420,7 +430,7 @@ public class ResultAggregation {
    * 
    * @return list of total male/female population selectors
    */
-  private List<IAggregationSelector> defineTotalMaleFemaleCombinedSelectors() { // FIXME
+  private List<IAggregationSelector> defineTotalMaleFemaleCombinedSelectors() {
     List<IAggregationSelector> selectors = new ArrayList<IAggregationSelector>();
     selectors.addAll(defineSingleYearSelectors(
         new MergeSubPopSumOverAgesSelector(allMaleAdditions,
@@ -440,16 +450,28 @@ public class ResultAggregation {
    * @return list of all end_x_mf selectors, for all generations and migrant
    *         populations
    */
-  private List<IAggregationSelector> defineMFSelectorsForAllMigrantGenerations() {
+  private List<IAggregationSelector> defineMFSelectorsForAllGenerations() {
     List<IAggregationSelector> selectors = new ArrayList<IAggregationSelector>();
-    for (ISubPopulationSelector trialSelector : GEN_POPULATIONS) {
-      for (int i = 0; i < generations; i++) {
+
+    for (SubPopulation subPopulation : subPopulationModel.getSubPopulations()) {
+      ISubPopulationSelector subPopSelector = subPopulationSelectors
+          .get(subPopulation);
+
+      if (subPopulation.isConsistingOfDescendantGenerations()) {
+        for (int i = 0; i < generations; i++) {
+          selectors.add(new MergeSubPopSumOverAgesSelector(
+              new AbstractAggregationSelector[] {
+                  subPopSelectorMap.get(subPopSelector).get(END_X_M).get(i),
+                  subPopSelectorMap.get(subPopSelector).get(END_X_F).get(i) },
+              new AbstractAggregationSelector[0], subPopSelector.getPrefix()
+                  + "_gen_" + i + "_end_x_mf"));
+        }
+      } else {
         selectors.add(new MergeSubPopSumOverAgesSelector(
             new AbstractAggregationSelector[] {
-                subPopSelectorMap.get(trialSelector).get(END_X_M).get(i),
-                subPopSelectorMap.get(trialSelector).get(END_X_F).get(i) },
-            new AbstractAggregationSelector[0], trialSelector.getPrefix()
-                + "_gen_" + i + "_end_x_mf"));
+                subPopSelectorMap.get(subPopSelector).get(END_X_M).get(0),
+                subPopSelectorMap.get(subPopSelector).get(END_X_F).get(0) },
+            subPopSelector.getPrefix() + "_end_x_mf"));
       }
     }
     return selectors;
@@ -463,6 +485,7 @@ public class ResultAggregation {
    *          the merge sub pop sum over ages selector
    * @param numOfYears
    *          the number of years
+   * @return the list
    */
   private static List<IAggregationSelector> defineSingleYearSelectors(
       MergeSubPopSumOverAgesSelector mergeSubPopSumOverAgesSelector,
@@ -482,7 +505,7 @@ public class ResultAggregation {
   }
 
   /**
-   * Gets the all for sub pop.
+   * Gets all selectors for a sub-population selector.
    * 
    * @param subPopSelector
    *          the sub-population selector
