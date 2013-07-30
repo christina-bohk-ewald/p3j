@@ -882,6 +882,10 @@ public class ResultExport {
         "dd. MM. yyyy (HH:mm:ss)")).format(Calendar.getInstance().getTime()));
     dataToBeInserted.put("numsettypes", projection.getAllSetTypes().size());
 
+    // Add list of sub-populations
+    dataToBeInserted.put("subPopulations", projection.getSubPopulationModel()
+        .getSubPopulations());
+
     // Add index list of generations
     List<Integer> generations = new ArrayList<Integer>();
     for (int i = 0; i < projection.getGenerations(); i++) {

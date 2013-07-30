@@ -77,54 +77,25 @@ $0.01$, $0.5$, $0.9$, $0.95$, $0.975$, and $1.0$."/>
 \tableofcontents
 
 
-
-\chapter{Results}
-
-\section{Total Population}
-<@populationsummary pop="total" popname="Total population"/>
-
-\section{Natives}
-<@populationsummary pop="natives" popname="Natives"/>
-
-
-
-\section{Immigrants: Direct Immigrants}
-<@populationsummary pop="immigrants_gen_0" popname="Direct immigrants"/>
-
-<#list desc_generations as gen>
-\section{Immigrants: Descendant Generation ${gen}}
-<@populationsummary pop="immigrants_gen_${gen}" popname="Descendant immigrant generation ${gen}"/>
-</#list>
-
-\section{Immigrants: All Descendant Generations}
-<@populationsummary pop="immigrants_desc" popname="All descendant immigrant generations"/>
-
-\section{Immigrants: All Immigrants}
-<@populationsummary pop="immigrants" popname="All immigrants"/>
-
-
-
-\section{Emigrants: Direct Emigrants}
-<@populationsummary pop="emigrants_gen_0" popname="Direct emigrants"/>
-
-<#list desc_generations as gen>
-\section{Emigrants: Descendant Generation ${gen}}
-<@populationsummary pop="emigrants_gen_${gen}" popname="Descendant emigrant generation ${gen}"/>
-</#list>
-
-\section{Emigrants: All Descendant Generations}
-<@populationsummary pop="emigrants_desc" popname="All descendant emigrant generations"/>
-
-\section{Emigrants: All Emigrants}
-<@populationsummary pop="emigrants" popname="All emigrants"/>
-
-
-
 \chapter{General Information}
 
-\section{Included Settypes and Sets}
-
 <#escape x as x?replace('\\','/')?replace('_',' ')?replace(r'$','')>
+
+\section{Sub-Populations}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|p{4cm}|l|l|l|}
+\hline
+\textbf{Name} & \textbf{Additivity} & \textbf{Jump-Off Population} & \textbf{Descendants}\\\hline
+<#list subPopulations as subPop>
+\emph{${subPop.getName()}} & <#if subPop.isAdditive()>+<#else>-</#if> & <#if subPop.isJumpOffPopulation()>yes<#else>no</#if> & <#if subPop.isConsistingOfDescendantGenerations()>yes<#else>no</#if> \\
+</#list>
+\hline  
+\end{tabular}
+\end{table}
+
+\section{Included Settypes and Sets}
 
 \begin{table}[h!]
 \centering
@@ -140,5 +111,30 @@ $0.01$, $0.5$, $0.9$, $0.95$, $0.975$, and $1.0$."/>
 \end{table}
 
 </#escape>
+
+\chapter{Results}
+
+\section{Total Population}
+<@populationsummary pop="total" popname="Total population"/>
+
+
+<#list subPopulations as subPop>
+	\section{${subPop.getName()}}
+	<@populationsummary pop="${subPop.getName()}" popname="${subPop.getName()}"/>
+
+	<#if subPop.isConsistingOfDescendantGenerations()>
+	\subsection{${subPop.getName()}: Generation 0}
+	<@populationsummary pop="${subPop.getName()}_gen_0" popname="${subPop.getName()} generation 0"/>
+
+	<#list desc_generations as gen>
+		\subsection{${subPop.getName()}: Descendant Generation ${gen}}
+		<@populationsummary pop="${subPop.getName()}_gen_${gen}" popname="Descendant ${subPop.getName()} generation ${gen}"/>
+	</#list>
+
+	\subsection{${subPop.getName()}: All Descendant Generations}
+	<@populationsummary pop="${subPop.getName()}_desc" popname="All descendant ${subPop.getName()} generations"/>
+	</#if>
+
+</#list>
 
 \end{document}
