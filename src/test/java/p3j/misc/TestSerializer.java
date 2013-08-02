@@ -15,7 +15,13 @@
  */
 package p3j.misc;
 
+import java.io.IOException;
+
 import org.junit.Test;
+
+import p3j.pppm.ProjectionModel;
+import p3j.pppm.SubPopulation;
+import p3j.pppm.SubPopulationModel;
 
 /**
  * Tests for {@link Serializer}.
@@ -27,9 +33,22 @@ import org.junit.Test;
  */
 public class TestSerializer {
 
-  @Test
-  public void testSubPoopulationStorage() {
+  private static final String TEMPORARY_MODEL_FILE = "./testModel.p3j";
 
+  final SubPopulationModel subPopModel = new SubPopulationModel();
+  {
+    subPopModel.getSubPopulations().add(
+        new SubPopulation("TestPop", true, true, true));
+    subPopModel.getSubPopulations().add(
+        new SubPopulation("TestPop2", false, false, false));
+  }
+
+  final ProjectionModel testProjectionModel = new ProjectionModel(
+      "scenarioName", "scenarioDescription", 3, 50, 100, 2011, subPopModel);
+
+  @Test
+  public void testSubPoopulationStorage() throws IOException {
+    (new Serializer()).save(testProjectionModel, TEMPORARY_MODEL_FILE);
   }
 
 }

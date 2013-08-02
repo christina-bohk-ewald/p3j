@@ -568,6 +568,7 @@ public class ProjectionModel extends Model implements IProjectionModel {
    */
   @Override
   public SubPopulationModel getSubPopulationModel() {
+    // For compatibility with old projections without a sub-population model:
     if (subPopulationModel == null)
       subPopulationModel = PPPModelFactory.createDefaultSubPopulationModel();
     return subPopulationModel;

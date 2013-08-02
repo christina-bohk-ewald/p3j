@@ -46,6 +46,8 @@ import p3j.gui.dialogs.ShowWarningAfterProjectionLoadingDialog;
 import p3j.gui.dialogs.execstatus.SimpleProgressDialog;
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;
+import p3j.pppm.SubPopulation;
+import p3j.pppm.SubPopulationModel;
 import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;
 import p3j.pppm.parameters.ParameterAssignmentSet;
@@ -279,6 +281,26 @@ public class Serializer {
     copy.setMaximumAge(original.getMaximumAge());
     copy.setYears(original.getYears());
     copy.setGenerations(original.getGenerations());
+    copy.setSubPopulationModel(copySubPopulationModel(original
+        .getSubPopulationModel()));
+  }
+
+  /**
+   * Copies the sub-population model.
+   * 
+   * @param original
+   *          the original sub population model
+   * @return the copy
+   */
+  private SubPopulationModel copySubPopulationModel(SubPopulationModel original) {
+    SubPopulationModel copy = new SubPopulationModel();
+    for (SubPopulation subPop : original.getSubPopulations())
+      copy.getSubPopulations()
+          .add(
+              new SubPopulation(subPop.getName(), subPop.isJumpOffPopulation(),
+                  subPop.isAdditive(), subPop
+                      .isConsistingOfDescendantGenerations()));
+    return copy;
   }
 
   /**
