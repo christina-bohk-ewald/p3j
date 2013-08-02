@@ -15,9 +15,6 @@
  */
 package p3j.database;
 
-import james.core.data.DBConnectionData;
-import james.core.util.misc.Pair;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -26,6 +23,9 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.util.misc.Pair;
 
 import p3j.gui.P3J;
 import p3j.gui.panels.PropertiesShowPanelFactory;
@@ -104,10 +104,10 @@ public class HSQLDBPreferencesUIProvider implements IPreferencesUIProvider {
   public void setDBPreferences(Pair<DBConnectionData, String> connData) {
     dbLocation.setText((new File(connData
         .getFirstValue()
-        .getUrl()
+        .getURL()
         .substring(
             Misc.HSQLDB_URL_PREFIX.length(),
-            connData.getFirstValue().getUrl().length()
+            connData.getFirstValue().getURL().length()
                 - Misc.HSQLDB_FILE_NAME.length())).getAbsolutePath()));
   }
 

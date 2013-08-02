@@ -15,20 +15,6 @@
  */
 package p3j.gui;
 
-import james.SimSystem;
-import james.core.experiments.BaseExperiment;
-import james.core.experiments.RunInformation;
-import james.core.experiments.taskrunner.parallel.ParallelComputationTaskRunnerFactory;
-import james.core.experiments.taskrunner.plugintype.TaskRunnerFactory;
-import james.core.parameters.ParameterBlock;
-import james.core.parameters.ParameterizedFactory;
-import james.core.processor.plugintype.ProcessorFactory;
-import james.gui.application.SplashScreen;
-import james.gui.application.resource.IconManager;
-import james.gui.experiment.ExperimentExecutorThreadPool;
-import james.gui.experiment.execution.ExperimentThread;
-import james.gui.utils.BasicUtilities;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -60,6 +46,20 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+
+import org.jamesii.SimSystem;
+import org.jamesii.core.experiments.BaseExperiment;
+import org.jamesii.core.experiments.RunInformation;
+import org.jamesii.core.experiments.taskrunner.parallel.ParallelComputationTaskRunnerFactory;
+import org.jamesii.core.experiments.taskrunner.plugintype.TaskRunnerFactory;
+import org.jamesii.core.parameters.ParameterBlock;
+import org.jamesii.core.parameters.ParameterizedFactory;
+import org.jamesii.core.processor.plugintype.ProcessorFactory;
+import org.jamesii.gui.application.SplashScreen;
+import org.jamesii.gui.application.resource.IconManager;
+import org.jamesii.gui.experiment.ExperimentExecutorThreadPool;
+import org.jamesii.gui.experiment.execution.ExperimentThread;
+import org.jamesii.gui.utils.BasicUtilities;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.DatabaseType;

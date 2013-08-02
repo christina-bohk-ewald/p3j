@@ -15,8 +15,6 @@
  */
 package p3j.gui.dialogs;
 
-import james.SimSystem;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +24,8 @@ import java.util.logging.Level;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+
+import org.jamesii.SimSystem;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;

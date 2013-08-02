@@ -15,15 +15,15 @@
  */
 package p3j.simulation;
 
-import james.SimSystem;
-import james.core.math.random.generators.IRandom;
-import james.core.util.misc.Pair;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.jamesii.SimSystem;
+import org.jamesii.core.math.random.generators.IRandom;
+import org.jamesii.core.util.misc.Pair;
 
 import p3j.database.IP3MDatabase;
 import p3j.experiment.results.ExecutionSummary;

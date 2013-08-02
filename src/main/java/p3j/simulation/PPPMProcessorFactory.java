@@ -15,18 +15,18 @@
  */
 package p3j.simulation;
 
-import james.SimSystem;
-import james.core.distributed.partition.Partition;
-import james.core.experiments.tasks.IComputationTask;
-import james.core.model.IModel;
-import james.core.parameters.ParameterBlock;
-import james.core.processor.IProcessor;
-import james.core.processor.ProcessorInformation;
-import james.core.processor.plugintype.ProcessorFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
+import org.jamesii.SimSystem;
+import org.jamesii.core.distributed.partition.Partition;
+import org.jamesii.core.experiments.tasks.IComputationTask;
+import org.jamesii.core.model.IModel;
+import org.jamesii.core.parameters.ParameterBlock;
+import org.jamesii.core.processor.IProcessor;
+import org.jamesii.core.processor.ProcessorInformation;
+import org.jamesii.core.processor.plugintype.ProcessorFactory;
 
 import p3j.pppm.IProjectionModel;
 import p3j.pppm.ProjectionModel;

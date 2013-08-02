@@ -15,8 +15,6 @@
  */
 package p3j.pppm;
 
-import james.core.model.Model;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -24,6 +22,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.jamesii.core.model.Model;
 
 import p3j.pppm.parameters.Parameter;
 import p3j.pppm.parameters.ParameterAssignment;

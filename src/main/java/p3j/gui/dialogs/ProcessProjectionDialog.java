@@ -15,12 +15,12 @@
  */
 package p3j.gui.dialogs;
 
-import james.gui.utils.BasicUtilities;
-
 import java.awt.BorderLayout;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import org.jamesii.gui.utils.BasicUtilities;
 
 import p3j.misc.gui.GUI;
 import p3j.pppm.ProjectionModel;

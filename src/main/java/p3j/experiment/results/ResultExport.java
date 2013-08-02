@@ -15,10 +15,6 @@
  */
 package p3j.experiment.results;
 
-import james.SimSystem;
-import james.core.util.misc.Strings;
-import james.core.util.misc.Triple;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -35,6 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+
+import org.jamesii.SimSystem;
+import org.jamesii.core.util.misc.Strings;
+import org.jamesii.core.util.misc.Triple;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.IProjectionResultsIterator;

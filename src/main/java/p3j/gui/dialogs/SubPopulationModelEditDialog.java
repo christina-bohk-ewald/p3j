@@ -15,8 +15,6 @@
  */
 package p3j.gui.dialogs;
 
-import james.gui.utils.BasicUtilities;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -33,6 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+
+import org.jamesii.gui.utils.BasicUtilities;
 
 import p3j.misc.gui.GUI;
 import p3j.pppm.SubPopulation;
@@ -141,7 +141,7 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
   }
 
   private void refreshSubPopList() {
-    BasicUtilities.invalidateOnEDT(subPopListPanel);
+    BasicUtilities.revalidateOnEDT(subPopListPanel);
     listScroll.validate();
   }
 

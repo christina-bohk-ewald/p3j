@@ -15,8 +15,9 @@
  */
 package p3j.gui.misc;
 
-import james.core.data.DBConnectionData;
-import james.gui.application.preferences.config.ConfFile;
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.gui.application.preferences.config.ConfFile;
+
 import p3j.misc.Misc;
 
 /**

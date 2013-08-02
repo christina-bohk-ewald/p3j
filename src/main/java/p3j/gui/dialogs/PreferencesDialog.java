@@ -15,9 +15,6 @@
  */
 package p3j.gui.dialogs;
 
-import james.core.data.DBConnectionData;
-import james.core.util.misc.Pair;
-
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +24,9 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.util.misc.Pair;
 
 import p3j.database.DatabaseType;
 import p3j.database.IPreferencesUIProvider;
@@ -111,7 +111,7 @@ public class PreferencesDialog extends JDialog {
       public void actionPerformed(ActionEvent e) {
         Pair<DBConnectionData, String> connData = uiProvider.getDBPreferences();
         Exception ex = P3MDatabase.testConnection(connData.getFirstValue()
-            .getUrl(), connData.getFirstValue().getUser(), connData
+            .getURL(), connData.getFirstValue().getUser(), connData
             .getFirstValue().getPassword());
         if (ex == null) {
           dbType.writePreferences(configFile, connData);
@@ -139,7 +139,7 @@ public class PreferencesDialog extends JDialog {
       public void actionPerformed(ActionEvent e) {
         Pair<DBConnectionData, String> connData = uiProvider.getDBPreferences();
         Exception ex = P3MDatabase.testConnection(connData.getFirstValue()
-            .getUrl(), connData.getFirstValue().getUser(), connData
+            .getURL(), connData.getFirstValue().getUser(), connData
             .getFirstValue().getPassword());
         if (ex != null) {
           GUI.printErrorMessage(

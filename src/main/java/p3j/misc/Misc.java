@@ -15,8 +15,6 @@
  */
 package p3j.misc;
 
-import james.core.data.DBConnectionData;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -37,6 +35,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.dialect.MySQL5Dialect;
 import org.hsqldb.jdbcDriver;
+import org.jamesii.core.data.DBConnectionData;
 import org.w3c.dom.Document;
 
 import p3j.database.DatabaseType;

@@ -15,10 +15,6 @@
  */
 package p3j.gui.dialogs.execstatus;
 
-import james.core.base.IEntity;
-import james.core.experiments.tasks.IComputationTask;
-import james.core.observe.IObserver;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -34,9 +30,13 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 
+import org.jamesii.core.experiments.tasks.IComputationTask;
+import org.jamesii.core.observe.IObserver;
+
 import p3j.gui.P3J;
 import p3j.gui.misc.NavigationTreeTab;
 import p3j.misc.gui.GUI;
+import p3j.simulation.PPPMProcessor;
 
 /**
  * 
@@ -46,7 +46,8 @@ import p3j.misc.gui.GUI;
  * @author Roland Ewald
  * 
  */
-public class ExecutionProgressDialog extends JDialog implements IObserver {
+public class ExecutionProgressDialog extends JDialog implements
+    IObserver<PPPMProcessor> {
 
   /** Serialization ID. */
   private static final long serialVersionUID = 6990212654769873627L;
@@ -173,12 +174,12 @@ public class ExecutionProgressDialog extends JDialog implements IObserver {
   }
 
   @Override
-  public void update(IEntity entity) {
+  public void update(PPPMProcessor entity) {
     // Don't do anything here...
   }
 
   @Override
-  public void update(IEntity entity, Object hint) {
+  public void update(PPPMProcessor entity, Object hint) {
     trialCounter++;
     if (trialCounter == numberOfTrials) {
       okButton.setEnabled(true);

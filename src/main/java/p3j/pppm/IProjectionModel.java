@@ -15,10 +15,10 @@
  */
 package p3j.pppm;
 
-import james.core.model.IModel;
-
 import java.util.List;
 import java.util.Map;
+
+import org.jamesii.core.model.IModel;
 
 import p3j.pppm.parameters.ParameterInstance;
 import p3j.pppm.sets.SetType;

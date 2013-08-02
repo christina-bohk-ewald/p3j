@@ -15,13 +15,13 @@
  */
 package p3j.pppm.readerwriter.database;
 
-import james.core.data.DBConnectionData;
-import james.core.util.misc.Pair;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import junit.framework.TestCase;
+
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.util.misc.Pair;
 
 /**
  * So far only tests {@link PPPMDatabaseReader}.
@@ -55,7 +55,7 @@ public class TestDBReaderWriter extends TestCase {
     DBConnectionData dbConn = modelReaderInfo.getFirstValue();
     assertEquals(dbUser, dbConn.getUser());
     assertEquals(dbPasswd, dbConn.getPassword());
-    assertEquals(dbURL, dbConn.getUrl());
+    assertEquals(dbURL, dbConn.getURL());
     assertEquals(dbDrv, dbConn.getDriver());
 
     assertEquals(projectionID, modelReaderInfo.getSecondValue().intValue());

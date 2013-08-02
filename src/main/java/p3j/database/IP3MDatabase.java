@@ -15,9 +15,9 @@
  */
 package p3j.database;
 
-import james.core.data.DBConnectionData;
-
 import java.util.List;
+
+import org.jamesii.core.data.DBConnectionData;
 
 import p3j.experiment.results.ResultsOfTrial;
 import p3j.gui.misc.P3JConfigFile;

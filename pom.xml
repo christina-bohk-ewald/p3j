@@ -89,9 +89,9 @@
 
 		<!-- James II -->
 		<dependency>
-			<groupId>james2</groupId>
+			<groupId>org.jamesii</groupId>
 			<artifactId>core</artifactId>
-			<version>0.8.5</version>
+			<version>0.9.2</version>
 		</dependency>
 
 		<!-- Colt -->

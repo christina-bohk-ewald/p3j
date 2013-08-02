@@ -15,7 +15,8 @@
  */
 package p3j.gui.panels.dboverview;
 
-import james.core.data.DBConnectionData;
+import org.jamesii.core.data.DBConnectionData;
+
 import p3j.gui.panels.projections.ProjectionTreeNode;
 
 /**

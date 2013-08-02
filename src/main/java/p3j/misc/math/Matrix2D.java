@@ -15,10 +15,10 @@
  */
 package p3j.misc.math;
 
-import james.SimSystem;
-
 import java.util.List;
 import java.util.logging.Level;
+
+import org.jamesii.SimSystem;
 
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 

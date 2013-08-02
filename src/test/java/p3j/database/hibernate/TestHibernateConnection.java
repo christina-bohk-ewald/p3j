@@ -15,12 +15,13 @@
  */
 package p3j.database.hibernate;
 
-import james.core.data.DBConnectionData;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
+
+import org.jamesii.core.data.DBConnectionData;
+
 import p3j.database.DatabaseFactory;
 import p3j.database.DatabaseType;
 import p3j.database.IP3MDatabase;

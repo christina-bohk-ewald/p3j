@@ -15,11 +15,11 @@
  */
 package p3j.database;
 
-import james.core.data.DBConnectionData;
-import james.core.util.misc.Pair;
-
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.util.misc.Pair;
 
 import p3j.gui.panels.PropertiesShowPanelFactory;
 import p3j.misc.Misc;
@@ -67,7 +67,7 @@ public class GenericPreferencesUIProvider implements IPreferencesUIProvider {
 
   @Override
   public void setDBPreferences(Pair<DBConnectionData, String> connData) {
-    dbURL.setText(connData.getFirstValue().getUrl());
+    dbURL.setText(connData.getFirstValue().getURL());
     dbUserName.setText(connData.getFirstValue().getUser());
     dbPassword.setText(connData.getFirstValue().getPassword());
     jdbcDriver.setText(connData.getFirstValue().getDriver());

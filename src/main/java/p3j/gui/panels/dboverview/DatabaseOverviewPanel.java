@@ -15,8 +15,6 @@
  */
 package p3j.gui.panels.dboverview;
 
-import james.SimSystem;
-
 import java.awt.BorderLayout;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,6 +26,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
+import org.jamesii.SimSystem;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;
@@ -44,93 +44,93 @@ import p3j.pppm.ProjectionModel;
  */
 public class DatabaseOverviewPanel extends AbstractNavigationPanel {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 7431882091363418297L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 7431882091363418297L;
 
-	/** Root of the database overview tree. */
-	private DatabaseNode root;
+  /** Root of the database overview tree. */
+  private DatabaseNode root;
 
-	/** Reference to the database. */
-	private IP3MDatabase db;
+  /** Reference to the database. */
+  private IP3MDatabase db;
 
-	/**
-	 * Instantiates a new database overview panel.
-	 * 
-	 * @param contentP
-	 *          the content panel
-	 */
-	public DatabaseOverviewPanel(JPanel contentP) {
-		super(null, contentP);
-		db = DatabaseFactory.getDatabaseSingleton();
-		initTree();
-		setLayout(new BorderLayout());
-		add(getScrollPane(), BorderLayout.CENTER);
-	}
+  /**
+   * Instantiates a new database overview panel.
+   * 
+   * @param contentP
+   *          the content panel
+   */
+  public DatabaseOverviewPanel(JPanel contentP) {
+    super(null, contentP);
+    db = DatabaseFactory.getDatabaseSingleton();
+    initTree();
+    setLayout(new BorderLayout());
+    add(getScrollPane(), BorderLayout.CENTER);
+  }
 
-	@Override
-	protected final void initTree() {
+  @Override
+  protected final void initTree() {
 
-		// We do not need to be re-initialized
-		if (root != null) {
-			return;
-		}
+    // We do not need to be re-initialized
+    if (root != null) {
+      return;
+    }
 
-		root = new DatabaseNode(DatabaseFactory.getDbConnData(), DatabaseFactory
-		    .getDbConnData().getUrl());
-		setTreeModel(new DefaultTreeModel(root));
-		setTree(new JTree(getTreeModel()));
-		getTree().setRootVisible(true);
-		setScrollPane(new JScrollPane(getTree()));
+    root = new DatabaseNode(DatabaseFactory.getDbConnData(), DatabaseFactory
+        .getDbConnData().getURL());
+    setTreeModel(new DefaultTreeModel(root));
+    setTree(new JTree(getTreeModel()));
+    getTree().setRootVisible(true);
+    setScrollPane(new JScrollPane(getTree()));
 
-		totalRefresh();
+    totalRefresh();
 
-		getTree().addTreeSelectionListener(new TreeSelectionListener() {
-			@Override
-			public void valueChanged(TreeSelectionEvent e) {
-				TreePath oldPath = e.getOldLeadSelectionPath();
-				if (oldPath != null) {
-					((ProjectionTreeNode<?>) oldPath.getLastPathComponent()).deselected();
-				}
-				getContentPanel().removeAll();
-				TreePath newPath = e.getNewLeadSelectionPath();
-				if (newPath != null) {
-					((ProjectionTreeNode<?>) newPath.getLastPathComponent()).selected(
-					    newPath, getContentPanel(), null);
-				}
-				getContentPanel().repaint();
-				getContentPanel().updateUI();
-			}
-		});
-	}
+    getTree().addTreeSelectionListener(new TreeSelectionListener() {
+      @Override
+      public void valueChanged(TreeSelectionEvent e) {
+        TreePath oldPath = e.getOldLeadSelectionPath();
+        if (oldPath != null) {
+          ((ProjectionTreeNode<?>) oldPath.getLastPathComponent()).deselected();
+        }
+        getContentPanel().removeAll();
+        TreePath newPath = e.getNewLeadSelectionPath();
+        if (newPath != null) {
+          ((ProjectionTreeNode<?>) newPath.getLastPathComponent()).selected(
+              newPath, getContentPanel(), null);
+        }
+        getContentPanel().repaint();
+        getContentPanel().updateUI();
+      }
+    });
+  }
 
-	/**
-	 * Refreshes database information.
-	 */
-	public final void totalRefresh() {
-		for (ProjectionTreeNode<?> child : root.getChilds()) {
-			getTreeModel().removeNodeFromParent(child);
-		}
+  /**
+   * Refreshes database information.
+   */
+  public final void totalRefresh() {
+    for (ProjectionTreeNode<?> child : root.getChilds()) {
+      getTreeModel().removeNodeFromParent(child);
+    }
 
-		List<ProjectionModel> projections = null;
+    List<ProjectionModel> projections = null;
 
-		try {
-			projections = db.getAllProjections();
-		} catch (Exception ex) {
-			SimSystem.report(Level.SEVERE,
-			    "Could not read projections list from data base.", ex);
-			projections = null;
-		}
+    try {
+      projections = db.getAllProjections();
+    } catch (Exception ex) {
+      SimSystem.report(Level.SEVERE,
+          "Could not read projections list from data base.", ex);
+      projections = null;
+    }
 
-		if (projections == null) {
-			return;
-		}
+    if (projections == null) {
+      return;
+    }
 
-		for (ProjectionModel projection : projections) {
-			root.add(new OverviewProjectionNode(projection, projection.getName()));
-		}
+    for (ProjectionModel projection : projections) {
+      root.add(new OverviewProjectionNode(projection, projection.getName()));
+    }
 
-		getTreeModel().nodeStructureChanged(root);
-		getTree().repaint();
-	}
+    getTreeModel().nodeStructureChanged(root);
+    getTree().repaint();
+  }
 
 }

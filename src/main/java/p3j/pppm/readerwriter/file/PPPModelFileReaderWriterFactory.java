@@ -15,12 +15,13 @@
  */
 package p3j.pppm.readerwriter.file;
 
-import james.core.data.model.IModelReader;
-import james.core.data.model.ModelFileReaderFactory;
-import james.core.data.model.read.plugintype.IMIMEType;
-import james.core.model.IModel;
-import james.core.model.symbolic.ISymbolicModel;
-import james.core.parameters.ParameterBlock;
+import org.jamesii.core.data.model.IModelReader;
+import org.jamesii.core.data.model.ModelFileReaderFactory;
+import org.jamesii.core.data.model.read.plugintype.IMIMEType;
+import org.jamesii.core.model.IModel;
+import org.jamesii.core.model.symbolic.ISymbolicModel;
+import org.jamesii.core.parameters.ParameterBlock;
+
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.SymbolicProjectionModel;
 

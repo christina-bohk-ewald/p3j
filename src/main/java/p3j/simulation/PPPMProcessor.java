@@ -15,12 +15,12 @@
  */
 package p3j.simulation;
 
-import james.SimSystem;
-import james.core.processor.RunnableProcessor;
-import james.core.util.misc.Pair;
-
 import java.util.List;
 import java.util.logging.Level;
+
+import org.jamesii.SimSystem;
+import org.jamesii.core.processor.RunnableProcessor;
+import org.jamesii.core.util.misc.Pair;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;
@@ -49,71 +49,72 @@ import p3j.simulation.assignments.plugintype.IParamAssignmentGenerator;
  * @author Roland Ewald
  * 
  */
-public class PPPMProcessor extends RunnableProcessor {
+public class PPPMProcessor extends RunnableProcessor<Integer> {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 6432515166274911748L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 6432515166274911748L;
 
-	/** The {@link IParamAssignmentGenerator} to be used. */
-	private final transient IParamAssignmentGenerator generator;
+  /** The {@link IParamAssignmentGenerator} to be used. */
+  private final transient IParamAssignmentGenerator generator;
 
-	/** The model to be simulated. */
-	private final IProjectionModel model;
+  /** The model to be simulated. */
+  private final IProjectionModel model;
 
-	/**
-	 * The pseudo-time, e.g. how many times the deterministic model had been
-	 * calculated.
-	 */
-	private int calcCount;
+  /**
+   * The pseudo-time, e.g. how many times the deterministic model had been
+   * calculated.
+   */
+  private int calcCount;
 
-	/** The database, to store results. */
-	private transient IP3MDatabase dataBase;
+  /** The database, to store results. */
+  private transient IP3MDatabase dataBase;
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param mod
-	 *          the model to be simulated
-	 * @param gen
-	 *          the assignment generator to be used
-	 */
-	public PPPMProcessor(IProjectionModel mod, IParamAssignmentGenerator gen) {
-		super(mod);
-		model = mod;
-		generator = gen;
-		generator.init(model);
-		dataBase = DatabaseFactory.createDatabase(P3J.getInstance().getConfigFile());
-	}
+  /**
+   * Default constructor.
+   * 
+   * @param mod
+   *          the model to be simulated
+   * @param gen
+   *          the assignment generator to be used
+   */
+  public PPPMProcessor(IProjectionModel mod, IParamAssignmentGenerator gen) {
+    super(mod);
+    model = mod;
+    generator = gen;
+    generator.init(model);
+    dataBase = DatabaseFactory
+        .createDatabase(P3J.getInstance().getConfigFile());
+  }
 
-	@Override
-	public Double getTime() {
-		return new Double(calcCount);
-	}
+  @Override
+  public Integer getTime() {
+    return calcCount;
+  }
 
-	/**
-	 * Calculates the outcome of *one* deterministic calculation.
-	 */
-	@Override
-	protected void nextStep() {
+  /**
+   * Calculates the outcome of *one* deterministic calculation.
+   */
+  @Override
+  protected void nextStep() {
 
-		// If the generator says we are done, i.e. we cannot generate more samples,
-		// then we are done
-		if (generator.assignmentsLeft() == 0) {
-			calcCount = Integer.MAX_VALUE;
-			return;
-		}
+    // If the generator says we are done, i.e. we cannot generate more samples,
+    // then we are done
+    if (generator.assignmentsLeft() == 0) {
+      calcCount = Integer.MAX_VALUE;
+      return;
+    }
 
-		// Select assignment, set everything up
-		SingleExecution execution = new SingleExecution(model, dataBase);
-		Pair<ExecutionSummary, List<GeneratorError>> runResults = execution
-		    .execute(generator);
+    // Select assignment, set everything up
+    SingleExecution execution = new SingleExecution(model, dataBase);
+    Pair<ExecutionSummary, List<GeneratorError>> runResults = execution
+        .execute(generator);
 
-		for (GeneratorError e : runResults.getSecondValue()) {
-			SimSystem.report(Level.WARNING, e.getErrorMessage());
-		}
+    for (GeneratorError e : runResults.getSecondValue()) {
+      SimSystem.report(Level.WARNING, e.getErrorMessage());
+    }
 
-		calcCount++;
-		changed(new Pair<PPPMProcessor, ExecutionSummary>(this,
-		    runResults.getFirstValue()));
-	}
+    calcCount++;
+    changed(new Pair<PPPMProcessor, ExecutionSummary>(this,
+        runResults.getFirstValue()));
+  }
 }

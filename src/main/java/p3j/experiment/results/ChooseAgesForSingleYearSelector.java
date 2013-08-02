@@ -15,12 +15,12 @@
  */
 package p3j.experiment.results;
 
-import james.SimSystem;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
+
+import org.jamesii.SimSystem;
 
 /**
  * Selectors of this type select data from a particular year across all trials.

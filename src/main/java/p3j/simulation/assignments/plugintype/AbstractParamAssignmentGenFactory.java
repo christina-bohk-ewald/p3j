@@ -15,7 +15,7 @@
  */
 package p3j.simulation.assignments.plugintype;
 
-import james.core.factories.AbstractFactory;
+import org.jamesii.core.factories.AbstractFactory;
 
 /**
  * The abstract factory for the plug-in type of parameter assignment generators.

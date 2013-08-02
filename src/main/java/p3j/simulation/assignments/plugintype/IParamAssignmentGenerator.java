@@ -15,11 +15,11 @@
  */
 package p3j.simulation.assignments.plugintype;
 
-import james.core.math.random.generators.IRandom;
-import james.core.util.misc.Pair;
-
 import java.util.List;
 import java.util.Map;
+
+import org.jamesii.core.math.random.generators.IRandom;
+import org.jamesii.core.util.misc.Pair;
 
 import p3j.misc.errors.GeneratorError;
 import p3j.pppm.IProjectionModel;

@@ -15,8 +15,6 @@
  */
 package p3j.gui.panels;
 
-import james.SimSystem;
-
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,6 +25,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+
+import org.jamesii.SimSystem;
 
 import p3j.misc.gui.GUI;
 

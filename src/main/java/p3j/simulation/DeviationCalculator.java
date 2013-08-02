@@ -15,8 +15,9 @@
  */
 package p3j.simulation;
 
-import james.core.math.random.distributions.NormalDistribution;
-import james.core.math.random.generators.IRandom;
+import org.jamesii.core.math.random.distributions.NormalDistribution;
+import org.jamesii.core.math.random.generators.IRandom;
+
 import p3j.misc.Misc;
 import p3j.misc.math.Matrix2D;
 import p3j.pppm.parameters.ParameterAssignment;

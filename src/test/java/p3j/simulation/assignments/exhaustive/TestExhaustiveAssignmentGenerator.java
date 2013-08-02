@@ -15,13 +15,14 @@
  */
 package p3j.simulation.assignments.exhaustive;
 
-import james.core.util.misc.Pair;
-import james.core.util.misc.Strings;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
+
+import org.jamesii.core.util.misc.Pair;
+import org.jamesii.core.util.misc.Strings;
+
 import p3j.misc.MatrixDimension;
 import p3j.pppm.PPPModelFactory;
 import p3j.pppm.ProjectionModel;

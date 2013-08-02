@@ -15,9 +15,6 @@
  */
 package p3j.misc;
 
-import james.SimSystem;
-import james.core.util.misc.Strings;
-
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
@@ -39,6 +36,9 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import org.jamesii.SimSystem;
+import org.jamesii.core.util.misc.Strings;
 
 import p3j.database.IP3MDatabase;
 import p3j.gui.P3J;

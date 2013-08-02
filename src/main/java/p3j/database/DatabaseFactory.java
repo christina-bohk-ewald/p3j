@@ -15,9 +15,6 @@
  */
 package p3j.database;
 
-import james.SimSystem;
-import james.core.data.DBConnectionData;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -26,6 +23,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.hibernate.cfg.Configuration;
+import org.jamesii.SimSystem;
+import org.jamesii.core.data.DBConnectionData;
 
 import p3j.database.hibernate.P3MDatabase;
 import p3j.gui.P3J;
@@ -126,7 +125,7 @@ public final class DatabaseFactory {
     connectionProps.put("user", connData.getUser());
     connectionProps.put("password", connData.getPassword());
 
-    try (Connection conn = DriverManager.getConnection(dbConnData.getUrl(),
+    try (Connection conn = DriverManager.getConnection(dbConnData.getURL(),
         connectionProps)) {
       ResultSet rs = conn.createStatement().executeQuery(
           "SHOW INDEX FROM matrices WHERE KEY_NAME = '"

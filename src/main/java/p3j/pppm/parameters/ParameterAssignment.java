@@ -15,10 +15,10 @@
  */
 package p3j.pppm.parameters;
 
-import james.core.serialization.SerialisationUtils;
-
 import java.io.IOException;
 import java.io.Serializable;
+
+import org.jamesii.core.serialization.SerialisationUtils;
 
 import p3j.misc.Misc;
 import p3j.misc.math.Matrix;

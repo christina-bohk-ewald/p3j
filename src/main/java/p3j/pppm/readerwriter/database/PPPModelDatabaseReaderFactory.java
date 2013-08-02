@@ -15,16 +15,16 @@
  */
 package p3j.pppm.readerwriter.database;
 
-import james.core.data.DBConnectionData;
-import james.core.data.model.IModelReader;
-import james.core.data.model.read.plugintype.IMIMEType;
-import james.core.data.model.read.plugintype.ModelReaderFactory;
-import james.core.model.IModel;
-import james.core.model.symbolic.ISymbolicModel;
-import james.core.parameters.ParameterBlock;
-import james.core.util.misc.Pair;
-
 import java.net.URI;
+
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.data.model.IModelReader;
+import org.jamesii.core.data.model.read.plugintype.IMIMEType;
+import org.jamesii.core.data.model.read.plugintype.ModelReaderFactory;
+import org.jamesii.core.model.IModel;
+import org.jamesii.core.model.symbolic.ISymbolicModel;
+import org.jamesii.core.parameters.ParameterBlock;
+import org.jamesii.core.util.misc.Pair;
 
 import p3j.pppm.ProjectionModel;
 import p3j.pppm.SymbolicProjectionModel;
@@ -109,7 +109,7 @@ public class PPPModelDatabaseReaderFactory extends ModelReaderFactory {
   public static ParameterBlock createReaderParams(DBConnectionData connData,
       int projectionID) {
     ParameterBlock readerParams = new ParameterBlock();
-    readerParams.addSubBlock(KEY_CONN_DATA_URL, connData.getUrl());
+    readerParams.addSubBlock(KEY_CONN_DATA_URL, connData.getURL());
     readerParams.addSubBlock(KEY_CONN_DATA_USER, connData.getUser());
     readerParams.addSubBlock(KEY_CONN_DATA_PWD, connData.getPassword());
     readerParams.addSubBlock(KEY_CONN_DATA_DRIVER, connData.getDriver());

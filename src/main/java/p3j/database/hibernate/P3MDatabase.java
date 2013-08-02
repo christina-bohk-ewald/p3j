@@ -15,10 +15,6 @@
  */
 package p3j.database.hibernate;
 
-import james.SimSystem;
-import james.core.data.DBConnectionData;
-import james.core.util.StopWatch;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -32,6 +28,9 @@ import org.hibernate.classic.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.jamesii.SimSystem;
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.util.StopWatch;
 
 import p3j.database.IP3MDatabase;
 import p3j.database.IProjectionResultsIterator;
@@ -113,7 +112,7 @@ public class P3MDatabase implements IP3MDatabase {
   public void init(DBConnectionData dbConn, P3JConfigFile configFile) {
     getConfig()
         .setProperty("hibernate.connection.username", dbConn.getUser())
-        .setProperty("hibernate.connection.url", dbConn.getUrl())
+        .setProperty("hibernate.connection.url", dbConn.getURL())
         .setProperty(Misc.PREF_HIBERNATE_DRIVER_PROPERTY, dbConn.getDriver())
         .setProperty(Misc.PREF_HIBERNATE_DIALECT_PROPERTY,
             Misc.HIBERNATE_DIALECTS.get(configFile.get(Misc.PREF_DB_TYPE)));
@@ -470,7 +469,7 @@ public class P3MDatabase implements IP3MDatabase {
   public static Exception testConnection(DBConnectionData dbConnData) {
     Connection c = null;
     try {
-      c = DriverManager.getConnection(dbConnData.getUrl(),
+      c = DriverManager.getConnection(dbConnData.getURL(),
           dbConnData.getUser(), dbConnData.getPassword());
       if (c == null) {
         throw new IllegalArgumentException(

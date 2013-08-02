@@ -15,9 +15,6 @@
  */
 package p3j.gui.panels.projections;
 
-import james.core.util.misc.CSVReader;
-import james.core.util.misc.Files;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -31,6 +28,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
+
+import org.jamesii.core.util.misc.CSVReader;
+import org.jamesii.core.util.misc.Files;
 
 import p3j.database.DatabaseFactory;
 import p3j.gui.P3J;

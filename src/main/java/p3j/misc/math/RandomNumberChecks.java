@@ -15,10 +15,10 @@
  */
 package p3j.misc.math;
 
-import james.core.math.random.generators.IRandom;
-
 import java.util.Collection;
 import java.util.List;
+
+import org.jamesii.core.math.random.generators.IRandom;
 
 import p3j.gui.P3J;
 import p3j.misc.Misc;

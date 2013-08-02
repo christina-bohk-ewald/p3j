@@ -15,7 +15,8 @@
  */
 package p3j.simulation.assignments.random;
 
-import james.core.parameters.ParameterBlock;
+import org.jamesii.core.parameters.ParameterBlock;
+
 import p3j.simulation.assignments.plugintype.IParamAssignmentGenerator;
 import p3j.simulation.assignments.plugintype.ParamAssignmentGenFactory;
 

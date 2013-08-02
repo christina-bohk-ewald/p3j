@@ -15,9 +15,9 @@
  */
 package p3j.gui.dialogs.execstatus;
 
-import james.core.experiments.instrumentation.computation.IComputationInstrumenter;
-import james.core.experiments.instrumentation.computation.plugintype.ComputationInstrumenterFactory;
-import james.core.parameters.ParameterBlock;
+import org.jamesii.core.experiments.instrumentation.computation.IComputationInstrumenter;
+import org.jamesii.core.experiments.instrumentation.computation.plugintype.ComputationInstrumenterFactory;
+import org.jamesii.core.parameters.ParameterBlock;
 
 /**
  * Creates an {@link ExecutionProgressInstrumenter}.

@@ -15,8 +15,8 @@
  */
 package p3j.simulation.assignments.plugintype;
 
-import james.core.factories.Factory;
-import james.core.parameters.ParameterBlock;
+import org.jamesii.core.factories.Factory;
+import org.jamesii.core.parameters.ParameterBlock;
 
 /**
  * Base class for {@link IParamAssignmentGenerator} factories.
@@ -24,7 +24,8 @@ import james.core.parameters.ParameterBlock;
  * @author Christina Bohk
  * @author Roland Ewald
  */
-public abstract class ParamAssignmentGenFactory extends Factory {
+public abstract class ParamAssignmentGenFactory extends
+    Factory<IParamAssignmentGenerator> {
 
   /**
    * Serialization ID.
@@ -38,6 +39,7 @@ public abstract class ParamAssignmentGenFactory extends Factory {
    *          parameters for creating the instance
    * @return a new generator
    */
+  @Override
   public abstract IParamAssignmentGenerator create(ParameterBlock params);
 
 }

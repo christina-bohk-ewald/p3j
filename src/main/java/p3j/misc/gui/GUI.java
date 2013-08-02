@@ -15,9 +15,6 @@
  */
 package p3j.misc.gui;
 
-import james.SimSystem;
-import james.gui.utils.BasicUtilities;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
@@ -37,6 +34,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+
+import org.jamesii.SimSystem;
+import org.jamesii.gui.utils.BasicUtilities;
 
 import p3j.gui.P3J;
 

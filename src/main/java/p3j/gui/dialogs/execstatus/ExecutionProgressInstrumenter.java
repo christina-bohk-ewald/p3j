@@ -15,14 +15,14 @@
  */
 package p3j.gui.dialogs.execstatus;
 
-import james.core.experiments.instrumentation.computation.IComputationInstrumenter;
-import james.core.experiments.tasks.IComputationTask;
-import james.core.observe.IObserver;
-import james.core.observe.Mediator;
-import james.core.processor.IProcessor;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jamesii.core.experiments.instrumentation.computation.IComputationInstrumenter;
+import org.jamesii.core.experiments.tasks.IComputationTask;
+import org.jamesii.core.observe.IObserver;
+import org.jamesii.core.observe.Mediator;
+import org.jamesii.core.processor.IProcessor;
 
 /**
  * Instruments PPPM simulations with an observer that displays the progress to
@@ -34,71 +34,71 @@ import java.util.List;
  */
 public class ExecutionProgressInstrumenter implements IComputationInstrumenter {
 
-	/** Serialization ID. */
-	private static final long serialVersionUID = 1037938671428167027L;
+  /** Serialization ID. */
+  private static final long serialVersionUID = 1037938671428167027L;
 
-	/**
-	 * List of observers. To make sure that the same dialog is used in case of
-	 * multiple threads, only *one* instance of the observer is created and then
-	 * saved for future use.
-	 * 
-	 * TODO: This should be solved more elegantly.
-	 */
-	private static List<IObserver> observers = new ArrayList<IObserver>();
+  /**
+   * List of observers. To make sure that the same dialog is used in case of
+   * multiple threads, only *one* instance of the observer is created and then
+   * saved for future use.
+   * 
+   * TODO: This should be solved more elegantly.
+   */
+  private static List<IObserver<?>> observers = new ArrayList<>();
 
-	/** The number of trials. */
-	private int numberOfTrials;
+  /** The number of trials. */
+  private int numberOfTrials;
 
-	/**
-	 * Instantiates a new execution progress instrumenter.
-	 */
-	public ExecutionProgressInstrumenter() {
+  /**
+   * Instantiates a new execution progress instrumenter.
+   */
+  public ExecutionProgressInstrumenter() {
 
-	}
+  }
 
-	/**
-	 * Instantiates a new execution progress instrumenter.
-	 * 
-	 * @param numOfTrials
-	 *          the num of trials
-	 */
-	public ExecutionProgressInstrumenter(Integer numOfTrials) {
-		observers.clear();
-		numberOfTrials = numOfTrials;
-	}
+  /**
+   * Instantiates a new execution progress instrumenter.
+   * 
+   * @param numOfTrials
+   *          the num of trials
+   */
+  public ExecutionProgressInstrumenter(Integer numOfTrials) {
+    observers.clear();
+    numberOfTrials = numOfTrials;
+  }
 
-	@Override
-	public void instrumentComputation(IComputationTask computationTask) {
+  @Override
+  public void instrumentComputation(IComputationTask computationTask) {
 
-		synchronized (observers) {
-			if (observers.size() == 0) {
-				observers.add(new ExecutionProgressDialog(numberOfTrials));
-			}
-			((ExecutionProgressDialog) observers.get(0))
-			    .addSimulationRun(computationTask);
-		}
-		IProcessor simulator = computationTask.getProcessorInfo().getLocal();
-		Mediator.create(simulator);
-		simulator.registerObserver(observers.get(0));
-	}
+    synchronized (observers) {
+      if (observers.size() == 0) {
+        observers.add(new ExecutionProgressDialog(numberOfTrials));
+      }
+      ((ExecutionProgressDialog) observers.get(0))
+          .addSimulationRun(computationTask);
+    }
+    IProcessor simulator = computationTask.getProcessorInfo().getLocal();
+    Mediator.create(simulator);
+    simulator.registerObserver(observers.get(0));
+  }
 
-	@Override
-	public List<? extends IObserver> getInstantiatedObservers() {
-		return observers;
-	}
+  @Override
+  public List<? extends IObserver<?>> getInstantiatedObservers() {
+    return observers;
+  }
 
-	/**
-	 * Cleans list of observers.
-	 */
-	public static void cleanObservers() {
-		observers.clear();
-	}
+  /**
+   * Cleans list of observers.
+   */
+  public static void cleanObservers() {
+    observers.clear();
+  }
 
-	public int getNumberOfTrials() {
-		return numberOfTrials;
-	}
+  public int getNumberOfTrials() {
+    return numberOfTrials;
+  }
 
-	public void setNumberOfTrials(int numberOfTrials) {
-		this.numberOfTrials = numberOfTrials;
-	}
+  public void setNumberOfTrials(int numberOfTrials) {
+    this.numberOfTrials = numberOfTrials;
+  }
 }

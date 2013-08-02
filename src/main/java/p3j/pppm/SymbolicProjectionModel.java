@@ -15,10 +15,10 @@
  */
 package p3j.pppm;
 
-import james.core.data.model.read.plugintype.IMIMEType;
-import james.core.model.Model;
-import james.core.model.symbolic.ISymbolicModel;
-import james.core.model.symbolic.convert.IDocument;
+import org.jamesii.core.data.model.read.plugintype.IMIMEType;
+import org.jamesii.core.model.Model;
+import org.jamesii.core.model.symbolic.ISymbolicModel;
+import org.jamesii.core.model.symbolic.convert.IDocument;
 
 /**
  * Implementation of {@link ISymbolicModel} that wraps {@link ProjectionModel}.

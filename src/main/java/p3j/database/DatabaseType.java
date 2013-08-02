@@ -15,8 +15,9 @@
  */
 package p3j.database;
 
-import james.core.data.DBConnectionData;
-import james.core.util.misc.Pair;
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.util.misc.Pair;
+
 import p3j.gui.misc.P3JConfigFile;
 import p3j.misc.Misc;
 
@@ -101,7 +102,7 @@ public enum DatabaseType {
 
   private void writePreferences(String prefix, P3JConfigFile conf,
       Pair<DBConnectionData, String> connData) {
-    conf.put(prefix + Misc.PREF_DB_URL, connData.getFirstValue().getUrl());
+    conf.put(prefix + Misc.PREF_DB_URL, connData.getFirstValue().getURL());
     conf.put(prefix + Misc.PREF_DB_USER, connData.getFirstValue().getUser());
     conf.put(prefix + Misc.PREF_DB_PWD, connData.getFirstValue().getPassword());
     conf.put(prefix + Misc.PREF_HIBERNATE_DRIVER_PROPERTY, connData

@@ -22,10 +22,11 @@ import static p3j.pppm.parameters.ParameterType.MORTALITY;
 import static p3j.pppm.parameters.ParameterType.PROP_INF_DEATHS_FIRST_6M;
 import static p3j.pppm.parameters.ParameterType.PROP_MALE_LIVE_BIRTHS;
 import static p3j.pppm.parameters.ParameterType.SURV_PROB_OPEN_END;
-import james.SimSystem;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jamesii.SimSystem;
 
 import p3j.database.DatabaseFactory;
 import p3j.database.IP3MDatabase;

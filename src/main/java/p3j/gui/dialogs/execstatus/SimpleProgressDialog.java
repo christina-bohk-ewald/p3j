@@ -15,8 +15,6 @@
  */
 package p3j.gui.dialogs.execstatus;
 
-import james.gui.utils.BasicUtilities;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -29,6 +27,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
+
+import org.jamesii.gui.utils.BasicUtilities;
 
 import p3j.misc.IProgressObserver;
 import p3j.misc.gui.GUI;

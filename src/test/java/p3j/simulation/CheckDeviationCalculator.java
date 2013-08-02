@@ -15,13 +15,14 @@
  */
 package p3j.simulation;
 
-import james.SimSystem;
-import james.core.util.misc.CSVReader;
-import james.core.util.misc.Strings;
-
 import java.util.List;
 
 import junit.framework.TestCase;
+
+import org.jamesii.SimSystem;
+import org.jamesii.core.util.misc.CSVReader;
+import org.jamesii.core.util.misc.Strings;
+
 import p3j.misc.MatrixDimension;
 import p3j.misc.math.Matrix;
 import p3j.misc.math.Matrix2D;

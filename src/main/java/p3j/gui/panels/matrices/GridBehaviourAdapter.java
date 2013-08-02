@@ -15,8 +15,6 @@
  */
 package p3j.gui.panels.matrices;
 
-import james.SimSystem;
-
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -32,6 +30,8 @@ import javax.swing.KeyStroke;
 
 import net.sf.jeppers.grid.JGrid;
 import net.sf.jeppers.grid.SelectionModel;
+
+import org.jamesii.SimSystem;
 
 /**
  * An adapter to integrate Copy/Paste-Behaviour to {@link JGrid}. Implements

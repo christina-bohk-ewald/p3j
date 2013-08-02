@@ -15,8 +15,9 @@
  */
 package p3j.database;
 
-import james.core.data.DBConnectionData;
-import james.core.util.misc.Pair;
+import org.jamesii.core.data.DBConnectionData;
+import org.jamesii.core.util.misc.Pair;
+
 import p3j.gui.panels.PropertiesShowPanelFactory;
 
 /**

@@ -15,14 +15,14 @@
  */
 package p3j.pppm;
 
-import james.core.model.IModel;
-import james.core.model.formalism.Formalism;
-import james.core.model.plugintype.ModelFactory;
-import james.core.model.symbolic.ISymbolicModel;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import org.jamesii.core.model.IModel;
+import org.jamesii.core.model.formalism.Formalism;
+import org.jamesii.core.model.plugintype.ModelFactory;
+import org.jamesii.core.model.symbolic.ISymbolicModel;
 
 /**
  * Creates {@link ProjectionModel} instances.

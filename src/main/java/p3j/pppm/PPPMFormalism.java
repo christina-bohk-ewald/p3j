@@ -15,7 +15,7 @@
  */
 package p3j.pppm;
 
-import james.core.model.formalism.Formalism;
+import org.jamesii.core.model.formalism.Formalism;
 
 /**
  * This class describes PPP models as a formalism.
