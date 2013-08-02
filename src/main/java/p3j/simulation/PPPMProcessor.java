@@ -49,7 +49,7 @@ import p3j.simulation.assignments.plugintype.IParamAssignmentGenerator;
  * @author Roland Ewald
  * 
  */
-public class PPPMProcessor extends RunnableProcessor<Integer> {
+public class PPPMProcessor extends RunnableProcessor<Double> {
 
   /** Serialization ID. */
   private static final long serialVersionUID = 6432515166274911748L;
@@ -87,8 +87,8 @@ public class PPPMProcessor extends RunnableProcessor<Integer> {
   }
 
   @Override
-  public Integer getTime() {
-    return calcCount;
+  public Double getTime() {
+    return new Double(calcCount);
   }
 
   /**

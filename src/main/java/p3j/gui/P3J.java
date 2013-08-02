@@ -50,11 +50,14 @@ import javax.swing.UIManager;
 import org.jamesii.SimSystem;
 import org.jamesii.core.experiments.BaseExperiment;
 import org.jamesii.core.experiments.RunInformation;
+import org.jamesii.core.experiments.instrumentation.computation.plugintype.ComputationInstrumenterFactory;
 import org.jamesii.core.experiments.taskrunner.parallel.ParallelComputationTaskRunnerFactory;
 import org.jamesii.core.experiments.taskrunner.plugintype.TaskRunnerFactory;
+import org.jamesii.core.experiments.tasks.stoppolicy.plugintype.ComputationTaskStopPolicyFactory;
 import org.jamesii.core.parameters.ParameterBlock;
 import org.jamesii.core.parameters.ParameterizedFactory;
 import org.jamesii.core.processor.plugintype.ProcessorFactory;
+import org.jamesii.core.simulationrun.stoppolicy.SimTimeStopFactory;
 import org.jamesii.gui.application.SplashScreen;
 import org.jamesii.gui.application.resource.IconManager;
 import org.jamesii.gui.experiment.ExperimentExecutorThreadPool;
@@ -776,12 +779,15 @@ public final class P3J extends JFrame {
         Misc.PREF_NUM_PARALLEL_THREADS);
     double stopTime = Math.ceil((double) numOfTrials / numOfThreads);
 
-    baseExperiment.setDefaultSimStopTime(stopTime);
     baseExperiment.setRepeatRuns(numOfThreads);
     baseExperiment
-        .setComputationInstrumenterFactory(new ExecProgressInstrFactory());
-    baseExperiment.setComputationInstrumenterParameters(new ParameterBlock(
-        numOfTrials, ExecProgressInstrFactory.NUM_OF_TRIALS));
+        .setComputationTaskStopPolicyFactory(new ParameterizedFactory<ComputationTaskStopPolicyFactory>(
+            new SimTimeStopFactory(), new ParameterBlock(stopTime,
+                SimTimeStopFactory.SIMEND)));
+    baseExperiment
+        .setComputationInstrumenterFactory(new ParameterizedFactory<ComputationInstrumenterFactory>(
+            new ExecProgressInstrFactory(), new ParameterBlock(numOfTrials,
+                ExecProgressInstrFactory.NUM_OF_TRIALS)));
 
     if (numOfThreads > 1) {
       baseExperiment
