@@ -173,4 +173,21 @@ public class SubPopulation implements Serializable {
         .replace("\\", "_").replace("/", "_");
   }
 
+  @Override
+  public int hashCode() {
+    return name.hashCode()
+        ^ ("" + additive + consistingOfDescendantGenerations + jumpOffPopulation)
+            .hashCode();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || !(o instanceof SubPopulation))
+      return false;
+    SubPopulation oSubPop = (SubPopulation) o;
+    return name.equals(oSubPop.getName())
+        && additive == oSubPop.additive
+        && consistingOfDescendantGenerations == oSubPop.consistingOfDescendantGenerations
+        && jumpOffPopulation == oSubPop.jumpOffPopulation;
+  }
 }

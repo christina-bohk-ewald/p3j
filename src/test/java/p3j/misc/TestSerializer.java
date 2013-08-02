@@ -17,6 +17,7 @@ package p3j.misc;
 
 import java.io.IOException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import p3j.pppm.ProjectionModel;
@@ -47,8 +48,21 @@ public class TestSerializer {
       "scenarioName", "scenarioDescription", 3, 50, 100, 2011, subPopModel);
 
   @Test
-  public void testSubPoopulationStorage() throws IOException {
+  public void testSubPoopulationStorage() throws IOException,
+      ClassNotFoundException {
     (new Serializer()).save(testProjectionModel, TEMPORARY_MODEL_FILE);
+    ProjectionModel projectionModel = (ProjectionModel) (new Serializer())
+        .load(TEMPORARY_MODEL_FILE);
+    SubPopulationModel loadedModel = projectionModel.getSubPopulationModel();
+
+    Assert.assertEquals("Number of sub-populations should match.", subPopModel
+        .getSubPopulations().size(), loadedModel.getSubPopulations().size());
+
+    for (int i = 0; i < subPopModel.getSubPopulations().size(); i++) {
+      SubPopulation expectedSubPop = subPopModel.getSubPopulations().get(i);
+      Assert.assertEquals("Sub-populations should be equal", expectedSubPop,
+          loadedModel.getSubPopulations().get(i));
+    }
   }
 
 }
