@@ -158,11 +158,11 @@ public class SubPopulationModelEditDialog extends ProjectionDialog {
    */
   private synchronized void addSubPopulation(SubPopulation subPopulation) {
     for (SubPopulation subPop : subPopulationModel.getSubPopulations())
-      if (subPop.getName().equals(subPopulation.getName())) {
+      if (subPop.getSimplifiedName().equals(subPopulation.getSimplifiedName())) {
         GUI.printMessage(
             this,
             "Adding sub-population failed",
-            "Sub-population names must be unique, and there already is a sub-population called '"
+            "Sub-population names must be unique (when converted to lower case, ignoring special characters like '/' and '\\'). \nThere already is a sub-population called '"
                 + subPopulation.getName() + "'.");
         return;
       }

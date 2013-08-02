@@ -26,7 +26,6 @@ import p3j.misc.math.Matrix2D;
 import p3j.pppm.SubPopulation;
 import p3j.pppm.SubPopulationModel;
 
-// TODO: Auto-generated Javadoc
 /**
  * Simple helper class to define the result aggregation.
  * 
@@ -134,8 +133,10 @@ public class ResultAggregation {
   private Map<SubPopulation, ISubPopulationSelector> createSubPopSelectors() {
     Map<SubPopulation, ISubPopulationSelector> result = new HashMap<>();
     for (SubPopulation subPopulation : subPopulationModel.getSubPopulations()) {
-      result.put(subPopulation,
-          new SubPopulationSelector(subPopulation.getName()));
+      result.put(
+          subPopulation,
+          new SubPopulationSelector(subPopulation.getName(), subPopulation
+              .getSimplifiedName()));
     }
     return Collections.unmodifiableMap(result);
   }
@@ -241,13 +242,24 @@ public class ResultAggregation {
     private final String subPopName;
 
     /**
+     * The prefix to be used in the file system (this places adds restrictions
+     * regarding the permitted characters, hence not identical to
+     * {@link SubPopulationSelector#subPopName}).
+     */
+    private final String prefix;
+
+    /**
      * Instantiates a new sub population selector.
      * 
      * @param subPopulationName
      *          the sub population name
+     * @param thePrefix
+     *          the prefix (to be used as part of a file name, i.e. should only
+     *          contain permitted characters)
      */
-    SubPopulationSelector(String subPopulationName) {
+    SubPopulationSelector(String subPopulationName, String thePrefix) {
       subPopName = subPopulationName;
+      prefix = thePrefix;
     }
 
     @Override
@@ -269,7 +281,7 @@ public class ResultAggregation {
 
     @Override
     public String getPrefix() {
-      return subPopName;
+      return prefix;
     }
 
   }
