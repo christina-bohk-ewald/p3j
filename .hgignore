@@ -7,3 +7,4 @@ glob:*.lck
 glob:*.log
 glob:*.properties
 glob:*.script
+conf/*
