@@ -8,7 +8,7 @@
 	<name>P3J</name>
 	<description>The Probabilistic Population Projection Model (PPPM) for Java.</description>
 	<url>https://bitbucket.org/Christina_Bohk/p3j</url>
-	<version>0.9.8-SNAPSHOT</version>
+	<version>0.9.8</version>
 
 	<scm>
 		<connection>scm:hg:https://bitbucket.org/Christina_Bohk/p3j</connection>

@@ -2,6 +2,7 @@ glob:target
 glob:*.class
 glob:.settings
 glob:.classpath
+glob:.regdata
 glob:.project
 glob:*.lck
 glob:*.log
