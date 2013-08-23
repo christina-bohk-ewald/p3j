@@ -236,29 +236,16 @@ public class TestHibernateConnection extends TestCase {
   }
 
   public void matrixOperations() throws Exception {
-    // Set up everything required
+
     matrix1 = db.newMatrix(new Matrix2D(TEST_SQUARE_MATRIX_WIDTH,
         TEST_SQUARE_MATRIX_WIDTH));
     assertNotNull(EXPL_INSTANTIATION, matrix1);
     assertEquals(EXPL_ID_SAVE, 1, matrix1.getID());
+
     matrix2 = db.newMatrix(new Matrix2D(TEST_SQUARE_MATRIX_WIDTH,
         TEST_SQUARE_MATRIX_WIDTH));
-    assertEquals(EXPL_UNIQUE, 1, matrix2.getID());
-    Matrix matrix3 = db.getMatrix(new Matrix2D(TEST_SQUARE_MATRIX_WIDTH,
-        TEST_SQUARE_MATRIX_WIDTH));
-    assertEquals(EXPL_ONE_ENTITY, matrix2, matrix3);
-    Matrix2D matValue = new Matrix2D(TEST_SQUARE_MATRIX_WIDTH,
-        TEST_SQUARE_MATRIX_WIDTH);
-    matValue.setQuick(0, 0, 1);
-    matrix2 = db.newMatrix(matValue);
-    List<Matrix> matrices = db.getAllMatrices();
-    assertEquals(EXPL_TWO_ENTITIES, 2, matrices.size());
-    assertTrue(EXPL_DELETION, db.deleteMatrix(matrix2));
-    matrices = db.getAllMatrices();
-    assertEquals(EXPL_ONE_ENTITY, 1, matrices.size());
-    assertEquals(EXPL_EQUAL_FIRST, matrix1, matrices.get(0));
-    matrix2 = db.newMatrix(matValue);
-
+    assertNotNull(EXPL_INSTANTIATION, matrix2);
+    assertEquals(EXPL_TWO_ENTITIES, 2, matrix2.getID());
   }
 
   public void testParameterAssignmentOperations() throws Exception {

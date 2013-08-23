@@ -176,22 +176,6 @@ public interface IP3MDatabase {
   Matrix newMatrix(Matrix2D value);
 
   /**
-   * Get matrix with a certain value from database.
-   * 
-   * @param value
-   *          the value of the matrix
-   * @return the matrix, if could be found - otherwise null
-   */
-  Matrix getMatrix(Matrix2D value);
-
-  /**
-   * Retrieves all input matrices from the database.
-   * 
-   * @return list of all matrices
-   */
-  List<Matrix> getAllMatrices();
-
-  /**
    * Deletes given matrix from the database.
    * 
    * @param matrix

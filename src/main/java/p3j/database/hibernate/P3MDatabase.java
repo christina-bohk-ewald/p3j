@@ -268,37 +268,13 @@ public class P3MDatabase implements IP3MDatabase {
   }
 
   // TODO: Add method to remove orphaned matrices from the database.
-  // Ensure that changed matrices will be saved as new ones.
   @Override
   public Matrix newMatrix(Matrix2D value) {
-    Matrix matrix = getMatrix(value);
-    if (matrix == null) {
-      matrix = new Matrix(value);
-      save(matrix);
-    }
+    Matrix matrix = new Matrix(value);
+    save(matrix);
     return matrix;
   }
 
-  @Override
-  public Matrix getMatrix(Matrix2D value) {
-    List<Matrix> matrices = Misc
-        .autoCast(session.createCriteria(Matrix.class)
-            .add(Restrictions.eq("hash", Matrix2D.calculateHashCode(value)))
-            .list());
-    for (Matrix matrix : matrices) {
-      if (matrix.getValue().equals(value)) {
-        return matrix;
-      }
-    }
-    return null;
-  }
-
-  @Override
-  public List<Matrix> getAllMatrices() {
-    List<Matrix> matrices = Misc.autoCast(session.createQuery("from Matrix")
-        .list());
-    return matrices;
-  }
 
   @Override
   public boolean deleteMatrix(Matrix matrix) {
