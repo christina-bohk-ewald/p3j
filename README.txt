@@ -13,6 +13,8 @@ Building the project:
 
 We use Maven 3 to build the project. See http://maven.apache.org if you are not familiar with this tool.
 
+If you want to start the P3J during development from an IDE (e.g., Eclipse), please make sure to run the main class (p3j.gui.P3J) with the working directory bein set to the binary directory (i.e. p3j/target/classes).
+
 Coding Conventions:
 
 We use Sonar (http://www.sonarsource.org/) with a slightly adapted 'Sonar way' rule set (the default) to check the P3J code for inconsistencies, bugs, etc.:
