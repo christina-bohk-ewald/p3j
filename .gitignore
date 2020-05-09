@@ -1,0 +1,11 @@
+target
+*.class
+.settings
+.classpath
+.regdata
+.project
+*.lck
+*.log
+*.properties
+*.script
+conf/*
